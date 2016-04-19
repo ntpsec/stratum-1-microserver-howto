@@ -1,0 +1,359 @@
+== SemPiTernal: A Raspberry Pi Stratum 1 timeserver build ==
+:description: Building and configuring a tiny Stratum 1 timeserver with NTPsec
+:keywords: Raspberry Pi, NTP, NTPsec, time service
+by Eric S. Raymond
+version 0.1
+
+== Introduction ==
+
+This HOWTO gives complete instructions for building a headless Stratum
+1 timeserver using a Raspberry Pi, the Adafruit GPS hat, and NTPsec.
+Total parts cost should be about $80.  Light soldering is required.
+
+Why do it?  It's cheap, fun, and because your NTP server is running on
+a dedicated machine you won't have so much jitter due to variable
+load.
+
+The Adafruit GPS hat is a better idea than an external GPS because it
+also supplies a battery-backed-up RTC, which the GPS can use for
+warm-starting.
+
+== Parts list and hardware assembly ==
+
+You will need:
+
+* One Raspberry Pi.  I used a Raspberry Pi 3: these instructions cover
+  older variants as well.
+
+* One
+  https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi[Adafruit
+  GPS HAT]
+
+* One CR1220 3-volt lithium coin cell.  They're cheapest ordered from
+  Adafruit along with the HAT, but you can buy them at most places
+  that carry hearing-aid batteries.
+
+* (Optional) A Raspberry Pi case to protect your hardware from
+  dust and curious felines.
+
+The HAT is shipped as two parts, a circuit board and a 40-pin header.
+Your first step will be to solder the header to the bottom of the
+board, on the opposite side from the GPS module (under what would be
+the east edge if the Adafruit logo were a map legend). Poke the
+header pins upwards through the double row of through holes at the
+east edge of the board and go.  This is the last bit of hardware
+hacking absolutely required.
+
+(The device is shipped as parts almost certainly to evade a regulatory
+requirement for FCC conformance testing to RF emission standards,
+which is expensive and would have added to the unit cost.)
+
+The header on the assembled HAT fits down over the double row of pins
+on the east edge of the Pi, such that the two boards make a neat
+stack.
+
+== Case and board modding == 
+
+(Ignore this if you have an AdaFruit case.  I thought I had one, but
+it seems to have been made by some third party to smaller dimensions
+than either the AdaFruit or Pi "official" case.)
+
+As shipped, the Pi + HAT assembly will *not* fit in the Canakit
+acrylic case it arruved here in.  The HAT is slightly too large for that.
+
+As an optional step, you can modify the board and case so the HAT
+fits in.  You'll do this in two steps:
+
+First, modify the flanges that are engaged by the five clips on the
+bottom of the case top. Unaltered, the flanges will physically
+interfere with the HAT.
+
+Ideally, you want to cut a rectangular piece off each flange about an
+eighth of an inch horizontal dimension and about a quarter-inch
+vertical dimension.  You do _not_ want to shave the flanges all the
+way back to the case walls if you can avoid it: if you do that, the
+clips won't have anything to engage and the top will sit slightly
+loose. (Mine is modded that less-than-ideal way.  It's not worth
+re-doing with a new case.)
+
+Your other problem is that an unused portion of the board (consisting of
+an array of through holes for mounting ICs) collides with the case
+shield for the Ethernet.  To fix this, cut a rectangular piece off
+the south-east corner with a small coping saw.  The piece needs to be two
+through-holes wide (east-west) and nine holes high (north-south).
+
+== Beheading the Pi ==
+
+You first step is to configure the Pi to run headless attached to an
+Ethernet cable. You'll do all subsequent configuration via ssh, and
+your other machines will take time corrections via TCP/IP over the
+Ethernet.
+
+Plug in a monitor, mouse, and keyboard.  Power up the Pi.  Invoke
+a terminal emulator.
+
+Normally the Pi configures itself using DHCP when you connect it to
+your Ethernet, acquiring a TCP/IP address that may vary depending on
+what other devices are hooked to your network. For our use case,
+giving it a static address is more convenient.  Here's how to do that:
+
+. Just in case, make a backup copy of your /etc/network/interfaces file:
+
+------------------------------------------------------------------------
+sudo cp /etc/network/interfaces /etc/network/interfaces.backup
+------------------------------------------------------------------------
+
+. Edit that file:
+
+------------------------------------------------------------------------
+sudo vi /etc/network/interfaces
+------------------------------------------------------------------------
+
+. Change the contents to look something like this:
+
+------------------------------------------------------------------------
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 192.168.1.23
+netmask 255.255.255.0
+gateway 192.168.1.1
+dns-nameservers 192.168.1.1
+------------------------------------------------------------------------
+
+Once the file has been updated, use :wq to save and exit.
+
+Note: This assumes that (a) You're using the usual 192.168.1.x convention
+for private addresses, (b) your router lives at .1, and (c) you have
+DNS running on your router.  If any of these assumptions are false, you
+probably knew what you were doing when you set up your network and
+know how to modify the above.
+
+The "23" should change to whatever low quad you want to use to make
+the Pi's address unique on your network.  I like to follow up by
+adding a line like this to the /etc/hosts files of the other machines
+on my network, allowing me to refer to it by name: 
+
+------------------------------------------------------------------------
+192.168.1.23 timekeeper
+------------------------------------------------------------------------
+
+. Reboot the Pi.
+
+------------------------------------------------------------------------
+sudo shutdown -r now
+------------------------------------------------------------------------
+
+.  From some machine on your network, do:
+
+------------------------------------------------------------------------
+ping timekeeper
+------------------------------------------------------------------------
+
+If you don't get a ping response, troubleshoot (unplugged or loose
+cables are always the first thing to check for). If you do, you can
+log out and then disconnect the keyboard/screen/mouse, which you
+should do to reduce power draw and heating of the board (graphics
+processing for the GUI is expensive that way).  You'll do the
+remaining steps over ssh.
+
+. Remove network-manager, because it's now just dead weight eating your
+cycles.
+
+------------------------------------------------------------------------
+apt-get remove network-manager
+------------------------------------------------------------------------
+
+== On Jessie: uninstall systemd ==
+
+If you are running on Raspbian Jessie, next step is to uninstall
+systemd.  It is a CPU hog (not just on the Pi; similar problems have
+been reported across many architectures) and a complexity
+sinkhole. The things that have it as a dependency are things you don't
+want on a headless NTP server.
+
+Additionally, systemd tries to be its own NTP client.  This is
+undesirable for a Stratum 1 server; it might leae to unexpected
+interactions with your NTP installation.
+
+(Our instructions are based on
+http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[this]
+and
+https://www.raspberrypi.org/forums/viewtopic.php?f=66&t=121911[this])
+
+. First, pull in the core of sysvinit, preserving the inittab that
+systemd generated. Then reboot.
+
+------------------------------------------------------------------------
+apt-get install sysvinit-core sysvinit-utils
+cp /usr/share/sysvinit/inittab /etc/inittab
+reboot
+------------------------------------------------------------------------
+
+. Purge the remnants of systemd and packages that depend on it.
+
+------------------------------------------------------------------------
+apt-get remove --purge --auto-remove systemd
+------------------------------------------------------------------------
+
+. Prevent apt from installing systemd packages in the future.
+
+------------------------------------------------------------------------
+echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
+------------------------------------------------------------------------
+
+. Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
+
+------------------------------------------------------------------------
+echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
+------------------------------------------------------------------------
+
+== Disable getty on your UART device ==
+
+Now that you're using a System-V-like init, ensure that any
+/etc/inittab entries referring to ttyAMA0 or ttyS0 are commented out
+or removed. You do not want a getty to spawn on these. To check this,
+you can reboot and do
+
+------------------------------------------------------------------------
+ps ax | grep getty
+------------------------------------------------------------------------
+
+If neither ttyS0 or ttyAMA0 appears in any of the selected lines,
+you're in good shape.
+
+== Pi 3 only: disable Bluetooth and remap console device ==
+
+The Pi 3 Raspbian implementors made a design decision on the Raspberry
+Pi 3 that ties the serial baud rate to the CPU clock rate (by
+default).  This was done because the normal lines that fed the serial
+port were used for the built-in Bluetooth. This does not affect any
+other Pi variant.
+
+Your headless timeserver is not going to need Bluetooth, so you should
+disable it and remap the devices.  Our instructions come from
+http://www.briandorey.com/post/Raspberry-Pi-3-UART-Overlay-Workaround[this
+original], which explains the problem in more detail.  We don't use
+some of their steps because this build is designed to run headless 
+
+. Copy the
+http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[boot
+overlay] to the root directory of your Pi 3, and unzip it.
+
+. Edit the /boot/config.txt file to append these lines:
+
+------------------------------------------------------------------------
+# Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
+dtoverlay=pi3-miniuart-bt-overlay
+force_turbo=1
+------------------------------------------------------------------------
+
+== Release the console pins ==
+
+. Next, edit the boot command line. You need to be root to do this.
+This is what I saw on an unmodified Pi 3:
+
+------------------------------------------------------------------------
+root@whoville:/home/pi# cat /boot/cmdline.txt
+dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
+------------------------------------------------------------------------
+
+You may want to save a copy of the original
+/boot/cmdline.txt before modifying it.
+
+To disable the serial console, remove all "console" options.  The
+Adafruit
+https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup[Pi
+GPS setup] page mentions a "kgdboc" option; if present, it should be
+removed.
+
+You must reboot the Pi for these changes to take effect.
+
+== Testing the GPS ==
+
+Next thing you want to do is verify that the GPS works.  Put your
+micro-server on someplace like a windowsill with a good sky view outside.
+The MKT3339 on the HAT has very good weak-signal discrimination and
+is much less fussy about siting than older GPS receivers.
+
+On first (cold) boot, the device may take 20-30 minutes to download a
+satellite ephemeris. After that, time to get a fix should be much faster
+unless you live in a canyon (including the urban kind) or dense forest.
+I, living in a suburb with the front of my house half-screened by tall
+trees, typically get lock about 30 seconds from power up.  It will
+seem longer than it is first time: have patience.
+
+(Some material in this section is from Adafruit's
+https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[basic
+test] page for the HAT.)
+
+When the red LED on the HAT blinks once per second, you don't have a
+satellite fix. When it achieves lock it will blink with much lower
+frequency.
+
+To test that you can read data from the device, do this:
+
+------------------------------------------------------------------------
+stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
+cat /dev/ttyS0
+------------------------------------------------------------------------
+
+You should see NMEA0183 sentences issuing in bursts once per second.
+
+Now install GPSD.  You won't use this for production, as we plan to
+direct-connect NTPsec to the GPS, but its diagnostic tools (especially
+gpsmon) are useful for sanity-checking the output of the HAT.
+
+------------------------------------------------------------------------
+apt-get install gpsd gpsd-clients python-gps
+------------------------------------------------------------------------
+
+Run 
+
+------------------------------------------------------------------------
+gpsmon /dev/ttyAMA0
+------------------------------------------------------------------------
+
+You should see a curses panel display that shows you both raw GPS
+data and the results of data reduction on it.  Later, this tool
+will be useful for checking that you can see the 1PPS signal from
+your device.
+
+== Optional: Thin out the system processes on your Pi ==
+
+The Raspbian default is to install a lot of background processes that
+exist to support a graphical desktop. Running headless with Ethernet
+as the only channel to the device, you can remove these in order to
+reduce load variability on the processor.  This will decrease your
+time jitter.  It will also cut your power draw and heat dissipation,
+increasing the Pi's expected lifetime.  Most importantly, it will
+reduce the number of ways for things to go wrong.
+
+The following commands are partly based on
+https://github.com/jwhitehorn/raspbian-mod/blob/master/slim.sh[raspbian-mod],
+but remove some of the author's more parochial assumptions.
+
+------------------------------------------------------------------------
+apt-get -y remove --purge xserver-common
+apt-get -y remove --purge x11-common
+apt-get -y remove --purge gnome-icon-theme
+apt-get -y remove --purge gnome-themes-standard
+apt-get -y remove --purge penguinspuzzle
+apt-get -y remove --purge desktop-base
+apt-get -y remove --purge desktop-file-utils
+apt-get -y remove --purge hicolor-icon-theme
+apt-get -y remove --purge raspberrypi-artwork
+apt-get -y remove --purge omxplayer
+apt-get -y remove --purge bluez
+apt-get -y remove --purge avahi-daemon
+apt-get -y remove --purge dhcpcd
+apt-get -y autoremove
+apt-get -y update
+rm -rf /home/pi/python_games
+------------------------------------------------------------------------
+
+== Other resources ==
+
+http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
