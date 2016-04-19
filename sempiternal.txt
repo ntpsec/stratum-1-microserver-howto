@@ -54,12 +54,12 @@ stack.
 
 == Case and board modding == 
 
-(Ignore this if you have an AdaFruit case.  I thought I had one, but
-it seems to have been made by some third party to smaller dimensions
-than either the AdaFruit or Pi "official" case.)
+(Ignore this if you have an AdaFruit or "official" case.  I thought I
+had one, but it seems to have been made by some third party to smaller
+dimensions than either the AdaFruit or Pi "official" cases.)
 
 As shipped, the Pi + HAT assembly will *not* fit in the Canakit
-acrylic case it arruved here in.  The HAT is slightly too large for that.
+acrylic case it arrived here in.  The HAT is slightly too large for that.
 
 As an optional step, you can modify the board and case so the HAT
 fits in.  You'll do this in two steps:
@@ -80,7 +80,8 @@ Your other problem is that an unused portion of the board (consisting of
 an array of through holes for mounting ICs) collides with the case
 shield for the Ethernet.  To fix this, cut a rectangular piece off
 the south-east corner with a small coping saw.  The piece needs to be two
-through-holes wide (east-west) and nine holes high (north-south).
+through-holes wide (noth-south) and nine holes high (east-west). That
+is just enough to clear the shield for the Ethernet jack.
 
 == Beheading the Pi ==
 
@@ -357,3 +358,5 @@ rm -rf /home/pi/python_games
 == Other resources ==
 
 http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
+
+http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
