@@ -25,9 +25,7 @@ You will need:
 * One Raspberry Pi.  I used a Raspberry Pi 3: these instructions cover
   older variants as well.
 
-* One
-  https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi[Adafruit
-  GPS HAT]
+* One Adafruit GPS HAT <<GPS-HAT>>
 
 * One CR1220 3-volt lithium coin cell.  They're cheapest ordered from
   Adafruit along with the HAT, but you can buy them at most places
@@ -104,10 +102,10 @@ giving it a static address is more convenient.  Here's how to do that:
 sudo cp /etc/network/interfaces /etc/network/interfaces.backup
 ------------------------------------------------------------------------
 
-. Edit that file:
+. Edit that file using your favorite editor:
 
 ------------------------------------------------------------------------
-sudo vi /etc/network/interfaces
+sudo $EDITOR /etc/network/interfaces
 ------------------------------------------------------------------------
 
 . Change the contents to look something like this:
@@ -123,8 +121,6 @@ netmask 255.255.255.0
 gateway 192.168.1.1
 dns-nameservers 192.168.1.1
 ------------------------------------------------------------------------
-
-Once the file has been updated, use :wq to save and exit.
 
 Note: This assumes that (a) You're using the usual 192.168.1.x convention
 for private addresses, (b) your router lives at .1, and (c) you have
@@ -176,13 +172,11 @@ sinkhole. The things that have it as a dependency are things you don't
 want on a headless NTP server.
 
 Additionally, systemd tries to be its own NTP client.  This is
-undesirable for a Stratum 1 server; it might leae to unexpected
+undesirable for a Stratum 1 server; it might lead to unexpected
 interactions with your NTP installation.
 
-(Our instructions are based on
-http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[this]
-and
-https://www.raspberrypi.org/forums/viewtopic.php?f=66&t=121911[this])
+(Our instructions are based on <<NO-SYSTEMD>>)
+
 
 . First, pull in the core of sysvinit, preserving the inittab that
 systemd generated. Then reboot.
@@ -235,9 +229,8 @@ other Pi variant.
 
 Your headless timeserver is not going to need Bluetooth, so you should
 disable it and remap the devices.  Our instructions come from
-http://www.briandorey.com/post/Raspberry-Pi-3-UART-Overlay-Workaround[this
-original], which explains the problem in more detail.  We don't use
-some of their steps because this build is designed to run headless 
+<<DOREY>>, which explains the problem in more detail.  We don't use
+some of his steps because this build is designed to run headless.
 
 . Copy the
 http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[boot
@@ -254,7 +247,7 @@ force_turbo=1
 == Release the console pins ==
 
 . Next, edit the boot command line. You need to be root to do this.
-This is what I saw on an unmodified Pi 3:
+This is what I saw on an unmodified Pi 3 running Jessie:
 
 ------------------------------------------------------------------------
 root@whoville:/home/pi# cat /boot/cmdline.txt
@@ -265,10 +258,8 @@ You may want to save a copy of the original
 /boot/cmdline.txt before modifying it.
 
 To disable the serial console, remove all "console" options.  The
-Adafruit
-https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup[Pi
-GPS setup] page mentions a "kgdboc" option; if present, it should be
-removed.
+Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
+option; if present, it should be removed.
 
 You must reboot the Pi for these changes to take effect.
 
@@ -286,9 +277,7 @@ I, living in a suburb with the front of my house half-screened by tall
 trees, typically get lock about 30 seconds from power up.  It will
 seem longer than it is first time: have patience.
 
-(Some material in this section is from Adafruit's
-https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[basic
-test] page for the HAT.)
+(Some material in this section is from <<ADAFRUIT-TEST>>.)
 
 When the red LED on the HAT blinks once per second, you don't have a
 satellite fix. When it achieves lock it will blink with much lower
@@ -354,6 +343,26 @@ apt-get -y autoremove
 apt-get -y update
 rm -rf /home/pi/python_games
 ------------------------------------------------------------------------
+
+WiFi is deliberately not removed, in order to give you a fallback TCP/IP
+access when a cable is inconvenient
+
+== References ==
+
+[bibliography]
+
+- [[[GPS-HAT]]]
+  https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi[Adafruit
+  GPS HAT]
+
+- [[[REMOVE-SYSTEMD]]]
+  http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[How to remove systemd from a Debian jessie/sid installation]
+
+- [[[DOREY]]] http://www.briandorey.com/post/Raspberry-Pi-3-UART-Overlay-Workaround[Raspberry Pi 3 UART Overlay Workaround]
+
+- [[[ADAFRUIT-SETUP]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup[Pi GPS Setup]
+
+- [[[ADAFRUIT-TEST]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[Basic Test]
 
 == Other resources ==
 
