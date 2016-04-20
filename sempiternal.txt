@@ -112,7 +112,19 @@ the south-east corner with a small coping saw.  The piece needs to be two
 through-holes wide (noth-south) and nine holes high (east-west). That
 is just enough to clear the shield for the Ethernet jack.
 
-== Beheading the Pi ==
+== Fully update Rapbian ==
+
+Fully update the Raspbian on your Pi.  The easiest way to do this is:
+
+------------------------------------------------------------------------
+apt-get update
+apt-get upgrade
+------------------------------------------------------------------------
+
+If you skip this step on an old enough Pi, 1PPS configuration will
+mysteriously fail because the required incantations have changed.
+
+== Behead the Pi ==
 
 You first step is to configure the Pi to run headless attached to an
 Ethernet cable. You'll do all subsequent configuration via ssh, and
@@ -407,13 +419,55 @@ interpreted by the Pi in different ways, configured by software.
 Which pin is used for 1PPS is a variable of the HAT design.  Here is a
 table:
 
-|===========================================================
-|GPIO pin | HAT
-|    4    | Adafruit
-|    18   | Uputronics
-|===========================================================
+[width="25%",frame="topbot",options="header"]
+|============================================
+| Logical pin   | Physical pin  | HAT
+|    4          |      P1 7     | Adafruit
+|    18         |      P1 12    | Uputronics
+|============================================
 
-// More to go here
+There is a Linux kernel driver called pps-gpio which,
+given one of these pins, uses the signal from it to support an
+RFC2783 interface to PPS that NTPsec (and GPSD) can use.  To
+see 1PPS, you need to ensure that this driver is loaded
+and monitoring the correct logical pin.
+
+In all versions, you force the driver to be loaded by
+editing /etc/modules to contain the line "pps-gpio".
+
+The procedure for declaring the GPIO pin varies by Raspbian version.
+We only give the formula for the current Raspbian here; you can
+find details about older versions at <<TAYLOR>>;
+
+Edit /boot/config.txt to contain these options, replacing N with
+the logical pin number for your HAT:
+
+------------------------------------------------------------------------
+dtoverlay=pps-gpio,gpiopin=N
+------------------------------------------------------------------------
+
+Any previous gpiopin option (such as bcm2708.pps_gpio_pin) sgould be
+removed.
+
+You must reboot your Pi for this change
+
+To test this change, use ppstest from the pps-tools package.  Note,
+this will produce a false negative if the GPS has no fix.
+
+------------------------------------------------------------------------
+apt-get install pps-tools
+ppstest /dev/pps0
+------------------------------------------------------------------------
+
+You should see repeated lines somewhat resembling this:
+
+------------------------------------------------------------------------
+source 0 - assert 1461161753.267392352, sequence: 246 - clear  0.000000000, sequence: 0
+------------------------------------------------------------------------
+
+As the pps-gpio module is in April 2016 it has a flaw. It catches only
+one edge of the PPS. You have a 50/50 chance you can't see the right edge, and
+no good way of knowing you have the right edge.
 
 == Building and configuring NTPsec ==
 
@@ -452,10 +506,12 @@ apt-get -y remove --purge ntp
 
 - [[[ADAFRUIT-TEST]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[Basic Test]
 
+- [[[TAYLOR]]] http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
+
 - [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
 
 == Other resources ==
 
-http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
+
 
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
