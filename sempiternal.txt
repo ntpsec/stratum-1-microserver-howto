@@ -2,7 +2,7 @@
 :description: Building and configuring a tiny Stratum 1 timeserver with RasPi
 :keywords: Raspberry Pi, NTP, NTPsec, time service
 by Eric S. Raymond
-version 0.1
+version 0.2
 
 == Introduction ==
 
@@ -20,7 +20,12 @@ specification, Hardware Attached on Top) is a better idea than an
 external GPS because a HAT will also supply a battery-backed-up RTC,
 which the GPS can use for warm-starting.  Also, the HAT uses an
 internal RS-232 interface that cuts latency and jitter compared to a
-USB GPS and can easily ship 1PPS from the receiver.
+USB GPS.
+
+While these are good reasons, the real showstopper in trying to using an
+external USB GPS rather than a HAT is the 1PPS signal required for
+precision time service.  Generic USB GPSes do not deliver this signal
+and therefore cannot be used for Stratum 1 service.
 
 Most of this build is actually independent of any one daughterboard's hardware
 idiosyncracies. The recipe was tested using an Adafruiit GPS HAT
