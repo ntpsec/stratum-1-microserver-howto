@@ -117,17 +117,26 @@ the south-east corner with a small coping saw.  The piece needs to be two
 through-holes wide (noth-south) and nine holes high (east-west). That
 is just enough to clear the shield for the Ethernet jack.
 
-== Fully update Rapbian ==
+== Fully update Raspbian ==
 
-Fully update the Raspbian on your Pi.  The easiest way to do this is:
+Fully update the Raspbian on your Pi.  The easiest way to do this is
+with these commands:
 
 ------------------------------------------------------------------------
-apt-get update
-apt-get upgrade
+# apt-get update
+# apt-get upgrade
 ------------------------------------------------------------------------
+
+The '#' means you need to be root to run them. Later, some commands
+won't require root; those command lines will be marked with "$".
 
 If you skip this step on an old enough Pi, 1PPS configuration will
 mysteriously fail because the required incantations have changed.
+
+Next, expand the filesystem on the SD card using raspi-config. You can
+do the build without this step, but it gives you more space for
+experiments. You should do this now, because you'll lose the option to
+expand later in the process when you strip out unused service daemons.
 
 == Behead the Pi ==
 
@@ -153,7 +162,7 @@ sudo cp /etc/network/interfaces /etc/network/interfaces.backup
 . Edit that file using your favorite editor:
 
 ------------------------------------------------------------------------
-sudo $EDITOR /etc/network/interfaces
+# $EDITOR /etc/network/interfaces
 ------------------------------------------------------------------------
 
 . Change the contents to look something like this:
@@ -188,13 +197,13 @@ on my network, allowing me to refer to it by name:
 . Reboot the Pi.
 
 ------------------------------------------------------------------------
-sudo shutdown -r now
+# shutdown -r now
 ------------------------------------------------------------------------
 
 .  From some machine on your network, do:
 
 ------------------------------------------------------------------------
-ping timekeeper
+$ ping timekeeper
 ------------------------------------------------------------------------
 
 If you don't get a ping response, troubleshoot (unplugged or loose
@@ -208,7 +217,7 @@ remaining steps over ssh.
 cycles.
 
 ------------------------------------------------------------------------
-apt-get remove network-manager
+# apt-get remove network-manager
 ------------------------------------------------------------------------
 
 == On Jessie: uninstall systemd ==
@@ -229,27 +238,27 @@ interactions with your NTP installation.
 systemd generated. Then reboot.
 
 ------------------------------------------------------------------------
-apt-get install sysvinit-core sysvinit-utils
-cp /usr/share/sysvinit/inittab /etc/inittab
-reboot
+# apt-get install sysvinit-core sysvinit-utils
+# cp /usr/share/sysvinit/inittab /etc/inittab
+# reboot
 ------------------------------------------------------------------------
 
 . Purge the remnants of systemd and packages that depend on it.
 
 ------------------------------------------------------------------------
-apt-get remove --purge --auto-remove systemd
+# apt-get remove --purge --auto-remove systemd
 ------------------------------------------------------------------------
 
 . Prevent apt from installing systemd packages in the future.
 
 ------------------------------------------------------------------------
-echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
+# echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
 ------------------------------------------------------------------------
 
 . Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
 
 ------------------------------------------------------------------------
-echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
+# echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
 ------------------------------------------------------------------------
 
 == Disable getty on your UART device ==
@@ -260,7 +269,7 @@ or removed. You do not want a getty to spawn on these. To check this,
 you can reboot and do
 
 ------------------------------------------------------------------------
-ps ax | grep getty
+$ ps ax | grep getty
 ------------------------------------------------------------------------
 
 If neither ttyS0 or ttyAMA0 appears in any of the selected lines,
@@ -333,8 +342,8 @@ frequency.
 To test that you can read data from the device, do this:
 
 ------------------------------------------------------------------------
-stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
-cat /dev/ttyS0
+$ stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/ttyS0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second.
@@ -344,13 +353,13 @@ direct-connect NTPsec to the GPS, but its diagnostic tools (especially
 gpsmon) are useful for sanity-checking the output of the HAT.
 
 ------------------------------------------------------------------------
-apt-get install gpsd gpsd-clients python-gps
+# apt-get install gpsd gpsd-clients python-gps
 ------------------------------------------------------------------------
 
 Run 
 
 ------------------------------------------------------------------------
-gpsmon /dev/ttyAMA0
+$ gpsmon /dev/ttyAMA0
 ------------------------------------------------------------------------
 
 You should see a curses panel display that shows you both raw GPS
@@ -361,8 +370,8 @@ your device.
 To avoid potential problems in later testing, disable autostartup of GPSD.
 
 ------------------------------------------------------------------------
-/etc/init.d gpsd stop
-update-rc.d gpsd remove
+# /etc/init.d gpsd stop
+# update-rc.d gpsd remove
 ------------------------------------------------------------------------
 
 Eventually, you may want to build your own GPSD test tools from source.
@@ -370,7 +379,7 @@ The prerequisites not present in a stock Raspbian can be covered with
 this import:
 
 ------------------------------------------------------------------------
-apt-get install scons ncurses-dev python-dev bc
+# apt-get install scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
 
 == Optional: Thin out the system processes on your Pi ==
@@ -384,23 +393,23 @@ increasing the Pi's expected lifetime.  Most importantly, it will
 reduce the number of ways for things to go wrong.
 
 ------------------------------------------------------------------------
-apt-get -y remove --purge xserver-common
-apt-get -y remove --purge x11-common
-apt-get -y remove --purge gnome-icon-theme
-apt-get -y remove --purge gnome-themes-standard
-apt-get -y remove --purge penguinspuzzle
-apt-get -y remove --purge desktop-base
-apt-get -y remove --purge desktop-file-utils
-apt-get -y remove --purge hicolor-icon-theme
-apt-get -y remove --purge raspberrypi-artwork
-apt-get -y remove --purge omxplayer
-apt-get -y remove --purge bluez
-apt-get -y remove --purge avahi-daemon
-apt-get -y remove --purge dhcpcd
-apt-get -y remove --purge triggerhappy
-apt-get -y autoremove
-apt-get -y update
-rm -rf /home/pi/python_games
+# apt-get -y remove --purge xserver-common
+# apt-get -y remove --purge x11-common
+# apt-get -y remove --purge gnome-icon-theme
+# apt-get -y remove --purge gnome-themes-standard
+# apt-get -y remove --purge penguinspuzzle
+# apt-get -y remove --purge desktop-base
+# apt-get -y remove --purge desktop-file-utils
+# apt-get -y remove --purge hicolor-icon-theme
+# apt-get -y remove --purge raspberrypi-artwork
+# apt-get -y remove --purge omxplayer
+# apt-get -y remove --purge bluez
+# apt-get -y remove --purge avahi-daemon
+# apt-get -y remove --purge dhcpcd
+# apt-get -y remove --purge triggerhappy
+# apt-get -y autoremove
+# apt-get -y update
+# rm -rf /home/pi/python_games
 ------------------------------------------------------------------------
 
 The resulting configuration is pretty minimal, as you can verify by
@@ -451,7 +460,7 @@ the logical pin number for your HAT:
 dtoverlay=pps-gpio,gpiopin=N
 ------------------------------------------------------------------------
 
-Any previous gpiopin option (such as bcm2708.pps_gpio_pin) sgould be
+Any previous gpiopin option (such as bcm2708.pps_gpio_pin) should be
 removed.
 
 You must reboot your Pi for this change
@@ -460,8 +469,8 @@ To test this change, use ppstest from the pps-tools package.  Note,
 this will produce a false negative if the GPS has no fix.
 
 ------------------------------------------------------------------------
-apt-get install pps-tools
-ppstest /dev/pps0
+# apt-get install pps-tools
+# ppstest /dev/pps0
 ------------------------------------------------------------------------
 
 You should see repeated lines somewhat resembling this:
@@ -482,8 +491,30 @@ can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
 
+. Uninstall the stock Raspbian NTP:
+
 ------------------------------------------------------------------------
-apt-get -y remove --purge ntp
+# apt-get -y remove --purge ntp
+------------------------------------------------------------------------
+
+. Then. clone the NTPsec repository:
+
+------------------------------------------------------------------------
+git clone https://gitlab.com/NTPsec/ntpsec.git
+------------------------------------------------------------------------
+
+. Install the build prerequisites
+
+------------------------------------------------------------------------
+# apt-get install bison libevent-dev libcap-dev libssl-dev
+# apt-get install libreadline-dev pps-tools asciidoc
+------------------------------------------------------------------------
+
+. Build the software.  
+
+------------------------------------------------------------------------
+$ waf configure
+$ waf build
 ------------------------------------------------------------------------
 
 // More to go here.  Use <<NEVILL>>
@@ -516,7 +547,5 @@ apt-get -y remove --purge ntp
 - [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
 
 == Other resources ==
-
-
 
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
