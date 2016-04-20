@@ -7,16 +7,24 @@ version 0.1
 == Introduction ==
 
 This HOWTO gives complete instructions for building a headless Stratum
-1 timeserver using a Raspberry Pi, the Adafruit GPS hat, and NTPsec.
-Total parts cost should be about $80.  Light soldering is required.
+1 timeserver using a Raspberry Pi, a GPS daughterboard designed for
+the Pi, and NTPsec <<NTPSEC>>.  Total parts cost should be about $80.
+Light soldering is required.
 
 Why do it?  It's cheap, fun, and because your NTP server is running on
 a dedicated machine you won't have so much jitter due to variable
 load.
 
-The Adafruit GPS hat is a better idea than an external GPS because it
-also supplies a battery-backed-up RTC, which the GPS can use for
-warm-starting.
+A GPS daughterboard is a better idea than an external GPS because a
+HAT will also supply a battery-backed-up RTC, which the GPS can use
+for warm-starting.  Also, the HAT uses an internal RS-232 interface
+that cuts latency and jitter compared to a USB GPS and can easily ship
+1PPS from the receiver.
+
+Most of this build is actually independent of any one HAT's hardware
+idiosyncracies. The recipe was tested using an Adafruiit GPS HAT
+<<ADAFRUIT-HAT>>, but should also cover the Uputronics GPS Expansion Board
+<<UPUTRONICS-HAT>>
 
 == Parts list and hardware assembly ==
 
@@ -25,19 +33,20 @@ You will need:
 * One Raspberry Pi.  I used a Raspberry Pi 3: these instructions cover
   older variants as well.
 
-* One Adafruit GPS HAT <<GPS-HAT>>
+* One Adafruit GPS HAT or Uputronics GPS Expansion Board.
 
-* One CR1220 3-volt lithium coin cell.  They're cheapest ordered from
-  Adafruit along with the HAT, but you can buy them at most places
-  that carry hearing-aid batteries.
+* One CR1220 (for Adafruit) or CR2032 (for Uputronics) 3-volt lithium
+  coin cell.  The CR1220 is cheapest ordered from Adafruit along with
+  the HAT, but you can buy either at most places that carry
+  hearing-aid batteries.
 
 * (Optional) A Raspberry Pi case to protect your hardware from
   dust and curious felines.
 
-The HAT is shipped as two parts, a circuit board and a 40-pin header.
-Your first step will be to solder the header to the bottom of the
-board, on the opposite side from the GPS module (under what would be
-the east edge if the Adafruit logo were a map legend). Poke the
+The Adafruit HAT is shipped as two parts, a circuit board and a 40-pin
+header.  Your first step will be to solder the header to the bottom of
+the board, on the opposite side from the GPS module (under what would
+be the east edge if the Adafruit logo were a map legend). Poke the
 header pins upwards through the double row of through holes at the
 east edge of the board and go.  This is the last bit of hardware
 hacking absolutely required.
@@ -46,9 +55,29 @@ hacking absolutely required.
 requirement for FCC conformance testing to RF emission standards,
 which is expensive and would have added to the unit cost.)
 
-The header on the assembled HAT fits down over the double row of pins
-on the east edge of the Pi, such that the two boards make a neat
-stack.
+The header on the assembled HAT fits down over the
+double row of pins on the east edge of the Pi, such that the two
+boards make a neat stack.
+
+== Understanding the GPIO connector ==
+
+The pins you'll plug the HAT into are the Pi's primary or P1 GPIO
+(General Purpose I/O) header.  There's a second or P5 GPIO connector
+near it consisting of a 2x3 array of through holes. This build won't
+use that.
+
+The Pi 3 and other recent variants have 40 pins in the P1 header.
+Older variants, the original Pi A and B, have only 26 pins.  The
+assignments for those pins on later versions are backward-compatible.
+
+The GPIO pins are sometimes referenced by physical pin location on the
+header (1-26 or 1-40), and sometimes as the GPIO line connected to the
+CPU.  This can cause confusion.  They are best referred to as
+P1-[1-40], p5-[1-8] or as GPIO +[2-31].  Some are typically
+pre-configured for specific functions (serial, i2c, etc.)  Two that
+will be important for this build are the TX and RX serial lines.
+
+The pinouts are described at <<GPIO>>.
 
 == Case and board modding == 
 
@@ -56,8 +85,9 @@ stack.
 had one, but it seems to have been made by some third party to smaller
 dimensions than either the AdaFruit or Pi "official" cases.)
 
-As shipped, the Pi + HAT assembly will *not* fit in the Canakit
-acrylic case it arrived here in.  The HAT is slightly too large for that.
+As shipped, a daughterboard the size of the Adafruit HAT will *not*
+fit in the Canakit acrylic case it arrived here in.  The HAT is
+slightly too large for that.
 
 As an optional step, you can modify the board and case so the HAT
 fits in.  You'll do this in two steps:
@@ -177,7 +207,6 @@ interactions with your NTP installation.
 
 (Our instructions are based on <<NO-SYSTEMD>>)
 
-
 . First, pull in the core of sysvinit, preserving the inittab that
 systemd generated. Then reboot.
 
@@ -259,7 +288,7 @@ You may want to save a copy of the original
 
 To disable the serial console, remove all "console" options.  The
 Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
-option; if present, it should be removed.
+option; if present, it should also be removed.
 
 You must reboot the Pi for these changes to take effect.
 
@@ -321,10 +350,6 @@ time jitter.  It will also cut your power draw and heat dissipation,
 increasing the Pi's expected lifetime.  Most importantly, it will
 reduce the number of ways for things to go wrong.
 
-The following commands are partly based on
-https://github.com/jwhitehorn/raspbian-mod/blob/master/slim.sh[raspbian-mod],
-but remove some of the author's more parochial assumptions.
-
 ------------------------------------------------------------------------
 apt-get -y remove --purge xserver-common
 apt-get -y remove --purge x11-common
@@ -339,21 +364,76 @@ apt-get -y remove --purge omxplayer
 apt-get -y remove --purge bluez
 apt-get -y remove --purge avahi-daemon
 apt-get -y remove --purge dhcpcd
+apt-get -y remove --purge triggerhappy
 apt-get -y autoremove
 apt-get -y update
 rm -rf /home/pi/python_games
 ------------------------------------------------------------------------
 
-WiFi is deliberately not removed, in order to give you a fallback TCP/IP
-access when a cable is inconvenient
+The resulting configuration is pretty minimal, as you can verify by
+running "ps ax" and noticing that most of the background processes are
+kernel threads.
+
+WiFi is deliberately not removed, in order to give
+you a fallback TCP/IP access when a cable is inconvenient.
+
+== Getting 1PPS from your device ==
+
+You'll need NTPsec to be able to see the high-precision PPS
+(pulse-per-second) signal from the GPS.  But the serial interface from an
+Adafruit or Uputronics HAT only supplies TX/RX; the PPS signal is
+shipped on a different pin of the GPIO connector.
+
+The RX/TX signals are always expected on the same two pins of the
+GPIO, which connect to the Pi's UART. You can see them, labeled, near
+the north end of the connector. Most other GPIO pins can be
+interpreted by the Pi in different ways, configured by software.
+Which pin is used for 1PPS is a variable of the HAT design.  Here is a
+table:
+
+|===========================================================
+|GPIO pin | HAT
+|    4    | Adafruit
+|    18   | Uputronics
+|===========================================================
+
+
+== Building and configuring NTPsec ==
+
+The stock ntpd shipped with Raspbian is intended to be used as a
+client instance, not a server.  It doesn't do 1PPS, and therefore
+can't be used for precision timekeeping.  Thus, we'ew going to build a
+better version from source.  That version is NTPsec, which runs
+lighter and more securely and can do more accurate time stepping.
+
+------------------------------------------------------------------------
+apt-get -y remove --purge ntp
+------------------------------------------------------------------------
+
+// More goes here.  Use <<NEVILL>>
+
+== Note on building gpsd from source ==
+i
+The prerequisites not present in a stock Raspbian can be covered with
+this import:
+
+------------------------------------------------------------------------
+apt-get install scons ncurses-dev python-dev bc
+------------------------------------------------------------------------
 
 == References ==
 
 [bibliography]
 
-- [[[GPS-HAT]]]
+- [[[ADAFRUIT-HAT]]]
   https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi[Adafruit
   GPS HAT]
+
+- [[[UPUTRONICS-HAT]]] https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81[Raspberry Pi+ GPS Expansion Board]
+
+- [[[NTPSEC]]] https://www.ntpsec.org/[The NTPsec project]
+
+- [[[GPIO]]] https://www.raspberrypi.org/documentation/usage/gpio-plus-and-raspi2/[GPIO: MODELS A+, B+, RASPBERRY PI 2 B AND RASPBERRY PI 3 B]
 
 - [[[REMOVE-SYSTEMD]]]
   http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[How to remove systemd from a Debian jessie/sid installation]
@@ -363,6 +443,8 @@ access when a cable is inconvenient
 - [[[ADAFRUIT-SETUP]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup[Pi GPS Setup]
 
 - [[[ADAFRUIT-TEST]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[Basic Test]
+
+- [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
 
 == Other resources ==
 
