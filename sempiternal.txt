@@ -124,7 +124,8 @@ with these commands:
 
 ------------------------------------------------------------------------
 # apt-get update
-# apt-get upgrade
+# apt-get dist-upgrade
+# rpi-update
 ------------------------------------------------------------------------
 
 The '#' means you need to be root to run them. Later, some commands
@@ -405,7 +406,6 @@ reduce the number of ways for things to go wrong.
 # apt-get -y remove --purge omxplayer
 # apt-get -y remove --purge bluez
 # apt-get -y remove --purge avahi-daemon
-# apt-get -y remove --purge dhcpcd
 # apt-get -y remove --purge triggerhappy
 # apt-get -y autoremove
 # apt-get -y update
@@ -510,12 +510,24 @@ git clone https://gitlab.com/NTPsec/ntpsec.git
 # apt-get install libreadline-dev pps-tools asciidoc
 ------------------------------------------------------------------------
 
-. Build the software.  
+. Build NTPsec.  The --refclock option says to include only Generic
+NMEA and 1PPS support, excluding all other drivers.
 
 ------------------------------------------------------------------------
-$ waf configure
+$ waf configure --refclock=20,22
 $ waf build
 ------------------------------------------------------------------------
+
+Before you install it, do this:
+
+------------------------------------------------------------------------
+# apt-get -y remove --purge dhcpcd
+------------------------------------------------------------------------
+
+According to <<NEVILL>>, "This has a nasty habit of interfering where
+it's not wanted. Specifically, in this instance, if your DHCP server
+specifies an NTP server, it will start ntpd with its own version of
+ntp.conf."
 
 // More to go here.  Use <<NEVILL>>
 
