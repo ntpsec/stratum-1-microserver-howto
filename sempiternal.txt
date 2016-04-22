@@ -88,7 +88,7 @@ assignments for those pins on later versions are backward-compatible.
 The GPIO pins are sometimes referenced by physical pin location on the
 header (1-26 or 1-40), and sometimes as the GPIO line connected to the
 CPU.  This can cause confusion.  They are best referred to as
-P1-[1-40], p5-[1-8] or as GPIO +[2-31].  Some are typically
+P1-[1-40], P5-[1-8] or as GPIO [0-31].  Some are typically
 pre-configured for specific functions (serial, i2c, etc.)  Two that
 will be important for this build are the TX and RX serial lines.
 
@@ -245,11 +245,12 @@ disable it and remap the devices.  Our instructions come from
 <<DOREY>>, which explains the problem in more detail.  We don't use
 some of his steps because this build is designed to run headless.
 
-. Copy the
-http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[boot
-overlay] to the root directory of your Pi 3, and unzip it.
+Check that you have the file
+/boot/overlay/pi3-miniuart-bt-overlay.dtb; if you don't, you can
+http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[download]
+it.
 
-. Edit the /boot/config.txt file to append these lines:
+Edit the /boot/config.txt file to append these lines:
 
 ------------------------------------------------------------------------
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
@@ -292,8 +293,8 @@ or by using the GUI configurator to re-enable
 To test that you can read data from the device, do this:
 
 ------------------------------------------------------------------------
-$ stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/ttyS0
+$ stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/ttyAMA0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
@@ -315,7 +316,7 @@ This was not a full functional test of the GPS; we'll do that latter.
 It's what engineers call a "smoke test", just checking that the
 device is alive and doing something reasonably sane.
 
-Once the GPS/HAT coombination has passed its smoke test you can proceed.
+Once the GPS/HAT combination has passed its smoke test you can proceed.
 
 You'll need NTPsec to be able to see the high-precision PPS
 (pulse-per-second) signal from the GPS.  But the serial interface from an
@@ -332,8 +333,8 @@ table:
 [width="25%",frame="topbot",options="header"]
 |============================================
 | Logical pin   | Physical pin  | HAT
-|    4          |      P1 7     | Adafruit
-|    18         |      P1 12    | Uputronics
+|   GPIO #4     |      P1 7     | Adafruit
+|   GPIO #18    |      P1 12    | Uputronics
 |============================================
 
 There is a Linux kernel driver called pps-gpio which,
@@ -349,8 +350,8 @@ The procedure for declaring the GPIO pin varies by Raspbian version.
 We only give the formula for the current Raspbian here; you can
 find details about older versions at <<TAYLOR>>;
 
-Edit /boot/config.txt to contain these options, replacing N with
-the logical pin number for your HAT:
+Edit /boot/config.txt to contain these options, replacing '4' with
+the logical pin number for your HAT if it's not an Adafruit:
 
 ------------------------------------------------------------------------
 dtoverlay=pps-gpio,gpiopin=4
@@ -477,9 +478,53 @@ it's not wanted. Specifically, in this instance, if your DHCP server
 specifies an NTP server, it will start ntpd with its own version of
 ntp.conf."
 
+Alternatively, you can can prevent that with an edit to /etc/init.d/ntp
+to stop it from running the /etc/default/ntp script.
+
 // More to go here.  Use <<NEVILL>>
 
 == Simplification and optimization ==
+
+=== Required on Jessie: uninstall systemd ===
+
+If you are running on Raspbian Jessie, next step is to uninstall
+systemd.  It is a CPU hog (not just on the Pi; similar problems have
+been reported across many architectures) and a complexity
+sinkhole. The things that have it as a dependency are things you don't
+want on a headless NTP server.
+
+But the reason this is marked "required" is that systemd tries to be
+its own NTP client.  This is undesirable for a Stratum 1 server; it
+might lead to unexpected interactions with your NTP installation.
+
+(Our instructions are based on <<NO-SYSTEMD>>)
+
+. First, pull in the core of sysvinit, preserving the inittab that
+systemd generated. Then reboot.
+
+------------------------------------------------------------------------
+# apt-get install sysvinit-core sysvinit-utils
+# cp /usr/share/sysvinit/inittab /etc/inittab
+# reboot
+------------------------------------------------------------------------
+
+. Purge the remnants of systemd and packages that depend on it.
+
+------------------------------------------------------------------------
+# apt-get remove --purge --auto-remove systemd
+------------------------------------------------------------------------
+
+. Prevent apt from installing systemd packages in the future.
+
+------------------------------------------------------------------------
+# echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
+------------------------------------------------------------------------
+
+. Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
+
+------------------------------------------------------------------------
+# echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
+------------------------------------------------------------------------
 
 === Declaring a static address ===
 
@@ -491,7 +536,7 @@ giving it a static address is more convenient.  Here's how to do that:
 . Just in case, make a backup copy of your /etc/network/interfaces file:
 
 ------------------------------------------------------------------------
-sudo cp /etc/network/interfaces /etc/network/interfaces.backup
+# cp /etc/network/interfaces /etc/network/interfaces.backup
 ------------------------------------------------------------------------
 
 . Edit that file using your favorite editor:
@@ -547,47 +592,6 @@ log out and then disconnect the keyboard/screen/mouse, which you
 should do to reduce power draw and heating of the board (graphics
 processing for the GUI is expensive that way).  You'll do the
 remaining steps over ssh.
-
-=== On Jessie: uninstall systemd ===
-
-If you are running on Raspbian Jessie, next step is to uninstall
-systemd.  It is a CPU hog (not just on the Pi; similar problems have
-been reported across many architectures) and a complexity
-sinkhole. The things that have it as a dependency are things you don't
-want on a headless NTP server.
-
-Additionally, systemd tries to be its own NTP client.  This is
-undesirable for a Stratum 1 server; it might lead to unexpected
-interactions with your NTP installation.
-
-(Our instructions are based on <<NO-SYSTEMD>>)
-
-. First, pull in the core of sysvinit, preserving the inittab that
-systemd generated. Then reboot.
-
-------------------------------------------------------------------------
-# apt-get install sysvinit-core sysvinit-utils
-# cp /usr/share/sysvinit/inittab /etc/inittab
-# reboot
-------------------------------------------------------------------------
-
-. Purge the remnants of systemd and packages that depend on it.
-
-------------------------------------------------------------------------
-# apt-get remove --purge --auto-remove systemd
-------------------------------------------------------------------------
-
-. Prevent apt from installing systemd packages in the future.
-
-------------------------------------------------------------------------
-# echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
-------------------------------------------------------------------------
-
-. Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
-
-------------------------------------------------------------------------
-# echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
-------------------------------------------------------------------------
 
 === Thin out the system processes on your Pi ===
 
@@ -645,12 +649,12 @@ driver can't see them to, worst case, 0.5s.  The worst case is rare;
 typical pulse widths are 50 to 200ms. Because the error is constant,
 you can compensate it out with an offset if you know what it is.
 
-//TO-DO: Measure the pulse width on the Adafruit hat.
+//TO-DO: Check the pulse width on the Adafruit hat.
 
 [width="25%",frame="topbot",options="header"]
 |===========================================================
 |Type           | Chipset    | 1PPS width  | gps-ppio detects
-|Adafruit HAT   | MTK3339    |     ?       | leading edge
+|Adafruit HAT   | MTK3339    |   100ms     | leading edge
 |Uputronics HAT | Ublox 8    |   100ms     | leading edge 
 |===========================================================
 
