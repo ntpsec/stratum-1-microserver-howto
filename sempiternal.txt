@@ -49,6 +49,15 @@ You will need:
 * (Optional) A Raspberry Pi case to protect your hardware from
   dust and curious felines.
 
+* (Optional) A micro-SD reader/writer, in case you need to recover
+  from a failed installation by making a new bootable image.
+
+* A live Ethernet cable to the Internet.
+
+* Temporary of a USB mouse and keyboard.
+
+* Temporary use of a DVI-compatile monitor and cable.
+
 The Adafruit HAT is shipped as two parts, a circuit board and a 40-pin
 header.  Your first step will be to solder the header to the bottom of
 the board, on the opposite side from the GPS module (under what would
@@ -85,39 +94,125 @@ will be important for this build are the TX and RX serial lines.
 
 The pinouts are described at <<GPIO>>.
 
-== Case and board modding == 
+== Configuration overview ==
 
-(Ignore this if you have an AdaFruit or "official" case.  I thought I
-had one, but it seems to have been made by some third party to smaller
-dimensions than either the AdaFruit or Pi "official" cases.)
+The steps in this configuration sequence have been carefully ordered
+to commit you to as few changes that are difficult to reverse as
+possible before you are certain you can make the hardware work as
+a dedicated timeserver.
 
-As shipped, a daughterboard the size of the Adafruit HAT will *not*
-fit in the Canakit acrylic case it arrived here in.  The HAT is
-slightly too large for that.
+The work divides into the following phases:
 
-As an optional step, you can modify the board and case so the HAT
-fits in.  You'll do this in two steps:
+1. Early configuration
 
-First, modify the flanges that are engaged by the five clips on the
-bottom of the case top. Unaltered, the flanges will physically
-interfere with the HAT.
+2. Smoke-test the Pi/HAT combination
 
-Ideally, you want to cut a rectangular piece off each flange about an
-eighth of an inch horizontal dimension and about a quarter-inch
-vertical dimension.  You do _not_ want to shave the flanges all the
-way back to the case walls if you can avoid it: if you do that, the
-clips won't have anything to engage and the top will sit slightly
-loose. (Mine is modded that less-than-ideal way.  It's not worth
-re-doing with a new case.)
+3. Live-test the GPS
 
-Your other problem is that an unused portion of the board (consisting of
-an array of through holes for mounting ICs) collides with the case
-shield for the Ethernet.  To fix this, cut a rectangular piece off
-the south-east corner with a small coping saw.  The piece needs to be two
-through-holes wide (noth-south) and nine holes high (east-west). That
-is just enough to clear the shield for the Ethernet jack.
+4. Build and configure NTPsec
 
-== Fully update Raspbian ==
+5. Simplification and optimization
+
+Within each phase, we try to indicate how difficult each operation is
+to back out.
+
+If all else fails, we'll give a procedure for making a new bootable SD
+which, unlike the "official" one, can be done entirely with a Unix
+machine.
+
+== Early configuration ==
+
+== Initial configuration in the GUI ==
+
+Plug in a monitor, a mouse, and keyboard, and a live Ethernet cable;
+power up the Pi. Go through your normal configuration - hostname,
+keyboard layout, timezone, locale, etc.
+
+One special thing you should do is disable the serial interface.  Your
+HAT needs the GPIO pins it uses, and it's easiest to disable from the
+GUI configurator.  This change is easily reversed until and unless
+you strip out the GUI in phase 6.
+
+Next, check to see if you can expand the filesystem on the SD card;
+the option may be active or frozen depending on how your SD card was
+made.
+
+You can do the build without expanding, but it gives you more space
+for experiments. You should do this now if you're going to, because
+you may lose the option to expand later in the process if you strip
+out unused services.  Note that this change is *not reversible*;
+however, you would probably want it for any other use of the Pi.
+
+=== Runnlng headless ===
+
+No actual configuration changes to the Pi are made in this step.
+
+After initial configuration, the rest of your timeserver setup will be
+done in a terminal emulator.  This will not require the GUI.
+Optionally, you can continue using it.
+
+Otherwise you can at this point begin to run headless, whuch you are
+almost certainly going to want to do anyway when you put the Pi into
+peoduction as a dedicated timeserver. Run this:
+
+------------------------------------------------------------------------
+$ ifconfig
+------------------------------------------------------------------------
+
+The output should contain a stanza roughly resembling this:
+
+------------------------------------------------------------------------
+eth0      Link encap:Ethernet  HWaddr b8:27:eb:05:b3:29  
+          inet addr:192.168.1.184  Bcast:192.168.1.255  Mask:255.255.255.0
+          inet6 addr: 2001:470:e34c:2::454/128 Scope:Global
+          inet6 addr: 2001:470:e34c:2:4273:1f68:840c:489a/64 Scope:Global
+          inet6 addr: fe80::e32f:9024:237f:5fc/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:16059 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:8453 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:10589511 (10.0 MiB)  TX bytes:880938 (860.2 KiB)
+------------------------------------------------------------------------
+
+The key piece of information is the IP address just after "inet
+addr:", in this case 192.168.1.184. Test this by running the
+equivalent of
+
+------------------------------------------------------------------------
+$ ssh pi@192.168.1.184
+------------------------------------------------------------------------
+
+from a different machine on your network, using whatever address you
+actually got.  You should be able to log in using the default password
+for the pi user. Once you can do that, you can unplug the
+mouse/keyboard/monitor on the Pi and run headless.
+
+Note that by default the Pi gets a dynamic IP address from whatever
+DHCP server it can find on your network - usually your router will
+provide DHCP.  This means that when you reboot the Pi it may come up
+using a different dynamic address that you don't know.
+
+There are two ways around this.  One is to be sure the avahi-demon
+package is installed on your Pi.  If it is, you can append ".local"
+to your Pi's hostname (by default, then, "raspberrypi.local") and
+ssh in using that name.
+
+The other way around is to configure the Pi to use a fixed, static IP
+address.  We'll give directions on how to set that up later in this
+HOWTO.
+
+If all else fails,
+
+------------------------------------------------------------------------
+# arp -a
+------------------------------------------------------------------------
+
+run from any machine on your network, will give you a list of
+IP-addresses/hostnames that are or have been active on your network
+(the information is cached).  You can try any IP addresses paired with
+your Pi's hostname; one of them should work.
+
+=== Fully update Raspbian ===
 
 Fully update the Raspbian on your Pi.  The easiest way to do this is
 with these commands:
@@ -134,20 +229,280 @@ won't require root; those command lines will be marked with "$".
 If you skip this step on an old enough Pi, 1PPS configuration will
 mysteriously fail because the required incantations have changed.
 
-Next, expand the filesystem on the SD card using raspi-config. You can
-do the build without this step, but it gives you more space for
-experiments. You should do this now, because you'll lose the option to
-expand later in the process when you strip out unused service daemons.
+These changes are not reversible, but you'd want them for any other
+use of the Pi anyway.
 
-== Behead the Pi ==
+=== Pi 3 only: disable Bluetooth and remap console device ===
 
-You first step is to configure the Pi to run headless attached to an
-Ethernet cable. You'll do all subsequent configuration via ssh, and
-your other machines will take time corrections via TCP/IP over the
-Ethernet.
+The Pi 3 Raspbian implementors made a design decision on the Raspberry
+Pi 3 that ties the serial baud rate to the CPU clock rate (by
+default).  This was done because the normal lines that fed the serial
+port were used for the built-in Bluetooth. This does not affect any
+other Pi variant.
 
-Plug in a monitor, mouse, and keyboard.  Power up the Pi.  Invoke
-a terminal emulator.
+Your timeserver is not going to need Bluetooth, so you should
+disable it and remap the devices.  Our instructions come from
+<<DOREY>>, which explains the problem in more detail.  We don't use
+some of his steps because this build is designed to run headless.
+
+. Copy the
+http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[boot
+overlay] to the root directory of your Pi 3, and unzip it.
+
+. Edit the /boot/config.txt file to append these lines:
+
+------------------------------------------------------------------------
+# Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
+dtoverlay=pi3-miniuart-bt-overlay
+force_turbo=1
+------------------------------------------------------------------------
+
+This change restores the behavior of the Pi2 and earlier, in which the
+serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
+
+This change can effectively be reversed by commenting out the
+dtoverlay and force_turbo lines.
+
+=== Release the console pins ===
+
+Next, edit the boot command line (if required - if you remembered to
+disable the serial interace in phase 1 it shouldn't be). You need to
+be root to do this.
+
+Save a copy of the original /boot/cmdline.txt before modifying it.
+
+This is what I saw on an unmodified Pi 3 running Jessie:
+
+------------------------------------------------------------------------
+root@whoville:/home/pi# cat /boot/cmdline.txt
+dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
+------------------------------------------------------------------------
+
+To disable the serial console, remove all "console" options.  The
+Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
+option; if present, it should also be removed.
+
+You must reboot the Pi for this change to take effect.
+
+This change can be undone by restoring the saved original of /boot/cmdline.txt,
+or by using the GUI configurator to re-enable 
+
+== Smoke-test the GPS/HAT combination ==
+
+To test that you can read data from the device, do this:
+
+------------------------------------------------------------------------
+$ stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/ttyS0
+------------------------------------------------------------------------
+
+You should see NMEA0183 sentences issuing in bursts once per second -
+text lines usually beginning with "$GP", and possiblt a "$PMTK
+sentence".  These will issue whether or not the GPS has satellite lock.
+
+If you see no output or random baud barf, re-do the stty command being
+very careful that all the arguments are correct. If you still don't
+see output, check that the HAT is correctly seated on the GPIO and
+powered up (a red light near the north edge should blink at least once
+per 10 seconds).
+
+If you still don't see legible output after checking these, you may
+have a problem this HOWTO can't solve - possibly dead or defective
+hardware.  However, it is far more likely that you have skipped
+a previous step or gotten one slightly wrong. Recheck your work.
+
+This was not a full functional test of the GPS; we'll do that latter.
+It's what engineers call a "smoke test", just checking that the
+device is alive and doing something reasonably sane.
+
+Once the GPS/HAT coombination has passed its smoke test you can proceed.
+
+You'll need NTPsec to be able to see the high-precision PPS
+(pulse-per-second) signal from the GPS.  But the serial interface from an
+Adafruit or Uputronics HAT only supplies TX/RX; the PPS signal is
+shipped on a different pin of the GPIO connector.
+
+The RX/TX signals are always expected on the same two pins of the
+GPIO, which connect to the Pi's UART. You can see them, labeled, near
+the north end of the connector. Most other GPIO pins can be
+interpreted by the Pi in different ways, configured by software.
+Which pin is used for 1PPS is a variable of the HAT design.  Here is a
+table:
+
+[width="25%",frame="topbot",options="header"]
+|============================================
+| Logical pin   | Physical pin  | HAT
+|    4          |      P1 7     | Adafruit
+|    18         |      P1 12    | Uputronics
+|============================================
+
+There is a Linux kernel driver called pps-gpio which,
+given one of these pins, uses the signal from it to support an
+RFC2783 interface to PPS that NTPsec (and GPSD) can use.  To
+see 1PPS, you need to ensure that this driver is loaded
+and monitoring the correct logical pin.
+
+In all versions, you force the driver to be loaded by
+editing /etc/modules to contain the line "pps-gpio".
+
+The procedure for declaring the GPIO pin varies by Raspbian version.
+We only give the formula for the current Raspbian here; you can
+find details about older versions at <<TAYLOR>>;
+
+Edit /boot/config.txt to contain these options, replacing N with
+the logical pin number for your HAT:
+
+------------------------------------------------------------------------
+dtoverlay=pps-gpio,gpiopin=4
+------------------------------------------------------------------------
+
+Any previous gpiopin option (such as bcm2708.pps_gpio_pin) should be
+removed.
+
+You must reboot your Pi for this change to take effect.
+
+To test this change, use ppstest from the pps-tools package.  Note,
+this will produce a false negative if the GPS has no fix.
+
+------------------------------------------------------------------------
+# apt-get install pps-tools
+# ppstest /dev/pps0
+------------------------------------------------------------------------
+
+You should see repeated lines somewhat resembling this:
+
+------------------------------------------------------------------------
+source 0 - assert 1461161753.267392352, sequence: 246 - clear  0.000000000, sequence: 0
+------------------------------------------------------------------------
+
+If you can see this, you have 1PPS and can do proper timekeeping.
+
+However...
+
+As the pps-gpio module is in April 2016 it has a flaw. It catches only
+one edge of the PPS. You have a 50/50 chance you are seeing the
+trailing edge rather than the leading edge (which is the actual top of
+second).  A patch to fix this has been submitted to the Linux kernel
+maintainers but not merged.
+
+Which edge the kernel will see, and the pulse width, are constant
+depending on the GPS type and firmware. If the kernel sees the
+trailing edge, the width of the pulse emitted by your GPS will
+introduce a fixed lag to the time when you actually see the PPS.
+
+Pulse widths (and the induced lag) range from so fast the serial
+driver can't see them to, worst case, 0.5s.  The worst case is rare;
+typical pulse widths are 50 to 200ms. Because the error is constant,
+you can compensate it out with an offset if you know what it is.
+
+//TO-DO: Measure the pulse width on the Adafruit and Uputronics hats.
+//Figure out if they make the leading or trailing edge visible, somehow.
+
+== Live-test the GPS ==
+
+Next thing you want to do is verify that the GPS works.  Put your
+micro-server on someplace like a windowsill with a good sky view outside.
+The MKT3339 on the HAT has very good weak-signal discrimination and
+is much less fussy about siting than older GPS receivers.
+
+On first (cold) boot, the device may take 20-30 minutes to download a
+satellite ephemeris. After that, time to get a fix should be much faster
+unless you live in a canyon (including the urban kind) or dense forest.
+I, living in a suburb with the front of my house half-screened by tall
+trees, typically get lock about 30 seconds from power up.  It will
+seem longer than it is first time: have patience.
+
+(Some material in this section is from <<ADAFRUIT-TEST>>.)
+
+When the red LED on the HAT blinks once per second, you don't have a
+satellite fix. When it achieves lock it will blink with much lower
+frequency.
+
+Now install GPSD.  You won't use this for production, as we plan to
+direct-connect NTPsec to the GPS, but its diagnostic tools (especially
+gpsmon) are useful for sanity-checking the output of the HAT.
+
+------------------------------------------------------------------------
+# apt-get install gpsd gpsd-clients python-gps
+------------------------------------------------------------------------
+
+Run 
+
+------------------------------------------------------------------------
+$ gpsmon /dev/ttyAMA0
+------------------------------------------------------------------------
+
+You should see a curses panel display that shows you both raw GPS
+data and the results of data reduction on it.  Later, this tool
+will be useful for checking that you can see the 1PPS signal from
+your device.
+
+To avoid potential problems in later testing, disable autostartup of GPSD.
+
+------------------------------------------------------------------------
+# /etc/init.d gpsd stop
+# update-rc.d gpsd remove
+------------------------------------------------------------------------
+
+Eventually, you may want to build your own GPSD test tools from source.
+The prerequisites not present in a stock Raspbian can be covered with
+this import:
+
+------------------------------------------------------------------------
+# apt-get install scons ncurses-dev python-dev bc
+------------------------------------------------------------------------
+
+== Build and configure NTPsec ==
+
+The stock ntpd shipped with Raspbian is intended to be used as a
+client instance, not a server.  It doesn't do 1PPS, and therefore
+can't be used for precision timekeeping.  Thus, we're going to build a
+better version from source.  That version is NTPsec, which runs
+lighter and more securely and can do more accurate time stepping.
+
+. Uninstall the stock Raspbian NTP:
+
+------------------------------------------------------------------------
+# apt-get -y remove --purge ntp
+------------------------------------------------------------------------
+
+. Then. clone the NTPsec repository:
+
+------------------------------------------------------------------------
+git clone https://gitlab.com/NTPsec/ntpsec.git
+------------------------------------------------------------------------
+
+. Install the build prerequisites
+
+------------------------------------------------------------------------
+# apt-get install bison libevent-dev libcap-dev libssl-dev
+# apt-get install libreadline-dev pps-tools asciidoc
+------------------------------------------------------------------------
+
+. Build NTPsec.  The --refclock option says to include only Generic
+NMEA and 1PPS support, excluding all other drivers.
+
+------------------------------------------------------------------------
+$ waf configure --refclock=20,22
+$ waf build
+------------------------------------------------------------------------
+
+Before you install it, do this:
+
+------------------------------------------------------------------------
+# apt-get -y remove --purge dhcpcd
+------------------------------------------------------------------------
+
+According to <<NEVILL>>, "This has a nasty habit of interfering where
+it's not wanted. Specifically, in this instance, if your DHCP server
+specifies an NTP server, it will start ntpd with its own version of
+ntp.conf."
+
+// More to go here.  Use <<NEVILL>>
+
+== Simplification and optimization ==
+
+=== Declaring a static address ===
 
 Normally the Pi configures itself using DHCP when you connect it to
 your Ethernet, acquiring a TCP/IP address that may vary depending on
@@ -214,14 +569,7 @@ should do to reduce power draw and heating of the board (graphics
 processing for the GUI is expensive that way).  You'll do the
 remaining steps over ssh.
 
-. Remove network-manager, because it's now just dead weight eating your
-cycles.
-
-------------------------------------------------------------------------
-# apt-get remove network-manager
-------------------------------------------------------------------------
-
-== On Jessie: uninstall systemd ==
+=== On Jessie: uninstall systemd ===
 
 If you are running on Raspbian Jessie, next step is to uninstall
 systemd.  It is a CPU hog (not just on the Pi; similar problems have
@@ -262,128 +610,7 @@ systemd generated. Then reboot.
 # echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
 ------------------------------------------------------------------------
 
-== Disable getty on your UART device ==
-
-Now that you're using a System-V-like init, ensure that any
-/etc/inittab entries referring to ttyAMA0 or ttyS0 are commented out
-or removed. You do not want a getty to spawn on these. To check this,
-you can reboot and do
-
-------------------------------------------------------------------------
-$ ps ax | grep getty
-------------------------------------------------------------------------
-
-If neither ttyS0 or ttyAMA0 appears in any of the selected lines,
-you're in good shape.
-
-== Pi 3 only: disable Bluetooth and remap console device ==
-
-The Pi 3 Raspbian implementors made a design decision on the Raspberry
-Pi 3 that ties the serial baud rate to the CPU clock rate (by
-default).  This was done because the normal lines that fed the serial
-port were used for the built-in Bluetooth. This does not affect any
-other Pi variant.
-
-Your headless timeserver is not going to need Bluetooth, so you should
-disable it and remap the devices.  Our instructions come from
-<<DOREY>>, which explains the problem in more detail.  We don't use
-some of his steps because this build is designed to run headless.
-
-. Copy the
-http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[boot
-overlay] to the root directory of your Pi 3, and unzip it.
-
-. Edit the /boot/config.txt file to append these lines:
-
-------------------------------------------------------------------------
-# Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
-dtoverlay=pi3-miniuart-bt-overlay
-force_turbo=1
-------------------------------------------------------------------------
-
-== Release the console pins ==
-
-. Next, edit the boot command line. You need to be root to do this.
-This is what I saw on an unmodified Pi 3 running Jessie:
-
-------------------------------------------------------------------------
-root@whoville:/home/pi# cat /boot/cmdline.txt
-dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
-------------------------------------------------------------------------
-
-You may want to save a copy of the original
-/boot/cmdline.txt before modifying it.
-
-To disable the serial console, remove all "console" options.  The
-Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
-option; if present, it should also be removed.
-
-You must reboot the Pi for these changes to take effect.
-
-== Testing the GPS ==
-
-Next thing you want to do is verify that the GPS works.  Put your
-micro-server on someplace like a windowsill with a good sky view outside.
-The MKT3339 on the HAT has very good weak-signal discrimination and
-is much less fussy about siting than older GPS receivers.
-
-On first (cold) boot, the device may take 20-30 minutes to download a
-satellite ephemeris. After that, time to get a fix should be much faster
-unless you live in a canyon (including the urban kind) or dense forest.
-I, living in a suburb with the front of my house half-screened by tall
-trees, typically get lock about 30 seconds from power up.  It will
-seem longer than it is first time: have patience.
-
-(Some material in this section is from <<ADAFRUIT-TEST>>.)
-
-When the red LED on the HAT blinks once per second, you don't have a
-satellite fix. When it achieves lock it will blink with much lower
-frequency.
-
-To test that you can read data from the device, do this:
-
-------------------------------------------------------------------------
-$ stty -F /dev/ttyS0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/ttyS0
-------------------------------------------------------------------------
-
-You should see NMEA0183 sentences issuing in bursts once per second.
-
-Now install GPSD.  You won't use this for production, as we plan to
-direct-connect NTPsec to the GPS, but its diagnostic tools (especially
-gpsmon) are useful for sanity-checking the output of the HAT.
-
-------------------------------------------------------------------------
-# apt-get install gpsd gpsd-clients python-gps
-------------------------------------------------------------------------
-
-Run 
-
-------------------------------------------------------------------------
-$ gpsmon /dev/ttyAMA0
-------------------------------------------------------------------------
-
-You should see a curses panel display that shows you both raw GPS
-data and the results of data reduction on it.  Later, this tool
-will be useful for checking that you can see the 1PPS signal from
-your device.
-
-To avoid potential problems in later testing, disable autostartup of GPSD.
-
-------------------------------------------------------------------------
-# /etc/init.d gpsd stop
-# update-rc.d gpsd remove
-------------------------------------------------------------------------
-
-Eventually, you may want to build your own GPSD test tools from source.
-The prerequisites not present in a stock Raspbian can be covered with
-this import:
-
-------------------------------------------------------------------------
-# apt-get install scons ncurses-dev python-dev bc
-------------------------------------------------------------------------
-
-== Optional: Thin out the system processes on your Pi ==
+=== Thin out the system processes on your Pi ===
 
 The Raspbian default is to install a lot of background processes that
 exist to support a graphical desktop. Running headless with Ethernet
@@ -419,117 +646,48 @@ kernel threads.
 WiFi is deliberately not removed, in order to give
 you a fallback TCP/IP access when a cable is inconvenient.
 
-== Getting 1PPS from your device ==
+== Reverting to a stock Raspbian ==
 
-You'll need NTPsec to be able to see the high-precision PPS
-(pulse-per-second) signal from the GPS.  But the serial interface from an
-Adafruit or Uputronics HAT only supplies TX/RX; the PPS signal is
-shipped on a different pin of the GPIO connector.
+When doing as much hackery on a Pi as I've described, it is wise to
+have a way to revert to a stock Raspbian in case the installation
+goes wrong.  Here's how to do it.
 
-The RX/TX signals are always expected on the same two pins of the
-GPIO, which connect to the Pi's UART. You can see them, labeled, near
-the north end of the connector. Most other GPIO pins can be
-interpreted by the Pi in different ways, configured by software.
-Which pin is used for 1PPS is a variable of the HAT design.  Here is a
-table:
+You will need a spare MicroSD card with at least 8GB capacity. You will
+also need an inexpensive USB MicroSD reader/writer, or one built into
+a computer you have.  We'll describe USB setup under a Debian-derived
+Linux here; device names might be slightly different on other
+variants.
 
-[width="25%",frame="topbot",options="header"]
-|============================================
-| Logical pin   | Physical pin  | HAT
-|    4          |      P1 7     | Adafruit
-|    18         |      P1 12    | Uputronics
-|============================================
+. Download the NOOBS zip file from <<NOOBS>>.
 
-There is a Linux kernel driver called pps-gpio which,
-given one of these pins, uses the signal from it to support an
-RFC2783 interface to PPS that NTPsec (and GPSD) can use.  To
-see 1PPS, you need to ensure that this driver is loaded
-and monitoring the correct logical pin.
+. Do "ls /dev/sd*".  Note which devices exist; they are most likely
+  to be sda (hard drive), sdb (hard drive) and sdc (CD-ROM/DVD).
 
-In all versions, you force the driver to be loaded by
-editing /etc/modules to contain the line "pps-gpio".
+. Insert the card in the reader and plug the reader into a USB port.
 
-The procedure for declaring the GPIO pin varies by Raspbian version.
-We only give the formula for the current Raspbian here; you can
-find details about older versions at <<TAYLOR>>;
+. Do "ls /dev/sd*". You should see an additional device, most likely /dev/sdd.
 
-Edit /boot/config.txt to contain these options, replacing N with
-the logical pin number for your HAT:
+. If you don't see a new device, do "lsusb" to check what USB devices
+  exist, with the reader first unplugged and then plugged in.  You
+  should see one asdditional USB device line when it's plugged in. If you
+  don't, you have a USB-layer or hardware problem beyond the scope of
+  this HOWTO.
 
-------------------------------------------------------------------------
-dtoverlay=pps-gpio,gpiopin=N
-------------------------------------------------------------------------
+. As root, do "fdisk /dev/sdd" (or substitute whatever new device you
+  found for sdd).  Do 'l' to check the partition names.  What you will
+  probably see is a single partition named for the device with the
+  suffix "1" - most likely, sdd1.
 
-Any previous gpiopin option (such as bcm2708.pps_gpio_pin) should be
-removed.
+. As root, moount the card. The command "mount /dev/ssd1 /media" will
+  probably be right.  Any empty directory will do as as a mount point, 
+  there is noting magic about "/media".
 
-You must reboot your Pi for this change
+. Change current directory to the root dictory of the card
+  (e.g."/meda") and run "unzip" with the NOOBS zip as argument.
 
-To test this change, use ppstest from the pps-tools package.  Note,
-this will produce a false negative if the GPS has no fix.
+. Unmount the card (e.g. "umount /dev/sdd").
 
-------------------------------------------------------------------------
-# apt-get install pps-tools
-# ppstest /dev/pps0
-------------------------------------------------------------------------
-
-You should see repeated lines somewhat resembling this:
-
-------------------------------------------------------------------------
-source 0 - assert 1461161753.267392352, sequence: 246 - clear  0.000000000, sequence: 0
-------------------------------------------------------------------------
-
-As the pps-gpio module is in April 2016 it has a flaw. It catches only
-one edge of the PPS. You have a 50/50 chance you can't see the right edge, and
-no good way of knowing you have the right edge.
-
-== Building and configuring NTPsec ==
-
-The stock ntpd shipped with Raspbian is intended to be used as a
-client instance, not a server.  It doesn't do 1PPS, and therefore
-can't be used for precision timekeeping.  Thus, we're going to build a
-better version from source.  That version is NTPsec, which runs
-lighter and more securely and can do more accurate time stepping.
-
-. Uninstall the stock Raspbian NTP:
-
-------------------------------------------------------------------------
-# apt-get -y remove --purge ntp
-------------------------------------------------------------------------
-
-. Then. clone the NTPsec repository:
-
-------------------------------------------------------------------------
-git clone https://gitlab.com/NTPsec/ntpsec.git
-------------------------------------------------------------------------
-
-. Install the build prerequisites
-
-------------------------------------------------------------------------
-# apt-get install bison libevent-dev libcap-dev libssl-dev
-# apt-get install libreadline-dev pps-tools asciidoc
-------------------------------------------------------------------------
-
-. Build NTPsec.  The --refclock option says to include only Generic
-NMEA and 1PPS support, excluding all other drivers.
-
-------------------------------------------------------------------------
-$ waf configure --refclock=20,22
-$ waf build
-------------------------------------------------------------------------
-
-Before you install it, do this:
-
-------------------------------------------------------------------------
-# apt-get -y remove --purge dhcpcd
-------------------------------------------------------------------------
-
-According to <<NEVILL>>, "This has a nasty habit of interfering where
-it's not wanted. Specifically, in this instance, if your DHCP server
-specifies an NTP server, it will start ntpd with its own version of
-ntp.conf."
-
-// More to go here.  Use <<NEVILL>>
+You will now have a card that can be booted in the Pi.
 
 == References ==
 
@@ -557,6 +715,8 @@ ntp.conf."
 - [[[TAYLOR]]] http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
 
 - [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
+
+- [[[NOOBS]]] https://www.raspberrypi.org/downloads/noobs/[NOOBS]
 
 == Other resources ==
 
