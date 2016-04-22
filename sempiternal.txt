@@ -377,27 +377,6 @@ source 0 - assert 1461161753.267392352, sequence: 246 - clear  0.000000000, sequ
 
 If you can see this, you have 1PPS and can do proper timekeeping.
 
-However...
-
-As the pps-gpio module is in April 2016 it has a flaw. It catches only
-one edge of the PPS. You have a 50/50 chance you are seeing the
-trailing edge rather than the leading edge (which is the actual top of
-second).  A patch to fix this has been submitted to the Linux kernel
-maintainers but not merged.
-
-Which edge the kernel will see, and the pulse width, are constant
-depending on the GPS type and firmware. If the kernel sees the
-trailing edge, the width of the pulse emitted by your GPS will
-introduce a fixed lag to the time when you actually see the PPS.
-
-Pulse widths (and the induced lag) range from so fast the serial
-driver can't see them to, worst case, 0.5s.  The worst case is rare;
-typical pulse widths are 50 to 200ms. Because the error is constant,
-you can compensate it out with an offset if you know what it is.
-
-//TO-DO: Measure the pulse width on the Adafruit and Uputronics hats.
-//Figure out if they make the leading or trailing edge visible, somehow.
-
 == Live-test the GPS ==
 
 Next thing you want to do is verify that the GPS works.  Put your
@@ -422,35 +401,35 @@ Now install GPSD.  You won't use this for production, as we plan to
 direct-connect NTPsec to the GPS, but its diagnostic tools (especially
 gpsmon) are useful for sanity-checking the output of the HAT.
 
-------------------------------------------------------------------------
-# apt-get install gpsd gpsd-clients python-gps
-------------------------------------------------------------------------
+It's best to clone the GPSD repository and build from that rather
+than installing the Raspbian package.  This both guarantees you
+the latest fixes and avoids instilling a start-on-boot script
+that you don't want in this build.
 
-Run 
-
-------------------------------------------------------------------------
-$ gpsmon /dev/ttyAMA0
-------------------------------------------------------------------------
-
-You should see a curses panel display that shows you both raw GPS
-data and the results of data reduction on it.  Later, this tool
-will be useful for checking that you can see the 1PPS signal from
-your device.
-
-To avoid potential problems in later testing, disable autostartup of GPSD.
-
-------------------------------------------------------------------------
-# /etc/init.d gpsd stop
-# update-rc.d gpsd remove
-------------------------------------------------------------------------
-
-Eventually, you may want to build your own GPSD test tools from source.
 The prerequisites not present in a stock Raspbian can be covered with
 this import:
 
 ------------------------------------------------------------------------
 # apt-get install scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
+
+Then do this:
+
+------------------------------------------------------------------------
+$ git clone git://git.savannah.nongnu.org/gpsd.git
+$ cd gpsd
+$ scons
+------------------------------------------------------------------------
+
+Then run this: 
+
+------------------------------------------------------------------------
+$ gpsmon /dev/ttyAMA0
+------------------------------------------------------------------------
+
+It will fail if you are using a non-root account.  The fix is to
+put that account in the "dialout" group, as the default "pi" user
+already is.
 
 == Build and configure NTPsec ==
 
@@ -646,15 +625,48 @@ kernel threads.
 WiFi is deliberately not removed, in order to give
 you a fallback TCP/IP access when a cable is inconvenient.
 
+== Edge-detection issues and new HATs ==
+
+As the pps-gpio module is in April 2016 it has a flaw. It catches only
+one edge of the PPS. You have a 50/50 chance you are seeing the
+trailing edge rather than the leading edge (which is the actual top of
+second).  A patch to fix this has been submitted to the Linux kernel
+maintainers but not merged.
+
+Which edge the kernel will see, and the pulse width, are constant
+depending on the GPS type and firmware (and if you can find a real
+datasheet for the GPS engine it will tell you the pulse width). If the
+kernel sees the trailing edge, the width of the pulse emitted by your
+GPS will introduce a fixed lag from top of second to the time when you
+actually see the PPS.
+
+Pulse widths (and the induced lag) range from so fast the serial
+driver can't see them to, worst case, 0.5s.  The worst case is rare;
+typical pulse widths are 50 to 200ms. Because the error is constant,
+you can compensate it out with an offset if you know what it is.
+
+//TO-DO: Measure the pulse width on the Adafruit hat.
+
+[width="25%",frame="topbot",options="header"]
+|===========================================================
+|Type           | Chipset    | 1PPS width  | gps-ppio detects
+|Adafruit HAT   | MTK3339    |     ?       | leading edge
+|Uputronics HAT | Ublox 8    |   100ms     | leading edge 
+|===========================================================
+
+These details will become relevant whenever we qualify a new HAT
+for coverage in this HAT.  The important thing to check is whether
+the pps-gpio driver triggers on leading or trailing edge.
+
 == Reverting to a stock Raspbian ==
 
-When doing as much hackery on a Pi as I've described, it is wise to
+When doing as much hackery on a Pi as we've described, it is wise to
 have a way to revert to a stock Raspbian in case the installation
 goes wrong.  Here's how to do it.
 
-You will need a spare MicroSD card with at least 8GB capacity. You will
-also need an inexpensive USB MicroSD reader/writer, or one built into
-a computer you have.  We'll describe USB setup under a Debian-derived
+You will need a spare MicroSD card with at least 8GB capacity. You
+will also need a USB MicroSD reader/writer, or one built into a
+computer you have.  We'll describe USB setup under a Debian-derived
 Linux here; device names might be slightly different on other
 variants.
 
