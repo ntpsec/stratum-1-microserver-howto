@@ -17,15 +17,11 @@ load.
 
 A GPS daughterboard (what Pi folks call a HAT after the Pi's interface
 specification, Hardware Attached on Top) is a better idea than an
-external GPS because a HAT will also supply a battery-backed-up RTC,
-which the GPS can use for warm-starting.  Also, the HAT uses an
-internal RS-232 interface that cuts latency and jitter compared to a
-USB GPS.
-
-While these are good reasons, the real showstopper in trying to using an
-external USB GPS rather than a HAT is the 1PPS signal required for
-precision time service.  Generic USB GPSes do not deliver this signal
-and therefore cannot be used for Stratum 1 service.
+external GPS because a HAT uses an internal RS-232 interface that cuts
+latency and jitter compared to a USB GPS, and provides the 1PPS
+signal required for precision time service.  Generic USB GPSes do not
+deliver this signal and therefore cannot be used for Stratum 1
+service.
 
 Most of this build is actually independent of any one daughterboard's hardware
 idiosyncracies. The recipe was tested using an Adafruiit GPS HAT
@@ -56,7 +52,7 @@ You will need:
 
 * Temporary of a USB mouse and keyboard.
 
-* Temporary use of a DVI-compatile monitor and cable.
+* Temporary use of a DVI-compatible monitor and cable.
 
 The Adafruit HAT is shipped as two parts, a circuit board and a 40-pin
 header.  Your first step will be to solder the header to the bottom of
