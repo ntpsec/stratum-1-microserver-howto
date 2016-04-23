@@ -2,7 +2,7 @@
 :description: Building and configuring a tiny Stratum 1 timeserver with RasPi
 :keywords: Raspberry Pi, NTP, NTPsec, time service
 by Eric S. Raymond
-version 0.2
+version 0.3
 
 == Introduction ==
 
@@ -286,7 +286,7 @@ option; if present, it should also be removed.
 You must reboot the Pi for this change to take effect.
 
 This change can be undone by restoring the saved original of /boot/cmdline.txt,
-or by using the GUI configurator to re-enable 
+or by using the GUI configurator to re-enable serial interfaces.
 
 == Smoke-test the GPS/HAT combination ==
 
@@ -425,12 +425,24 @@ $ scons
 Then run this: 
 
 ------------------------------------------------------------------------
-$ gpsmon /dev/ttyAMA0
+$ ./gpsmon /dev/ttyAMA0
 ------------------------------------------------------------------------
 
 It will fail if you are using a non-root account.  The fix is to
 put that account in the "dialout" group, as the default "pi" user
 already is.
+
+Running gpsmon should give you a nice panel display with a scrolling
+window at the bottom showing the raw data and a top section showing
+the analyzed fix and time to the second.
+
+//FIXME: Why does gpsmon not see PPS?
+//FIXME: Why does gpsd not see PPS?
+
+Having run this step and the earlier ppstest, you now know that both
+data and 1PPS from the HAT are fully visible from userspace on your
+Raspberry Pi.  You can now proceed with specializing it to be a
+time server.
 
 == Build and configure NTPsec ==
 
@@ -449,7 +461,7 @@ lighter and more securely and can do more accurate time stepping.
 . Then. clone the NTPsec repository:
 
 ------------------------------------------------------------------------
-git clone https://gitlab.com/NTPsec/ntpsec.git
+$ git clone https://gitlab.com/NTPsec/ntpsec.git
 ------------------------------------------------------------------------
 
 . Install the build prerequisites
@@ -463,39 +475,23 @@ git clone https://gitlab.com/NTPsec/ntpsec.git
 NMEA and 1PPS support, excluding all other drivers.
 
 ------------------------------------------------------------------------
+$ git clone https://gitlab.com/NTPsec/ntpsec.git
+# cd ntpsec
 $ waf configure --refclock=20,22
 $ waf build
 ------------------------------------------------------------------------
 
-Before you install it, do this:
-
-------------------------------------------------------------------------
-# apt-get -y remove --purge dhcpcd
-------------------------------------------------------------------------
-
-According to <<NEVILL>>, "This has a nasty habit of interfering where
-it's not wanted. Specifically, in this instance, if your DHCP server
-specifies an NTP server, it will start ntpd with its own version of
-ntp.conf."
-
-Alternatively, you can can prevent that with an edit to /etc/init.d/ntp
-to stop it from running the /etc/default/ntp script.
-
-// More to go here.  Use <<NEVILL>>
+//FIXME: More to go here.  Use <<NEVILL>>
 
 == Simplification and optimization ==
 
-=== Required on Jessie: uninstall systemd ===
+=== On Jessie: uninstall systemd ===
 
 If you are running on Raspbian Jessie, next step is to uninstall
 systemd.  It is a CPU hog (not just on the Pi; similar problems have
 been reported across many architectures) and a complexity
 sinkhole. The things that have it as a dependency are things you don't
 want on a headless NTP server.
-
-But the reason this is marked "required" is that systemd tries to be
-its own NTP client.  This is undesirable for a Stratum 1 server; it
-might lead to unexpected interactions with your NTP installation.
 
 (Our instructions are based on <<NO-SYSTEMD>>)
 
@@ -525,6 +521,16 @@ systemd generated. Then reboot.
 ------------------------------------------------------------------------
 # echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
 ------------------------------------------------------------------------
+
+Reboot and look at /etc/init.d/ntp
+
+According to <<NEVILL>>, "[dhcpcd] has a nasty habit of interfering where
+it's not wanted. Specifically, in this instance, if your DHCP server
+specifies an NTP server, it will start ntpd with its own version of
+ntp.conf."
+
+Prevent that with an edit to /etc/init.d/ntp to stop it from running
+the /etc/default/ntp script.
 
 === Declaring a static address ===
 
@@ -648,8 +654,6 @@ Pulse widths (and the induced lag) range from so fast the serial
 driver can't see them to, worst case, 0.5s.  The worst case is rare;
 typical pulse widths are 50 to 200ms. Because the error is constant,
 you can compensate it out with an offset if you know what it is.
-
-//TO-DO: Check the pulse width on the Adafruit hat.
 
 [width="25%",frame="topbot",options="header"]
 |===========================================================
