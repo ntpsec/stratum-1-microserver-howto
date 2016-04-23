@@ -464,7 +464,7 @@ Install the build prerequisites
 
 ------------------------------------------------------------------------
 # apt-get install bison libevent-dev libcap-dev libssl-dev
-# apt-get install libreadline-dev pps-tools asciidoc
+# apt-get install libreadline-dev asciidoc
 ------------------------------------------------------------------------
 
 . Build NTPsec.  The --refclock option says to include only Generic
@@ -659,7 +659,7 @@ you can compensate it out with an offset if you know what it is.
 |===========================================================
 
 These details will become relevant whenever we qualify a new HAT
-for coverage in this HAT.  The important thing to check is whether
+for coverage in this HOWTO.  The important thing to check is whether
 the pps-gpio driver triggers on leading or trailing edge.
 
 == Reverting to a stock Raspbian ==
