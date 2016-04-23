@@ -298,8 +298,8 @@ $ cat /dev/ttyAMA0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
-text lines usually beginning with "$GP", and possiblt a "$PMTK
-sentence".  These will issue whether or not the GPS has satellite lock.
+text lines usually beginning with "$GP", and possiblt a "$PMTK"
+sentence.  These will issue whether or not the GPS has satellite lock.
 
 If you see no output or random baud barf, re-do the stty command being
 very careful that all the arguments are correct. If you still don't
@@ -381,9 +381,9 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 == Live-test the GPS ==
 
 Next thing you want to do is verify that the GPS works.  Put your
-micro-server on someplace like a windowsill with a good sky view outside.
-The MKT3339 on the HAT has very good weak-signal discrimination and
-is much less fussy about siting than older GPS receivers.
+Pi on someplace like a windowsill with a good sky view outside.
+The HATs this HOWTO describes have very good weak-signal discrimination and
+are much less fussy about siting than older GPS receivers.
 
 On first (cold) boot, the device may take 20-30 minutes to download a
 satellite ephemeris. After that, time to get a fix should be much faster
@@ -452,19 +452,19 @@ can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
 
-. Uninstall the stock Raspbian NTP:
+Uninstall the stock Raspbian NTP:
 
 ------------------------------------------------------------------------
 # apt-get -y remove --purge ntp
 ------------------------------------------------------------------------
 
-. Then. clone the NTPsec repository:
+Then, clone the NTPsec repository:
 
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
 ------------------------------------------------------------------------
 
-. Install the build prerequisites
+Install the build prerequisites
 
 ------------------------------------------------------------------------
 # apt-get install bison libevent-dev libcap-dev libssl-dev
@@ -495,7 +495,7 @@ want on a headless NTP server.
 
 (Our instructions are based on <<NO-SYSTEMD>>)
 
-. First, pull in the core of sysvinit, preserving the inittab that
+First, pull in the core of sysvinit, preserving the inittab that
 systemd generated. Then reboot.
 
 ------------------------------------------------------------------------
@@ -504,7 +504,7 @@ systemd generated. Then reboot.
 # reboot
 ------------------------------------------------------------------------
 
-. Purge the remnants of systemd and packages that depend on it.
+Purge the remnants of systemd and packages that depend on it.
 
 ------------------------------------------------------------------------
 # apt-get remove --purge --auto-remove systemd
@@ -516,7 +516,7 @@ systemd generated. Then reboot.
 # echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
 ------------------------------------------------------------------------
 
-. Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
+Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
 
 ------------------------------------------------------------------------
 # echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
@@ -539,19 +539,19 @@ your Ethernet, acquiring a TCP/IP address that may vary depending on
 what other devices are hooked to your network. For our use case,
 giving it a static address is more convenient.  Here's how to do that:
 
-. Just in case, make a backup copy of your /etc/network/interfaces file:
+Just in case, make a backup copy of your /etc/network/interfaces file:
 
 ------------------------------------------------------------------------
 # cp /etc/network/interfaces /etc/network/interfaces.backup
 ------------------------------------------------------------------------
 
-. Edit that file using your favorite editor:
+Edit that file using your favorite editor:
 
 ------------------------------------------------------------------------
 # $EDITOR /etc/network/interfaces
 ------------------------------------------------------------------------
 
-. Change the contents to look something like this:
+Change the contents to look something like this:
 
 ------------------------------------------------------------------------
 auto lo
@@ -580,13 +580,13 @@ on my network, allowing me to refer to it by name:
 192.168.1.23 timekeeper
 ------------------------------------------------------------------------
 
-. Reboot the Pi.
+Reboot the Pi.
 
 ------------------------------------------------------------------------
 # shutdown -r now
 ------------------------------------------------------------------------
 
-.  From some machine on your network, do:
+From some machine on your network, do:
 
 ------------------------------------------------------------------------
 $ ping timekeeper
