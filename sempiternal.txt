@@ -421,24 +421,21 @@ $ scons
 Then run this: 
 
 ------------------------------------------------------------------------
-$ ./gpsmon /dev/ttyAMA0
+# ./gpsmon /dev/ttyAMA0
 ------------------------------------------------------------------------
-
-It will fail if you are using a non-root account.  The fix is to
-put that account in the "dialout" group, as the default "pi" user
-already is.
 
 Running gpsmon should give you a nice panel display with a scrolling
 window at the bottom showing the raw data and a top section showing
 the analyzed fix and time to the second.
 
-//FIXME: Why does gpsmon not see PPS?
-//FIXME: Why does gpsd not see PPS?
+If you have a fix, you should also see bars denoting 1PPS once per
+second between sentence bursts.  If you have a fix and *don't* see
+these, most likely you have forgotten to go root before running
+gpsmon.
 
-Having run this step and the earlier ppstest, you now know that both
-data and 1PPS from the HAT are fully visible from userspace on your
-Raspberry Pi.  You can now proceed with specializing it to be a
-time server.
+Having run this step, you now know that both data and 1PPS from the
+HAT are fully visible from userspace on your Raspberry Pi.  You can
+now proceed with specializing it to be a time server.
 
 == Build and configure NTPsec ==
 
