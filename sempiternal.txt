@@ -18,11 +18,12 @@ load.
 A GPS daughterboard (what Pi folks call a HAT after the Pi's interface
 specification, Hardware Attached on Top) is a better idea than an
 external GPS because a HAT uses an internal RS-232 interface that cuts
-latency and jitter compared to a USB GPS, and provides the 1PPS
-signal required for precision time service.  Generic USB GPSes do not
-deliver this signal and therefore cannot be used for Stratum 1
-service footnote[There is one USB GPS, the GR601-W, that provides 1PPS.
-Unfortunately, it is difficult to purchase in the U.S.].
+latency and jitter compared to a USB GPS, and provides the 1PPS signal
+required for precision time service.  Generic USB GPSes do not deliver
+this signal and therefore cannot be used for Stratum 1 service
+footnote[There is one line of USB GPSes, the GR601-W/GR701-W, that
+provides 1PPS.  Unfortunately, it is difficult to purchase in the
+U.S.].
 
 Most of this build is actually independent of any one daughterboard's
 hardware idiosyncracies. The recipe was tested using an Adafruit GPS
@@ -30,7 +31,7 @@ HAT <<ADAFRUIT-HAT>>, but should also cover the Uputronics GPS
 Expansion Board <<UPUTRONICS-HAT>>.
 
 The build may also generalize to other HAT-compatible Unix SBCs such as
-the ODROID C2, though details of those remain to be filled in.
+the Odroid C2, though details of those remain to be filled in.
 
 == Parts list and hardware assembly ==
 
@@ -52,27 +53,47 @@ You will need:
 * (Optional) A micro-SD reader/writer, in case you need to recover
   from a failed installation by making a new bootable image.
 
+* (Optional) 2 hex standoffs, .625" with 440 threading, 2 compatible
+  nuts, 2 compatible screws.  These are the standard spacers
+  used in PC cases; if you keep the small parts from old PCs around
+  you'll have a dozen of them.
+
 * A live Ethernet cable to the Internet.
 
 * Temporary use of a USB mouse and keyboard.
 
-* Temporary use of a DVI-compatible monitor and cable.
+* Temporary use of a HDMI-compatible monitor and cable.
 
-The Adafruit HAT is shipped as two parts, a circuit board and a 40-pin
-header.  Your first step will be to solder the header to the bottom of
-the board, on the opposite side from the GPS module (under what would
-be the east edge if the Adafruit logo were a map legend). Poke the
-header pins upwards through the double row of through holes at the
-east edge of the board and go.  This is the last bit of hardware
-hacking absolutely required.
+The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
+board and a 40-pin header. The header on the assembled HAT fits down
+over the double row of pins on the east edge of the Pi, such that when
+fully assembled the two boards will make a neat stack.
+
+First: mate the female side of the detached 40-pin header with the
+40-pin GPIO connector on the SBC (this would be the east edge if the
+Adafruit logo were a map legend).
+
+Second: if you have them, bolt the the two hex standoffs to the corner
+holes on the opposite (west) side of the SBC, female end up.  These will
+support the HAT while you're soldering it to its header.
+
+Third: Lay the HAT over the board in such a way that the two sets of 4
+corner holes line up and the header pins poke through a matching 40
+holes in the HAT.  The GPS module and battery clip should face
+upwards. If you added standoffs, they should match the corner holes of
+the HAT.
+
+Fourth: Solder each header pin into its through-hole. This is the last
+bit of hardware hacking absolutely required.
+
+Fifth: If you added standoffs, now secure the HAT to their
+female-threaded upper ends using the screws.  This will help
+protect the headers and pins from mechanical stress if the
+assembly is dropped or has something sat on it.
 
 (The device is shipped as parts almost certainly to evade a regulatory
 requirement for FCC conformance testing to RF emission standards,
 which is expensive and would have added to the unit cost.)
-
-The header on the assembled HAT fits down over the
-double row of pins on the east edge of the Pi, such that the two
-boards make a neat stack.
 
 == Understanding the GPIO connector ==
 
@@ -131,11 +152,11 @@ keyboard layout, timezone, locale, etc.
 One special thing you should do is disable the serial interface.  Your
 HAT needs the GPIO pins it uses, and it's easiest to disable from the
 GUI configurator.  This change is easily reversed until and unless
-you strip out the GUI in phase 6.
+you strip out the GUI later.
 
 Next, check to see if you can expand the filesystem on the SD card;
-the option may be active or frozen depending on how your SD card was
-made.
+the GUI configurator option may be active or frozen depending on how
+your SD card was made.
 
 You can do the build without expanding, but it gives you more space
 for experiments. You should do this now if you're going to, because
@@ -193,7 +214,7 @@ eth0      Link encap:Ethernet  HWaddr b8:27:eb:05:b3:29
 
 The key piece of information is the IP address just after "inet
 addr:", in this case 192.168.1.184. Test this by running the
-equivalent of
+equivalent of this
 
 ------------------------------------------------------------------------
 $ ssh pi@192.168.1.184
@@ -201,7 +222,7 @@ $ ssh pi@192.168.1.184
 
 from a different machine on your network, using whatever address you
 actually got.  You should be able to log in using the default password
-for the pi user. Once you can do that, you can unplug the
+for the pi user ("raspberry"). Once you can do that, you can unplug the
 mouse/keyboard/monitor on the Pi and run headless.
 
 Note that by default the Pi gets a dynamic IP address from whatever
@@ -229,12 +250,13 @@ Fully update the Raspbian on your Pi.  The easiest way to do this is
 with these commands:
 
 ------------------------------------------------------------------------
+$ su -
 # apt-get update
 # apt-get dist-upgrade
 # rpi-update
 ------------------------------------------------------------------------
 
-The '#' means you need to be root to run them. Later, some commands
+The '#' means you need to be root to run them. Some commands
 won't require root; those command lines will be marked with "$".
 
 If you skip this step on an old enough Pi, 1PPS configuration will
@@ -294,40 +316,19 @@ To disable the serial console, remove all "console" options.  The
 Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
 option; if present, it should also be removed.
 
+On the Pi 3 the result looks like this:
+
+------------------------------------------------------------------------
+root@whoville:/home/pi# cat /boot/cmdline.txt
+dwc_otg.lpm_enable=0 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
+------------------------------------------------------------------------
+
 You must reboot the Pi for this change to take effect.
 
 This change can be undone by restoring the saved original of /boot/cmdline.txt,
 or by using the GUI configurator to re-enable serial interfaces.
 
-== Smoke-test the GPS/HAT combination ==
-
-To test that you can read data from the device, do this:
-
-------------------------------------------------------------------------
-$ stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/ttyAMA0
-------------------------------------------------------------------------
-
-You should see NMEA0183 sentences issuing in bursts once per second -
-text lines usually beginning with "$GP", and possiblt a "$PMTK"
-sentence.  These will issue whether or not the GPS has satellite lock.
-
-If you see no output or random baud barf, re-do the stty command being
-very careful that all the arguments are correct. If you still don't
-see output, check that the HAT is correctly seated on the GPIO and
-powered up (a red light near the north edge should blink at least once
-per 10 seconds).
-
-If you still don't see legible output after checking these, you may
-have a problem this HOWTO can't solve - possibly dead or defective
-hardware.  However, it is far more likely that you have skipped
-a previous step or gotten one slightly wrong. Recheck your work.
-
-This was not a full functional test of the GPS; we'll do that latter.
-It's what engineers call a "smoke test", just checking that the
-device is alive and doing something reasonably sane.
-
-Once the GPS/HAT combination has passed its smoke test you can proceed.
+=== Configure the 1PPS GPIO pin ==
 
 You'll need NTPsec to be able to see the high-precision PPS
 (pulse-per-second) signal from the GPS.  But the serial interface from an
@@ -377,7 +378,57 @@ removed.
 
 You must reboot your Pi for this change to take effect.
 
-To test this change, use ppstest from the pps-tools package.  Note,
+== Smoke-test the GPS/HAT combination ==
+
+(Some material in this section is from <<ADAFRUIT-TEST>>.)
+
+Next thing you want to do is verify that the GPS works.  Put your
+build on someplace like a windowsill with a good sky view outside.
+The HATs this HOWTO describes have very good weak-signal discrimination and
+are much less fussy about siting than older GPS receivers.
+
+When the red LED on the HAT blinks once per second, you don't have a
+satellite fix. When it achieves lock it will blink with much lower
+frequency.
+
+On first (cold) boot, the device may take 20-30 minutes to download a
+satellite ephemeris. After that, time to get a fix should be much faster
+unless you live in a canyon (including the urban kind) or dense forest.
+I, living in a suburb with the front of my house half-screened by tall
+trees, typically get lock about 30 seconds from power up.  It will
+seem longer than it is first time: have patience.
+
+=== GPS serial data ===
+
+To test that you can read data from the device, do this:
+
+------------------------------------------------------------------------
+$ stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/ttyAMA0
+------------------------------------------------------------------------
+
+You should see NMEA0183 sentences issuing in bursts once per second -
+text lines usually beginning with "$GP", and possiblt a "$PMTK"
+sentence.  These will issue whether or not the GPS has satellite lock.
+
+If you see no output or random baud barf, re-do the stty command being
+very careful that all the arguments are correct. If you still don't
+see output, check that the HAT is correctly seated on the GPIO and
+powered up (a red light near the north edge should blink at least once
+per 10 seconds).
+
+If you still don't see legible output after checking these, you may
+have a problem this HOWTO can't solve - possibly dead or defective
+hardware.  However, it is far more likely that you have skipped
+a previous step or gotten one slightly wrong. Recheck your work.
+
+This was not a full functional test of the GPS; we'll do that latter.
+It's what engineers call a "smoke test", just checking that the
+device is alive and doing something reasonably sane.
+
+=== 1PPS output ===
+
+To test 1PPS, use ppstest from the pps-tools package.  Note,
 this will produce a false negative if the GPS has no fix.
 
 ------------------------------------------------------------------------
@@ -395,31 +446,13 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 
 == Live-test the GPS ==
 
-Next thing you want to do is verify that the GPS works.  Put your
-Pi on someplace like a windowsill with a good sky view outside.
-The HATs this HOWTO describes have very good weak-signal discrimination and
-are much less fussy about siting than older GPS receivers.
-
-On first (cold) boot, the device may take 20-30 minutes to download a
-satellite ephemeris. After that, time to get a fix should be much faster
-unless you live in a canyon (including the urban kind) or dense forest.
-I, living in a suburb with the front of my house half-screened by tall
-trees, typically get lock about 30 seconds from power up.  It will
-seem longer than it is first time: have patience.
-
-(Some material in this section is from <<ADAFRUIT-TEST>>.)
-
-When the red LED on the HAT blinks once per second, you don't have a
-satellite fix. When it achieves lock it will blink with much lower
-frequency.
-
 Now install GPSD.  You won't use this for production, as we plan to
 direct-connect NTPsec to the GPS, but its diagnostic tools (especially
 gpsmon) are useful for sanity-checking the output of the HAT.
 
 It's best to clone the GPSD repository and build from that rather
 than installing the Raspbian package.  This both guarantees you
-the latest fixes and avoids instilling a start-on-boot script
+the latest fixes and avoids installing a start-on-boot script
 that you don't want in this build.
 
 The prerequisites not present in a stock Raspbian can be covered with
@@ -488,7 +521,7 @@ NMEA and 1PPS support, excluding all other drivers.
 
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
-# cd ntpsec
+$ cd ntpsec
 $ waf configure --refclock=20,22
 $ waf build
 ------------------------------------------------------------------------
@@ -503,7 +536,7 @@ KERNEL=="pps0", OWNER="root", GROUP="tty", MODE="0660", SYMLINK+="gpspps0"
 ------------------------------------------------------------------------
 
 At boot time this will ensure that device aliases /dev/gps0 and
-/dev/gpps0 exist.  These are special names that NTPsec expects to see
+/dev/gpsps0 exist.  These are special names that NTPsec expects to see
 when its Generic NMEA drive is active.
 
 According to <<NEVILL>>, "[dhcpcd5] has a nasty habit of interfering where
@@ -690,28 +723,28 @@ These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
 the pps-gpio driver triggers on leading or trailing edge.
 
-== A note about the ODROID C2 ==
+== A note about the Odroid C2 ==
 
-The ODROID C2 is an ARM-based hackerboard strongly resembling the
+The Odroid C2 is an ARM-based hackerboard strongly resembling the
 Raspberry Pi, but with better hardware and at a slighly higher price
-point. The main connector on the ODROID is pin-compatible with the
+point. The main connector on the Odroid is pin-compatible with the
 40-pin Pi connector.  A company representative has stated that
 forum.odroid.com/viewtopic.php?f=111&t=7660[the Adafruit HAT should
 work with it]
 
-This recipe has not been tested with the ODROID.  But we can give
+This recipe has not been tested with the Odroid.  But we can give
 some pointers towards making it work.
 
 * Your configuration and first-login process will be slighly different,
-  as your ODROID will be running a stock Ubuntu rather than Raspbian.
+  as your Odroid will be running a stock Ubuntu rather than Raspbian.
 
 * The company rep says that the UART device is /dev/ttyS2 rather
   than /dev/ttyAMA0.
 
 * The RPi 3 hack to disable serial interfaces won't be required.
 
-* You will not been able to see PPS in a stock gpsmon. GPSD has a
-  magic kludge for this that recognizes /de/ttyAMA0 as special,
+* You will not be able to see PPS in a stock gpsmon. GPSD has a
+  magic kludge for this that recognizes /dev/ttyAMA0 as special,
   but not /dev/ttyS2.
 
 * For the same reason, you need to give gpsd /dev/ppsS0 as a
