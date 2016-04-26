@@ -191,56 +191,6 @@ The default password is "raspberry".
 You may choose to configure the Pi to use a fixed, static IP
 address. That process is described in <<EAT-STATIC>>.
 
-Otherwise, you can run this:
-
-------------------------------------------------------------------------
-$ ifconfig
-------------------------------------------------------------------------
-
-The output should contain a stanza roughly resembling this:
-
-------------------------------------------------------------------------
-eth0      Link encap:Ethernet  HWaddr b8:27:eb:05:b3:29  
-          inet addr:192.168.1.184  Bcast:192.168.1.255  Mask:255.255.255.0
-          inet6 addr: 2001:470:e34c:2::454/128 Scope:Global
-          inet6 addr: 2001:470:e34c:2:4273:1f68:840c:489a/64 Scope:Global
-          inet6 addr: fe80::e32f:9024:237f:5fc/64 Scope:Link
-          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-          RX packets:16059 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:8453 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000 
-          RX bytes:10589511 (10.0 MiB)  TX bytes:880938 (860.2 KiB)
-------------------------------------------------------------------------
-
-The key piece of information is the IP address just after "inet
-addr:", in this case 192.168.1.184. Test this by running the
-equivalent of this
-
-------------------------------------------------------------------------
-$ ssh pi@192.168.1.184
-------------------------------------------------------------------------
-
-from a different machine on your network, using whatever address you
-actually got.  You should be able to log in using the default password
-for the pi user ("raspberry"). Once you can do that, you can unplug the
-mouse/keyboard/monitor on the Pi and run headless.
-
-Note that by default the Pi gets a dynamic IP address from whatever
-DHCP server it can find on your network - usually your router will
-provide DHCP.  This means that when you reboot the Pi it may come up
-using a different dynamic address that you don't know.
-
-If all else fails,
-
-------------------------------------------------------------------------
-# arp -a
-------------------------------------------------------------------------
-
-run from any machine on your network, will give you a list of
-IP-addresses/hostnames that are or have been active on your network
-(the information is cached).  You can try any IP addresses paired with
-your Pi's hostname; one of them should work.
-
 Once you can run headless, you will no longer need a
 monitor/mouse/keyboard tyo be plugged into the Pi.
 
@@ -360,7 +310,9 @@ see 1PPS, you need to ensure that this driver is loaded
 and monitoring the correct logical pin.
 
 In all versions, you force the driver to be loaded by
-editing /etc/modules to contain the line "pps-gpio".
+editing /etc/modules to contain the line "pps-gpio"
+footnote[Alternatively, you can build your own kernel with pps-gpio
+hardwired in.].
 
 The procedure for declaring the GPIO pin varies by Raspbian version.
 We only give the formula for the current Raspbian here; you can
@@ -594,6 +546,8 @@ receiver on /dev/gps0.
 
 The text "mode 17" tells it to look for $GPRMC messages at a baud of 9600bps.
 
+The text "prefer" declares the GPS your favored timeserver.
+
 The line "fudge 127.127.20.0" tells it that we have some further
 configuration for our GPS
 
@@ -610,7 +564,7 @@ Internet time servers for sanity::
 
 //FIXME: More to go here.  Use <<NEVILL>>
 //Things still to be documented include:
-//1. Testing ntpd
+//1. Testing ntpd. Point tp ntpq -p in the Time Service HOWTO.
 //2. Startup installation scripts, including aetting AMA speed to 9600.
 
 == Simplification and optimization ==
@@ -779,6 +733,8 @@ variants.
 . Insert the card in the reader and plug the reader into a USB port.
 
 . Do "ls /dev/sd*". You should see an additional device, most likely /dev/sdd.
+  (One way to check this is to do "dmesg tail" and look for a recent
+  device creation.
 
 . If you don't see a new device, do "lsusb" to check what USB devices
   exist, with the reader first unplugged and then plugged in.  You
@@ -844,3 +800,10 @@ You will now have a card that can be booted in the Pi.
 == Other resources ==
 
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
+
+//TO DO:
+// SKU 424254
+// http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
+// http://www.raspberrypiwiki.com/index.php/Raspberry_Pi_Add-On_GPS_HAT_Module
+
+//end
