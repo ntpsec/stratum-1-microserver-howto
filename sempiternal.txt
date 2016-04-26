@@ -155,9 +155,17 @@ Otherwise you can at this point begin to run headless, which you are
 almost certainly going to want to do anyway when you put the Pi into
 production as a dedicated timeserver.
 
-The avahi-demon package is installed on your Pi by default.  If it
+The avahi-daemon package is installed on your Pi by default.  If it
 hasn't been removed, you can append ".local" to your Pi's hostname (by
 default, then, "raspberrypi.local") and ssh in using that name.
+
+By default:
+
+------------------------------------------------------------------------
+$ ssh pi@raspberrypi.local
+------------------------------------------------------------------------
+
+The default password is "raspberry".
 
 You may choose to configure the Pi to use a fixed, static IP
 address. That process is described in <<EAT-STATIC>>.
@@ -694,6 +702,9 @@ work with it]
 This recipe has not been tested with the ODROID.  But we can give
 some pointers towards making it work.
 
+* Your configuration and first-login process will be slighly different,
+  as your ODROID will be running a stock Ubuntu rather than Raspbian.
+
 * The company rep says that the UART device is /dev/ttyS2 rather
   than /dev/ttyAMA0.
 
@@ -703,12 +714,15 @@ some pointers towards making it work.
   magic kludge for this that recognizes /de/ttyAMA0 as special,
   but not /dev/ttyS2.
 
-* Fotr the same reason, you need to give gpsd /dev/ppsS0 as a
+* For the same reason, you need to give gpsd /dev/ppsS0 as a
   command-line argument for it to see PPS. Thus:
  
 ------------------------------------------------------------------------
 # ./gpsd -n -N -D 5 /dev/ttyS2 /dev/pps0
 ------------------------------------------------------------------------
+
+* The recipe described in the next section for reverting to a stock
+  Raspbian won't work.
 
 We would welcome field reports to complete this recipe.
 
@@ -739,17 +753,23 @@ variants.
   don't, you have a USB-layer or hardware problem beyond the scope of
   this HOWTO.
 
-. As root, do "fdisk /dev/sdd" (or substitute whatever new device you
-  found for sdd).  Do 'l' to check the partition names.  What you will
-  probably see is a single partition named for the device with the
-  suffix "1" - most likely, sdd1.
+. Format the SD. As root, do "fdisk /dev/sdd" (or substitute whatever
+  new device you found for sdd).  Use 'd' to delete any partitions.
+  Use 'n' to create a new partition, then 'p' and '1' to create a new
+  partition table with one partition (accept the defaults for size and
+  type).  The commands 't' and 'b' set it up as FAT32.  Finally, use
+  'w' to write the partition table.
 
-. As root, moount the card. The command "mount /dev/ssd1 /media" will
+. Do 'l' to check the partition names.  What you should see is a
+  single partition named for the device with the suffix "1" - most
+  likely, sdd1.
+
+. As root, mount the card. The command "mount /dev/ssd1 /media" will
   probably be right.  Any empty directory will do as as a mount point, 
   there is noting magic about "/media".
 
 . Change current directory to the root dictory of the card
-  (e.g."/meda") and run "unzip" with the NOOBS zip as argument.
+  (e.g."/media") and run "unzip" with the NOOBS zip as argument.
 
 . Unmount the card (e.g. "umount /dev/sdd").
 
