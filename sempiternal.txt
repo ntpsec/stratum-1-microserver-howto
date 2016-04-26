@@ -1,6 +1,6 @@
 == SemPiTernal: A Raspberry Pi Stratum 1 timeserver build ==
 :description: Building and configuring a tiny Stratum 1 timeserver with RasPi
-:keywords: Raspberry Pi, NTP, NTPsec, time service
+:keywords: Raspberry Pi, odroid, NTP, NTPsec, time service
 by Eric S. Raymond
 version 0.3
 
@@ -9,7 +9,7 @@ version 0.3
 This HOWTO gives complete instructions for building a headless Stratum
 1 timeserver using a Raspberry Pi, a GPS daughterboard designed for
 the Pi, and NTPsec <<NTPSEC>>.  Total parts cost should be about $80.
-Light soldering is required.
+Beginner-level light soldering is required.
 
 Why do it?  It's cheap, fun, and because your NTP server is running on
 a dedicated machine you won't have so much jitter due to variable
@@ -21,12 +21,16 @@ external GPS because a HAT uses an internal RS-232 interface that cuts
 latency and jitter compared to a USB GPS, and provides the 1PPS
 signal required for precision time service.  Generic USB GPSes do not
 deliver this signal and therefore cannot be used for Stratum 1
-service.
+service footnote[There is one USB GPS, the GR601-W, that provides 1PPS.
+Unfortunately, it is difficult to purchase in the U.S.].
 
-Most of this build is actually independent of any one daughterboard's hardware
-idiosyncracies. The recipe was tested using an Adafruiit GPS HAT
-<<ADAFRUIT-HAT>>, but should also cover the Uputronics GPS Expansion Board
-<<UPUTRONICS-HAT>>
+Most of this build is actually independent of any one daughterboard's
+hardware idiosyncracies. The recipe was tested using an Adafruit GPS
+HAT <<ADAFRUIT-HAT>>, but should also cover the Uputronics GPS
+Expansion Board <<UPUTRONICS-HAT>>.
+
+The build may also generalize to other HAT-compatible Unix SBCs such as
+the ODROID C2, though details of those remain to be filled in.
 
 == Parts list and hardware assembly ==
 
@@ -658,6 +662,38 @@ you can compensate it out with an offset if you know what it is.
 These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
 the pps-gpio driver triggers on leading or trailing edge.
+
+== A note about the ODROID C2 ==
+
+The ODROID C2 is an ARM-based hackerboard strongly resembling the
+Raspberry Pi, but with better hardware and at a slighly higher price
+point. The main connector on the ODROID is pin-compatible with the
+40-pin Pi connector.  A company representative has stated that
+forum.odroid.com/viewtopic.php?f=111&t=7660[the Adafruit HAT should
+work with it]
+
+This recipe has not been tested with the ODROID.  But we can give
+some pointers towards making it work.
+
+* The company rep says that the UART device is /dev/ttyS2 rather
+  than /dev/ttyAMA0.
+
+* The RPi 3 hack to disable serial interfaces won't be required.
+
+* We don't know what logical GPIO pin numbers need to be given to
+  pps-gpio.  You may be able to determine this by comparing the RasPi
+  and ODROID pinouts.
+
+* You will not been able to see PPS in gpsmon
+
+* You need to give gpsd /dev/ppsS0 as command-line argument for
+  it to see PPS.  Thus,
+ 
+------------------------------------------------------------------------
+# ./gpsd -n -N -D 5 /dev/ttyS2 /dev/pps0
+------------------------------------------------------------------------
+
+We would welcome field reports to complete this recipe.
 
 == Reverting to a stock Raspbian ==
 
