@@ -54,7 +54,7 @@ You will need:
 
 * A live Ethernet cable to the Internet.
 
-* Temporary of a USB mouse and keyboard.
+* Temporary use of a USB mouse and keyboard.
 
 * Temporary use of a DVI-compatible monitor and cable.
 
@@ -151,9 +151,18 @@ After initial configuration, the rest of your timeserver setup will be
 done in a terminal emulator.  This will not require the GUI.
 Optionally, you can continue using it.
 
-Otherwise you can at this point begin to run headless, whuch you are
+Otherwise you can at this point begin to run headless, which you are
 almost certainly going to want to do anyway when you put the Pi into
-peoduction as a dedicated timeserver. Run this:
+production as a dedicated timeserver.
+
+The avahi-demon package is installed on your Pi by default.  If it
+hasn't been removed, you can append ".local" to your Pi's hostname (by
+default, then, "raspberrypi.local") and ssh in using that name.
+
+You may choose to configure the Pi to use a fixed, static IP
+address. That process is described in <<EAT-STATIC>>.
+
+Otherwise, you can run this:
 
 ------------------------------------------------------------------------
 $ ifconfig
@@ -192,15 +201,6 @@ DHCP server it can find on your network - usually your router will
 provide DHCP.  This means that when you reboot the Pi it may come up
 using a different dynamic address that you don't know.
 
-There are two ways around this.  One is to be sure the avahi-demon
-package is installed on your Pi.  If it is, you can append ".local"
-to your Pi's hostname (by default, then, "raspberrypi.local") and
-ssh in using that name.
-
-The other way around is to configure the Pi to use a fixed, static IP
-address.  We'll give directions on how to set that up later in this
-HOWTO.
-
 If all else fails,
 
 ------------------------------------------------------------------------
@@ -211,6 +211,9 @@ run from any machine on your network, will give you a list of
 IP-addresses/hostnames that are or have been active on your network
 (the information is cached).  You can try any IP addresses paired with
 your Pi's hostname; one of them should work.
+
+Once you can run headless, you will no longer need a
+monitor/mouse/keyboard tyo be plugged into the Pi.
 
 === Fully update Raspbian ===
 
@@ -761,6 +764,8 @@ You will now have a card that can be booted in the Pi.
   GPS HAT]
 
 - [[[UPUTRONICS-HAT]]] https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81[Raspberry Pi+ GPS Expansion Board]
+
+- [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
 - [[[NTPSEC]]] https://www.ntpsec.org/[The NTPsec project]
 
