@@ -1,15 +1,19 @@
 == SemPiTernal: A Raspberry Pi Stratum 1 timeserver build ==
 :description: Building and configuring a tiny Stratum 1 timeserver with RasPi
 :keywords: Raspberry Pi, odroid, NTP, NTPsec, time service
+:adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
+:upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
+:dxhat: 
 by Eric S. Raymond
 version 0.3
 
 == Introduction ==
 
 This HOWTO gives complete instructions for building a headless Stratum
-1 timeserver using a Raspberry Pi, a GPS daughterboard designed for
-the Pi, and NTPsec <<NTPSEC>>.  Total parts cost should be about $80.
-Beginner-level light soldering is required.
+1 timeserver using a Raspberry Pi or workalike SBC (= Single Board
+Computer), a GPS HAT (= daughterboard designed for the Pi), and NTPsec
+<<NTPSEC>>.  Total parts cost should be about $80.  Beginner-level
+light soldering may be required.
 
 Why do it?  It's cheap, fun, and because your NTP server is running on
 a dedicated machine you won't have so much jitter due to variable
@@ -27,36 +31,48 @@ U.S.].
 
 Most of this build is actually independent of any one daughterboard's
 hardware idiosyncracies. The recipe was tested using an Adafruit GPS
-HAT <<ADAFRUIT-HAT>>, but should also cover the Uputronics GPS
-Expansion Board <<UPUTRONICS-HAT>>.
+HAT, but some alternatives are given in a table in the parts list.
 
 The build may also generalize to other HAT-compatible Unix SBCs such as
-the Odroid C2, though details of those remain to be filled in.
+the Odroid C2, though details of those remain to be filled in. To
+emphasize which parts of the build won't vary versus those that
+will, we will refer to the main board as "SBC" for the invariant parts
+and as "Pi" or "Odroid" for the board-specific parts.
 
 == Parts list and hardware assembly ==
 
 You will need:
 
-* One Raspberry Pi.  I used a Raspberry Pi 3: these instructions cover
-  older variants as well.
+* One Raspberry Pi or workalike SBC such as the Odroid C2.  I used a
+  Raspberry Pi 3: these instructions cover older variants as well.
 
-* One Adafruit GPS HAT or Uputronics GPS Expansion Board.
+* One compatible GPS HAT.  Possibilities are:
 
-* One CR1220 (for Adafruit) or CR2032 (for Uputronics) 3-volt lithium
-  coin cell.  The CR1220 is cheapest ordered from Adafruit along with
-  the HAT, but you can buy either at most places that carry
-  hearing-aid batteries.
+[width="50%",frame="topbot",options="header"]
+|=======================================================================
+| HAT type                                 | Battery | Build status
+| {adahat}[Adafruit GPS HAT]               | CR1220  | Tested
+| {upuhat}[Uputronics GPS Expansion Board] | CR2032  | Untested
+| {dxhat}SKU 424254                        |    -    | Untested
+|=======================================================================
 
-* (Optional) A Raspberry Pi case to protect your hardware from
-  dust and curious felines.
+* One 3.3-volt lithium button cell (except the SKU 424254, which is
+  powered by an on-board supercap, included).  The CR1220 is cheapest
+  ordered from Adafruit along with the HAT, but you can buy compatible
+  button cells at most places that carry hearing-aid batteries.
+
+* (Optional) A case to protect your hardware from dust and curious
+  felines.  Any case with a 30mm or greater exterior height should be
+  able to hold both SBC and HAT.
 
 * (Optional) A micro-SD reader/writer, in case you need to recover
   from a failed installation by making a new bootable image.
 
-* (Optional) 2 hex standoffs, .625" with 440 threading, 2 compatible
-  nuts, 2 compatible screws.  These are the standard spacers
-  used in PC cases; if you keep the small parts from old PCs around
-  you'll have a dozen of them.
+* (Optional) 2 hex standoffs, .625" with M2.5 threading, 2 compatible
+  nuts, 2 compatible screws.  These are the standard spacers used in
+  PC cases; if you keep the small parts from old PCs around you'll
+  have a dozen of them.  Adafruit sells the standoffs and nuts
+  <<STANDOFFS>> but doesn't include the screws.
 
 * A live Ethernet cable to the Internet.
 
@@ -65,55 +81,68 @@ You will need:
 * Temporary use of a HDMI-compatible monitor and cable.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
-board and a 40-pin header. The header on the assembled HAT fits down
-over the double row of pins on the east edge of the Pi, such that when
-fully assembled the two boards will make a neat stack.
+board and a 40-pin header. The SKU 424254 comes presoldered.
 
-First: mate the female side of the detached 40-pin header with the
-40-pin GPIO connector on the SBC (this would be the east edge if the
-Adafruit logo were a map legend).
+(HATs are shipped as parts almost certainly to evade a regulatory
+requirement for FCC conformance testing to RF emission standards,
+which is expensive and would have added to the unit cost.)
 
-Second: if you have them, bolt the the two hex standoffs to the corner
-holes on the opposite (west) side of the SBC, female end up.  These will
-support the HAT while you're soldering it to its header.
+The header on the assembled HAT will fit down over the double row of pins
+on one edge of the SBC, such that when fully assembled the SBC and HAT will
+make a neat stack with all four pairs of corner holes vertically aligned.
 
-Third: Lay the HAT over the board in such a way that the two sets of 4
+. Find "north" on the HAT.  It's the edge the GPS module is
+closest to and has a rectagular notch in it.  On the Adafruit HAT,
+if you hold up the board so the "north" edge is at the top the
+Adafruit logo will be right-side up.
+
+. If you have them, bolt the the two hex standoffs to the corner
+holes on the west side of the SBC, female end up.  These will
+support the HAT.
+
+. Mate the female side of the detached 40-pin header with the
+40-pin GPIO connector on the east edge of the SBC.  If your HAT
+is presoldered, your boards are now stacked and you skip the next step.
+
+. Lay the HAT over the board in such a way that the two sets of 4
 corner holes line up and the header pins poke through a matching 40
 holes in the HAT.  The GPS module and battery clip should face
 upwards. If you added standoffs, they should match the corner holes of
-the HAT.
-
-Fourth: Solder each header pin into its through-hole. This is the last
+the HAT. Solder each header pin into its through-hole. This is the last
 bit of hardware hacking absolutely required.
 
-Fifth: If you added standoffs, now secure the HAT to their
+. If you added standoffs, now secure the HAT to their
 female-threaded upper ends using the screws.  This will help
 protect the headers and pins from mechanical stress if the
 assembly is dropped or has something sat on it.
 
-(The device is shipped as parts almost certainly to evade a regulatory
-requirement for FCC conformance testing to RF emission standards,
-which is expensive and would have added to the unit cost.)
+. Optional: put the combination into a case.  Anything sold as a
+"Raspberry Pi" case ought to do as long as it is flat-topped with an
+exterior height of at least 30mm.  The Raspberry Pi Foundation Case
+qualifies, but for functional reasons we recommend a transparent case.
 
 == Understanding the GPIO connector ==
 
-The pins you'll plug the HAT into are the Pi's primary or P1 GPIO
+The pins you'll plug the HAT into are the SBC's primary or P1 GPIO
 (General Purpose I/O) header.  There's a second or P5 GPIO connector
 near it consisting of a 2x3 array of through holes. This build won't
 use that.
 
-The Pi 3 and other recent variants have 40 pins in the P1 header.
-Older variants, the original Pi A and B, have only 26 pins.  The
-assignments for those pins on later versions are backward-compatible.
+The Pi 3, other recent Pi variants, and the Odroid have 40 pins in the
+P1 header.  Older variants, the original Pi A and B, have only 26
+pins.  The assignments for those pins on later versions are
+backward-compatible.
 
 The GPIO pins are sometimes referenced by physical pin location on the
 header (1-26 or 1-40), and sometimes as the GPIO line connected to the
-CPU.  This can cause confusion.  They are best referred to as
-P1-[1-40], P5-[1-8] or as GPIO [0-31].  Some are typically
-pre-configured for specific functions (serial, i2c, etc.)  Two that
-will be important for this build are the TX and RX serial lines.
+CPU.  This can cause confusion, especially since some kitbuilders use
+variant GPIO numberings.  All GPIO numbers in this HOWTO reference
+<<PI-PINOUT>>.
 
-The pinouts are described at <<GPIO>>.
+Physical pins are best referred to as P1-[1-40], P5-[1-8] or as
+GPIO[0-31].  Some are typically pre-configured for specific functions
+(serial, i2c, etc.)  Two that will be important for this build are the
+TX and RX serial lines.
 
 == Configuration overview ==
 
@@ -126,7 +155,7 @@ The work divides into the following phases:
 
 1. Early configuration
 
-2. Smoke-test the Pi/HAT combination
+2. Smoke-test the SBC/HAT combination
 
 3. Live-test the GPS
 
@@ -138,12 +167,12 @@ Within each phase, we try to indicate how difficult each operation is
 to back out.
 
 If all else fails, we'll give a procedure for making a new bootable SD
-which, unlike the "official" one, can be done entirely with a Unix
+which, unlike the RPi "official" one, can be done entirely with a Unix
 machine.
 
 == Early configuration ==
 
-== Initial configuration in the GUI ==
+== Initial configuration in the GUI (Pi only) ==
 
 Plug in a monitor, a mouse, and keyboard, and a live Ethernet cable;
 power up the Pi. Go through your normal configuration - hostname,
@@ -166,7 +195,7 @@ however, you would probably want it for any other use of the Pi.
 
 === Runnlng headless ===
 
-No actual configuration changes to the Pi are made in this step.
+No actual configuration changes to the SBC are made in this step.
 
 After initial configuration, the rest of your timeserver setup will be
 done in a terminal emulator.  This will not require the GUI.
@@ -176,44 +205,51 @@ Otherwise you can at this point begin to run headless, which you are
 almost certainly going to want to do anyway when you put the Pi into
 production as a dedicated timeserver.
 
-The avahi-daemon package is installed on your Pi by default.  If it
-hasn't been removed, you can append ".local" to your Pi's hostname (by
+The avahi-daemon package is installed on your SBC by default.  If it
+hasn't been removed, you can append ".local" to your SBC's hostname (by
 default, then, "raspberrypi.local") and ssh in using that name.
 
-By default:
+By default, on a Raspberry Pi:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
 ------------------------------------------------------------------------
 
-The default password is "raspberry".
+The default Pi password is "raspberry".
 
-You may choose to configure the Pi to use a fixed, static IP
+You may choose to configure the SBC to use a fixed, static IP
 address. That process is described in <<EAT-STATIC>>.
 
 Once you can run headless, you will no longer need a
-monitor/mouse/keyboard tyo be plugged into the Pi.
+monitor/mouse/keyboard tyo be plugged into the SBC.
 
-=== Fully update Raspbian ===
+=== Fully update Your OS ===
 
-Fully update the Raspbian on your Pi.  The easiest way to do this is
+Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
 
 ------------------------------------------------------------------------
 $ su -
 # apt-get update
 # apt-get dist-upgrade
+------------------------------------------------------------------------
+
+On the Raspberry Pi, add
+
+------------------------------------------------------------------------
 # rpi-update
 ------------------------------------------------------------------------
 
 The '#' means you need to be root to run them. Some commands
 won't require root; those command lines will be marked with "$".
+Remember that you go root with the command "su -".
 
-If you skip this step on an old enough Pi, 1PPS configuration will
-mysteriously fail because the required incantations have changed.
+If you skip this update step on an old enough Raspberry Pi, 1PPS
+configuration will mysteriously fail because the required incantations
+have changed.
 
 These changes are not reversible, but you'd want them for any other
-use of the Pi anyway.
+use of the SBC anyway.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
@@ -281,26 +317,29 @@ or by using the GUI configurator to re-enable serial interfaces.
 === Configure the 1PPS GPIO pin ==
 
 You'll need NTPsec to be able to see the high-precision PPS
-(pulse-per-second) signal from the GPS.  But the serial interface from an
-Adafruit or Uputronics HAT only supplies TX/RX; the PPS signal is
-shipped on a different pin of the GPIO connector.
+(pulse-per-second) signal from the GPS.  But the serial interface from
+an HAT only supplies TX/RX; the PPS signal is shipped on a different
+pin of the GPIO connector.
 
-The RX/TX signals are always expected on the same two pins of the
-GPIO, which connect to the Pi's UART. You can see them, labeled, near
-the north end of the connector. Most other GPIO pins can be
-interpreted by the Pi in different ways, configured by software.
+The RX/TX signals are always expected on the same two pins of the GPIO
+(P8 and P10) which connect to the SBC's UART. You can see them,
+labeled, near the north end of the connector. Most other GPIO pins can
+be interpreted by the Pi in different ways, configured by software.
 Which pin is used for 1PPS is a variable of the HAT design.  Here is a
 table:
 
 [width="25%",frame="topbot",options="header"]
 |============================================
 | Logical pin   | Physical pin  | HAT
-|   GPIO #4     |      P1 7     | Adafruit
-|   GPIO #18    |      P1 12    | Uputronics
+|   GPIO04      |      P1-7     | Adafruit
+|   GPIO18      |      P1-12    | Uputronics
+|   GPIO05      |      PI-29    | SKU 424254
 |============================================
 
+//FIXME: Verify SKU 424254 info - check PI 29 with a scope
+
 There is a different, non-HAT Adafruit product, the "Ultimate GPS
-Breakout Board", that also uses GPIO #18.  This may be a source of
+Breakout Board", that also uses GPIO18/P1-12.  This may be a source of
 confusion if you read some of the references in this document.
 
 There is a Linux kernel driver called pps-gpio which,
@@ -328,20 +367,31 @@ dtoverlay=pps-gpio,gpiopin=4
 Any previous gpiopin option (such as bcm2708.pps_gpio_pin) should be
 removed.
 
-You must reboot your Pi for this change to take effect.
+You must reboot your SBC for this change to take effect.
 
 == Smoke-test the GPS/HAT combination ==
 
 (Some material in this section is from <<ADAFRUIT-TEST>>.)
 
 Next thing you want to do is verify that the GPS works.  Put your
-build on someplace like a windowsill with a good sky view outside.
-The HATs this HOWTO describes have very good weak-signal discrimination and
-are much less fussy about siting than older GPS receivers.
+SBC+HAT combination on someplace like a windowsill with a good sky
+view outside.  The HATs this HOWTO describes have very good
+weak-signal discrimination and are much less fussy about siting than
+older GPS receivers.
 
-When the red LED on the HAT blinks once per second, you don't have a
-satellite fix. When it achieves lock it will blink with much lower
-frequency.
+Here's how to tell if your HAT has a fix.  The numbers are blink
+intervals for the fix LED; "on" means the device does not blink.
+
+//FIXME: Fill in missing blink intervals.
+//FIXME: Verify SKU 424254 info
+
+[width="50%",frame="topbot",options="header"]
+|=======================================================================
+| HAT type                        | No fix |  Fix
+| Adafruit GPS HAT                | 1      |  10
+| Uputronics GPS Expansion Board  | ?      |  ?
+| SKU 424254                      | on     |  1
+|=======================================================================
 
 On first (cold) boot, the device may take 20-30 minutes to download a
 satellite ephemeris. After that, time to get a fix should be much faster
@@ -360,7 +410,7 @@ $ cat /dev/ttyAMA0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
-text lines usually beginning with "$GP", and possiblt a "$PMTK"
+text lines usually beginning with "$GP", and possibly a "$PMTK"
 sentence.  These will issue whether or not the GPS has satellite lock.
 
 If you see no output or random baud barf, re-do the stty command being
@@ -438,18 +488,18 @@ these, most likely you have forgotten to go root before running
 gpsmon.
 
 Having run this step, you now know that both data and 1PPS from the
-HAT are fully visible from userspace on your Raspberry Pi.  You can
+HAT are fully visible from userspace on your SBC.  You can
 now proceed with specializing it to be a time server.
 
 == Build and configure NTPsec ==
 
-The stock ntpd shipped with Raspbian is intended to be used as a
+The stock ntpd shipped with your OS is intended to be used as a
 client instance, not a server.  It doesn't do 1PPS, and therefore
 can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
 
-Uninstall the stock Raspbian NTP and tell apt-get upgrade:
+Uninstall the stock NTP and tell apt-get upgrade:
 
 ------------------------------------------------------------------------
 # apt-get -y remove --purge ntp
@@ -665,13 +715,17 @@ Pulse widths (and the induced lag) range from so fast the serial
 driver can't see them to, worst case, 0.5s.  The worst case is rare;
 typical pulse widths are 50 to 200ms. Because the error is constant,
 you can compensate it out with an offset if you know what it is.
+HATs marked "leading edge" below do not require compensation.
 
 [width="25%",frame="topbot",options="header"]
 |===========================================================
 |Type           | Chipset    | 1PPS width  | gps-ppio detects
 |Adafruit HAT   | MTK3339    |   100ms     | leading edge
 |Uputronics HAT | Ublox 8    |   100ms     | leading edge 
+|SKU 424254     | Ublox 6    |   100ms     | leading edge
 |===========================================================
+
+//FIXME: Verify SKU 424254 info with a scope
 
 These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
@@ -709,7 +763,8 @@ some pointers towards making it work.
 ------------------------------------------------------------------------
 
 * The recipe described in the next section for reverting to a stock
-  Raspbian won't work.
+  Raspbian won't work.  The Odroid doesn't run Raspbian, it runs
+  Ubuntu.
 
 We would welcome field reports to complete this recipe.
 
@@ -768,17 +823,13 @@ You will now have a card that can be booted in the Pi.
 
 [bibliography]
 
-- [[[ADAFRUIT-HAT]]]
-  https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi[Adafruit
-  GPS HAT]
+- [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
 
-- [[[UPUTRONICS-HAT]]] https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81[Raspberry Pi+ GPS Expansion Board]
+- [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
 - [[[NTPSEC]]] https://www.ntpsec.org/[The NTPsec project]
-
-- [[[GPIO]]] https://www.raspberrypi.org/documentation/usage/gpio-plus-and-raspi2/[GPIO: MODELS A+, B+, RASPBERRY PI 2 B AND RASPBERRY PI 3 B]
 
 - [[[REMOVE-SYSTEMD]]]
   http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[How to remove systemd from a Debian jessie/sid installation]
@@ -805,5 +856,6 @@ http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
 // SKU 424254
 // http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 // http://www.raspberrypiwiki.com/index.php/Raspberry_Pi_Add-On_GPS_HAT_Module
+// http://www.digikey.com/product-detail/en/seiko-instruments/XH414H-IV01E/728-1038-1-ND/1631941?WT.srch=1&gclid=Cj0KEQjwo_y4BRD0nMnfoqqnxtEBEiQAWdA121uytiEWyuT3qkSmZFXC2OVk8SEZOOc6iLZEvuKx3nAaAvgp8P8HAQ#substitute-section
 
 //end
