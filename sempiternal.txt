@@ -854,8 +854,8 @@ http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
 
 //TO DO:
 // SKU 424254
-// http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 // http://www.raspberrypiwiki.com/index.php/Raspberry_Pi_Add-On_GPS_HAT_Module
 // http://www.digikey.com/product-detail/en/seiko-instruments/XH414H-IV01E/728-1038-1-ND/1631941?WT.srch=1&gclid=Cj0KEQjwo_y4BRD0nMnfoqqnxtEBEiQAWdA121uytiEWyuT3qkSmZFXC2OVk8SEZOOc6iLZEvuKx3nAaAvgp8P8HAQ#substitute-section
+// How to set stationary mode on the u-blox 8.
 
 //end
