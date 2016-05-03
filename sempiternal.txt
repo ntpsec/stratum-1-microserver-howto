@@ -664,8 +664,8 @@ similar problems have been reported across many architectures) and a
 complexity sinkhole. The things that have it as a dependency are
 things you don't want on a headless NTP server.
 
-Note that if you dop this you may lose the ability to upgrade from
-jessie to the upcoming stetch release, and might need to rebuild your
+Note that if you do this you may lose the ability to upgrade from
+jessie to the upcoming stretch release, and might need to rebuild your
 image from scratch as a result.
 
 (Our instructions are based on <<NO-SYSTEMD>>)
