@@ -3,7 +3,7 @@
 :keywords: Raspberry Pi, odroid, NTP, NTPsec, time service
 :adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
-:dxhat: 
+:dxhat:http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
 version 0.3
 
@@ -11,9 +11,9 @@ version 0.3
 
 This HOWTO gives complete instructions for building a headless Stratum
 1 timeserver using a Raspberry Pi or workalike SBC (= Single Board
-Computer), a GPS HAT (= daughterboard designed for the Pi), and NTPsec
-<<NTPSEC>>.  Total parts cost should be about $80.  Beginner-level
-light soldering may be required.
+Computer), a GPS HAT (= daughterboard designed for the Pi and
+workalikes), and NTPsec <<NTPSEC>>.  Total parts cost should be about
+$80.  Beginner-level light soldering may be required.
 
 Why do it?  It's cheap, fun, and because your NTP server is running on
 a dedicated machine you won't have so much jitter due to variable
@@ -37,7 +37,11 @@ The build may also generalize to other HAT-compatible Unix SBCs such as
 the Odroid C2, though details of those remain to be filled in. To
 emphasize which parts of the build won't vary versus those that
 will, we will refer to the main board as "SBC" for the invariant parts
-and as "Pi" or "Odroid" for the board-specific parts.
+and as "Pi", "Pi 2", "Pi 3", or "Odroid" for the board-specific parts.
+
+Where this HOWTO says "I" it refers to the author's direct experience;
+"we" includes both the author and various technical experts who
+assisted in the preparation of this document.
 
 == Parts list and hardware assembly ==
 
@@ -121,6 +125,7 @@ assembly is dropped or has something sat on it.
 exterior height of at least 30mm.  The Raspberry Pi Foundation Case
 qualifies, but for functional reasons we recommend a transparent case.
 
+
 == Understanding the GPIO connector ==
 
 The pins you'll plug the HAT into are the SBC's primary or P1 GPIO
@@ -142,7 +147,7 @@ variant GPIO numberings.  All GPIO numbers in this HOWTO reference
 Physical pins are best referred to as P1-[1-40], P5-[1-8] or as
 GPIO[0-31].  Some are typically pre-configured for specific functions
 (serial, i2c, etc.)  Two that will be important for this build are the
-TX and RX serial lines.
+TX and RX serial lines attached to the SBC's UART.
 
 == Configuration overview ==
 
@@ -195,7 +200,7 @@ however, you would probably want it for any other use of the Pi.
 
 === Runnlng headless ===
 
-No actual configuration changes to the SBC are made in this step.
+No actual configuration changes to the OS are made in this step.
 
 After initial configuration, the rest of your timeserver setup will be
 done in a terminal emulator.  This will not require the GUI.
@@ -209,7 +214,7 @@ The avahi-daemon package is installed on your SBC by default.  If it
 hasn't been removed, you can append ".local" to your SBC's hostname (by
 default, then, "raspberrypi.local") and ssh in using that name.
 
-By default, on a Raspberry Pi:
+By default, for a Raspberry Pi:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
@@ -221,7 +226,39 @@ You may choose to configure the SBC to use a fixed, static IP
 address. That process is described in <<EAT-STATIC>>.
 
 Once you can run headless, you will no longer need a
-monitor/mouse/keyboard tyo be plugged into the SBC.
+monitor/mouse/keyboard to be plugged into the SBC.  Instead, you'll
+ssh to it from another machine, which later instructions will refer
+to as the "host".
+
+=== Secure the machine ===
+
+The fact that your SBC has a known default name and default user means
+that it is very vulnerable to being attacked and exploited by anyone
+who gets access to your network.  Here's how to fix this:
+
+. On the SBC, create an account for "me" (whatever username you like).
+
+. On the SBC, add "me" to the sudo group by editing /etc/group (append your
+  username, preceded by a comma, to the "sudo" line; you will
+  need to be root to do this).
+
+. From the host, verify that you can log in vie "ssh me@raspberrypi.local"
+  and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
+
+. On the SBC, disable the 'pi' login ("deluser pi" as root).
+
+. From the host, export an ssh key from the "me" account to the
+  SBC. If you don't understand this instruction, search for "ssh
+  tutorial on the web and learn.  The
+  http://www.catb.org/~esr/sshexport/[sshexport] tool may be useful.
+
+. Reboot the SBC. Verify that you can login via ssh from "me" on your host
+  machine to "me" on the SBC without giving a password.
+
+. On the SBC, disable root login and password tunnelling. To do
+  this, edit its /etc/ssh/sshd_config file.  Change the
+  "PermitRootLogin" and "PasswordAuthentication" lines so the
+  second token is "no".
 
 === Fully update Your OS ===
 
@@ -627,6 +664,10 @@ similar problems have been reported across many architectures) and a
 complexity sinkhole. The things that have it as a dependency are
 things you don't want on a headless NTP server.
 
+Note that if you dop this you may lose the ability to upgrade from
+jessie to the upcoming stetch release, and might need to rebuild your
+image from scratch as a result.
+
 (Our instructions are based on <<NO-SYSTEMD>>)
 
 First, pull in the core of sysvinit, preserving the inittab that
@@ -847,6 +888,12 @@ You will now have a card that can be booted in the Pi.
 - [[NMEA-DRIVER]] https://docs.ntpsec.org/latest/driver20.html
 
 - [[[NOOBS]]] https://www.raspberrypi.org/downloads/noobs/[NOOBS]
+
+== Acknwledgememts ==
+
+Various devteam members and friends of the GPSD and NTPsec projects
+assisted with this HOWTO, including: Gary E. Miller, Hal Murray, and
+Phil Salkie.
 
 == Other resources ==
 
