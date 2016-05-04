@@ -554,7 +554,7 @@ Install the build prerequisites
 
 ------------------------------------------------------------------------
 # apt-get install bison libevent-dev libcap-dev libssl-dev
-# apt-get install libreadline-dev asciidoc
+# apt-get install libreadline-dev
 ------------------------------------------------------------------------
 
 Build NTPsec.  The --refclock option says to include only Generic
@@ -911,6 +911,8 @@ Phil Salkie.
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
 
 //TO DO:
+// 1. Try installing the Jessie Light image to start headless.
+// 2. Try not modifying /etc/modules
 // SKU 424254
 // http://www.raspberrypiwiki.com/index.php/Raspberry_Pi_Add-On_GPS_HAT_Module
 // http://www.digikey.com/product-detail/en/seiko-instruments/XH414H-IV01E/728-1038-1-ND/1631941?WT.srch=1&gclid=Cj0KEQjwo_y4BRD0nMnfoqqnxtEBEiQAWdA121uytiEWyuT3qkSmZFXC2OVk8SEZOOc6iLZEvuKx3nAaAvgp8P8HAQ#substitute-section
