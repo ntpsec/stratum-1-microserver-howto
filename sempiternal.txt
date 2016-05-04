@@ -751,7 +751,8 @@ cutting the number of service processes running.
 # apt-get -y remove --purge avahi-daemon dhcpd5
 ------------------------------------------------------------------------
 
-Once you do this, the SBC will no longer 
+Once you do this, the SBC will no longer be accessible at a ".local"
+address.
 
 == Edge-detection issues and new HATs ==
 
