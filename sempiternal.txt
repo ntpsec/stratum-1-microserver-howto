@@ -166,7 +166,9 @@ The work divides into the following phases:
 
 4. Build and configure NTPsec
 
-5. Simplification and optimization
+5. Set up ntpd to run at boot time
+
+6. Simplification and optimization
 
 Within each phase, we try to indicate how difficult each operation is
 to back out.
@@ -653,6 +655,15 @@ Internet time servers for sanity::
 //Things still to be documented include:
 //1. Testing ntpd. Point tp ntpq -p in the Time Service HOWTO.
 //2. Startup installation scripts, including aetting AMA speed to 9600.
+
+=== Set up ntpd to run at boot time ==
+
+//FIXME: More to go here.
+
+------------------------------------------------------------------------
+# systemctl enable ntpd
+# timedatectl set-ntp
+------------------------------------------------------------------------
 
 == Simplification and optimization ==
 
