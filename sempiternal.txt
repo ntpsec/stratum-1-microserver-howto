@@ -25,9 +25,9 @@ external GPS because a HAT uses an internal RS-232 interface that cuts
 latency and jitter compared to a USB GPS, and provides the 1PPS signal
 required for precision time service.  Generic USB GPSes do not deliver
 this signal and therefore cannot be used for Stratum 1 service
-footnote[There is one line of USB GPSes, the GR601-W/GR701-W, that
-provides 1PPS.  Unfortunately, it is difficult to purchase in the
-U.S.].
+footnote[There is one line of USB GPSes, the Navisys
+GR601-W/GR701-W/GR801-W, that provides 1PPS.  Unfortunately, it is
+difficult to purchase in the U.S.].
 
 Most of this build is actually independent of any one daughterboard's
 hardware idiosyncracies. The recipe was tested using an Adafruit GPS
@@ -209,12 +209,8 @@ done in a terminal emulator.  This will not require the GUI.
 Optionally, you can continue using it.
 
 Otherwise you can at this point begin to run headless, which you are
-almost certainly going to want to do anyway when you put the Pi into
+almost certainly going to want to do anyway when you put the SBC into
 production as a dedicated timeserver.
-
-The avahi-daemon package is installed on your SBC by default.  If it
-hasn't been removed, you can append ".local" to your SBC's hostname (by
-default, then, "raspberrypi.local") and ssh in using that name.
 
 By default, for a Raspberry Pi:
 
@@ -223,9 +219,6 @@ $ ssh pi@raspberrypi.local
 ------------------------------------------------------------------------
 
 The default Pi password is "raspberry".
-
-You may choose to configure the SBC to use a fixed, static IP
-address. That process is described in <<EAT-STATIC>>.
 
 Once you can run headless, you will no longer need a
 monitor/mouse/keyboard to be plugged into the SBC.  Instead, you'll
@@ -742,11 +735,23 @@ The resulting configuration is pretty minimal, as you can verify by
 running "ps ax" and noticing that most of the background processes are
 kernel threads.
 
-Be careful not to remove avahi-daemon unless you have previously
-configured your Pi to have a static IP address.
-
 WiFi is deliberately not removed, in order to give
 you a fallback TCP/IP access when a cable is inconvenient.
+
+=== Configuring for a static IP address ==
+
+You can choose to configure the SBC to use a fixed, static IP
+address. That process is described in <<EAT-STATIC>>.
+
+If you do this, and verify that it works, you
+can remove avahi-daemon and dhcpd5, further
+cutting the number of service processes running.
+
+------------------------------------------------------------------------
+# apt-get -y remove --purge avahi-daemon dhcpd5
+------------------------------------------------------------------------
+
+Once you do this, the SBC will no longer 
 
 == Edge-detection issues and new HATs ==
 
