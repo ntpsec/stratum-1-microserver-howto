@@ -5,7 +5,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat:http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-version 0.4
+version 0.5
 
 == Introduction ==
 
@@ -43,6 +43,10 @@ Where this HOWTO says "I" it refers to the author's direct experience;
 "we" includes both the author and various technical experts who
 assisted in the preparation of this document.
 
+This tutorial assumes some basic Unix competence. You will not need to
+be a programmer or an expert system administrator; you will need to
+know your way around the command line a little and how to edit files.
+
 == Parts list and hardware assembly ==
 
 You will need:
@@ -65,24 +69,22 @@ You will need:
   ordered from Adafruit along with the HAT, but you can buy compatible
   button cells at most places that carry hearing-aid batteries.
 
+* A micro-SD reader/writer for making bootable OS images.
+
+* A micro-SD card.  1GB is minimal. 4GB is plenty.
+
+* A Linux host machine and a live Ethernet cable on which your Pi can
+  see your local network and the Internet.
+
 * (Optional) A case to protect your hardware from dust and curious
   felines.  Any case with a 30mm or greater exterior height should be
   able to hold both SBC and HAT.
-
-* (Optional) A micro-SD reader/writer, in case you need to recover
-  from a failed installation by making a new bootable image.
 
 * (Optional) 2 hex standoffs, .625" with M2.5 threading, 2 compatible
   nuts, 2 compatible screws.  These are the standard spacers used in
   PC cases; if you keep the small parts from old PCs around you'll
   have a dozen of them.  Adafruit sells the standoffs and nuts
   <<STANDOFFS>> but doesn't include the screws.
-
-* A live Ethernet cable to the Internet.
-
-* Temporary use of a USB mouse and keyboard.
-
-* Temporary use of a HDMI-compatible monitor and cable.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.
@@ -124,7 +126,6 @@ assembly is dropped or has something sat on it.
 "Raspberry Pi" case ought to do as long as it is flat-topped with an
 exterior height of at least 30mm.  The Raspberry Pi Foundation Case
 qualifies, but for functional reasons we recommend a transparent case.
-
 
 == Understanding the GPIO connector ==
 
@@ -173,57 +174,89 @@ The work divides into the following phases:
 Within each phase, we try to indicate how difficult each operation is
 to back out.
 
-If all else fails, we'll give a procedure for making a new bootable SD
-which, unlike the RPi "official" one, can be done entirely with a Unix
-machine.
+This recipe consists of a few commands run on your host machine, and
+more on your SBC.  A '#' before a command line means you need to be
+root to run it. Some commands won't require root; those command lines
+will be marked with "$".  Remember that you go root with the command
+"sudo bash" or (after you haves set a root password) "su -".
+
 
 == Early configuration ==
 
-== Initial configuration in the GUI (Pi only) ==
+=== Making a bootable SD ===
 
-Plug in a monitor, a mouse, and keyboard, and a live Ethernet cable;
-power up the Pi. Go through your normal configuration - hostname,
-keyboard layout, timezone, locale, etc.
+Download the Raspbian Lite image zip file from <<RASPBIAN>> to your
+host.  The link will be named 'raspbian_lite_latest'.  The actual file
+will be named something like '2016-03-18-raspbian-jessie-lite.img',
+though probably with a later date.
 
-One special thing you should do is disable the serial interface.  Your
-HAT needs the GPIO pins it uses, and it's easiest to disable from the
-GUI configurator.  This change is easily reversed until and unless
-you strip out the GUI later.
+Use sha1sum to verify the correctness of the image.  Something like
+this:
 
-Next, check to see if you can expand the filesystem on the SD card;
-the GUI configurator option may be active or frozen depending on how
-your SD card was made.
+------------------------------------------------------------------------
+$ sha1sum 2016-03-18-raspbian-jessie-lite.zip
+------------------------------------------------------------------------
 
-You can do the build without expanding, but it gives you more space
-for experiments. You should do this now if you're going to, because
-you may lose the option to expand later in the process if you strip
-out unused services.  Note that this change is *not reversible*;
-however, you would probably want it for any other use of the Pi.
+The hex string this command returns should match the SHA-1 checksum
+on the web page.  If it doesn't, you have a corrupted image and should
+re-fetch it.
 
-=== Runnlng headless ===
+Note that this is not the regular NOOBS image. but one specifically
+designed to boot the Pi as a headless server, communicated with only
+by Ethernet. By going this route we get to avoid some hardware
+prerequisites that would never be used after install, and skip a bunch
+of steps in removing unnecessary desktop software.
 
-No actual configuration changes to the OS are made in this step.
+Unzip it to get an img file:
 
-After initial configuration, the rest of your timeserver setup will be
-done in a terminal emulator.  This will not require the GUI.
-Optionally, you can continue using it.
+------------------------------------------------------------------------
+$ sha1sum 2016-03-18-raspbian-jessie-lite.zip
+------------------------------------------------------------------------
 
-Otherwise you can at this point begin to run headless, which you are
-almost certainly going to want to do anyway when you put the SBC into
-production as a dedicated timeserver.
+Install dcfldd on your host machine:
 
-By default, for a Raspberry Pi:
+------------------------------------------------------------------------
+# apt-get install dcfldd
+------------------------------------------------------------------------
+
+You can use the older 'dd' for the next step, but dfcldd is better
+about giving you progress messages duting the operation.
+
+Insert an SD card in the reader and plug the reader into a USB port on your host.
+
+Follow the directions at <<INSTALLATION>>, using dfcldd.  Under On a
+host running Debian or Ubuntu, the device will likely be /dev/sdd and
+your command will look something like:
+
+------------------------------------------------------------------------
+# dcfldd bs=4M if=2016-03-18-raspbian-jessie.img of=/dev/sdd
+------------------------------------------------------------------------
+
+When this command complete, take the card out of the SD reader and
+insert it into your Pi. Make sure your Pi has a live Ethernet cable
+plugged in. Power it up and wait a few seconds, then do this
+from your host:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
 ------------------------------------------------------------------------
 
-The default Pi password is "raspberry".
+If ssh tells you it can't see any host named 'raspberrypi.local',
+either the Pi hasn't yet booted or your network can't see it. Don't
+panic. Check for a green light on the Pi's Ethernet port to be sure
+it's plugged in properly. Make sure your SD card is right-side-up and
+properly seated. Wait 30 seconds and try again.
 
-Once you can run headless, you will no longer need a
-monitor/mouse/keyboard to be plugged into the SBC.  Instead, you'll
-ssh to it from another machine, which later instructions will refer
-to as the "host".
+Only persistent failure after you've tried these things mean you need
+to rebuild the SD card image. Try with a different card, as sometimes
+older ones go flaky.
+
+You may see some noise from ssh about an unknown host; tell it yes,
+you want to connect.  Then you should be asked for a login password. The
+default Pi password is "raspberry".  Entering that should give you
+a shell prompt.
+
+The hardest part is now done.
 
 === Secure the machine ===
 
@@ -231,13 +264,17 @@ The fact that your SBC has a known default name and default user means
 that it is very vulnerable to being attacked and exploited by anyone
 who gets access to your network.  Here's how to fix this:
 
-. On the SBC, create an account for "me" (whatever username you like).
+. On the SBC, create an account for "me" (whatever username you like)
+  using 'adduser' run as root.
 
 . On the SBC, add "me" to the sudo group by editing /etc/group (append your
   username, preceded by a comma, to the "sudo" line; you will
   need to be root to do this).
 
-. From the host, verify that you can log in vie "ssh me@raspberrypi.local"
+. Also, add yourself to the 'dialout' group.  This will make some
+  later test steps easier.
+
+. From the host, verify that you can log in via "ssh me@raspberrypi.local"
   and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
 
 . On the SBC, disable the 'pi' login ("deluser pi" as root).
@@ -255,30 +292,46 @@ who gets access to your network.  Here's how to fix this:
   "PermitRootLogin" and "PasswordAuthentication" lines so the
   second token is "no".
 
+=== Initial configuration ===
+
+Call 'sudo raspi-config' on the Pi.  
+
+Request 'Expand Filesystem' by keying Return with the select bar on
+that entry.  This will make all the space on the SD above the end of
+your copied OS image avaolable on next reboot.
+
+Request 'Wait for Network at Boot'.  This makes recovery a little
+more convenient if you power up the SBC forgetting to plug in
+the Ethernet cable.
+
+Go through your normal configuration - keyboard layout, timezone,
+locale, etc.  In the U.S., you probably want en_US.UTF-8; in any other
+country, look for your ISO language code followed by ".UTF-8".
+
+Note: raspi-config seems to be a bit glitchy about building locales.
+You may have to uncomment your locale in /etc/locale-gen, run
+"locale-gen: as root, and then run raspi-config again in order to
+select the one you want.
+
+One special thing you should do is disable the serial interface (might
+be A8 under 'Advanced Options').  Your HAT needs the GPIO pins it
+uses, and it's easiest to disable from the GUI configurator.  This
+change is easily reversed until and unless you strip out the GUI
+later.
+
+To change the machine's hostname, edit '/etc/hostname'.  You will
+need to be root to do this.
+
 === Fully update Your OS ===
 
 Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
 
 ------------------------------------------------------------------------
-$ su -
+$ sudo bash
 # apt-get update
 # apt-get dist-upgrade
 ------------------------------------------------------------------------
-
-On the Raspberry Pi, add
-
-------------------------------------------------------------------------
-# rpi-update
-------------------------------------------------------------------------
-
-The '#' means you need to be root to run them. Some commands
-won't require root; those command lines will be marked with "$".
-Remember that you go root with the command "su -".
-
-If you skip this update step on an old enough Raspberry Pi, 1PPS
-configuration will mysteriously fail because the required incantations
-have changed.
 
 These changes are not reversible, but you'd want them for any other
 use of the SBC anyway.
@@ -315,37 +368,6 @@ serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
 This change can effectively be reversed by commenting out the
 dtoverlay and force_turbo lines.
 
-=== Release the console pins ===
-
-Next, edit the boot command line (if required - if you remembered to
-disable the serial interace in phase 1 it shouldn't be). You need to
-be root to do this.
-
-Save a copy of the original /boot/cmdline.txt before modifying it.
-
-This is what I saw on an unmodified Pi 3 running Jessie:
-
-------------------------------------------------------------------------
-root@whoville:/home/pi# cat /boot/cmdline.txt
-dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
-------------------------------------------------------------------------
-
-To disable the serial console, remove all "console" options.  The
-Adafruit setup document <<ADAFRUIT-SETUP>> page mentions a "kgdboc"
-option; if present, it should also be removed.
-
-On the Pi 3 the result looks like this:
-
-------------------------------------------------------------------------
-root@whoville:/home/pi# cat /boot/cmdline.txt
-dwc_otg.lpm_enable=0 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
-------------------------------------------------------------------------
-
-You must reboot the Pi for this change to take effect.
-
-This change can be undone by restoring the saved original of /boot/cmdline.txt,
-or by using the GUI configurator to re-enable serial interfaces.
-
 === Configure the 1PPS GPIO pin ==
 
 You'll need NTPsec to be able to see the high-precision PPS
@@ -380,11 +402,6 @@ RFC2783 interface to PPS that NTPsec (and GPSD) can use.  To
 see 1PPS, you need to ensure that this driver is loaded
 and monitoring the correct logical pin.
 
-In all versions, you force the driver to be loaded by
-editing /etc/modules to contain the line "pps-gpio"
-footnote[Alternatively, you can build your own kernel with pps-gpio
-hardwired in.].
-
 The procedure for declaring the GPIO pin varies by Raspbian version.
 We only give the formula for the current Raspbian here; you can
 find details about older versions at <<TAYLOR>>;
@@ -393,11 +410,9 @@ Edit /boot/config.txt to contain these options, replacing '4' with
 the logical pin number for your HAT if it's not an Adafruit:
 
 ------------------------------------------------------------------------
+# Get 1PPS from HAT pin 
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
-
-Any previous gpiopin option (such as bcm2708.pps_gpio_pin) should be
-removed.
 
 You must reboot your SBC for this change to take effect.
 
@@ -493,7 +508,7 @@ The prerequisites not present in a stock Raspbian can be covered with
 this import:
 
 ------------------------------------------------------------------------
-# apt-get install scons ncurses-dev python-dev bc
+# apt-get install git scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
 
 Then do this:
@@ -706,29 +721,20 @@ Prevent apt from installing any systemd like packages in the future (note the st
 === Thin out the system processes on your Pi ===
 
 The Raspbian default is to install a lot of background processes that
-exist to support a graphical desktop. Running headless with Ethernet
-as the only channel to the device, you can remove these in order to
-reduce load variability on the processor.  This will decrease your
-time jitter.  It will also cut your power draw and heat dissipation,
-increasing the Pi's expected lifetime.  Most importantly, it will
-reduce the number of ways for things to go wrong.
+exist to support a graphical desktop. Installing from the Lite image
+eliminates most of these.  This reduces load variability on the
+processor, which will will decrease your time jitter.  It will also
+cut your power draw and heat dissipation, increasing the Pi's expected
+lifetime.  Most importantly, it will reduce the number of ways for
+things to go wrong.
+
+You can strip down a bit further with these commands:
 
 ------------------------------------------------------------------------
-# apt-get -y remove --purge xserver-common
-# apt-get -y remove --purge x11-common
-# apt-get -y remove --purge gnome-icon-theme
-# apt-get -y remove --purge gnome-themes-standard
-# apt-get -y remove --purge penguinspuzzle
-# apt-get -y remove --purge desktop-base
-# apt-get -y remove --purge desktop-file-utils
-# apt-get -y remove --purge hicolor-icon-theme
-# apt-get -y remove --purge raspberrypi-artwork
-# apt-get -y remove --purge omxplayer
 # apt-get -y remove --purge bluez
 # apt-get -y remove --purge triggerhappy
 # apt-get -y autoremove
 # apt-get -y update
-# rm -rf /home/pi/python_games
 ------------------------------------------------------------------------
 
 The resulting configuration is pretty minimal, as you can verify by
@@ -826,57 +832,6 @@ some pointers towards making it work.
 
 We would welcome field reports to complete this recipe.
 
-== Reverting to a stock Raspbian ==
-
-When doing as much hackery on a Pi as we've described, it is wise to
-have a way to revert to a stock Raspbian in case the installation
-goes wrong.  Here's how to do it.
-
-You will need a spare MicroSD card with at least 8GB capacity. You
-will also need a USB MicroSD reader/writer, or one built into a
-computer you have.  We'll describe USB setup under a Debian-derived
-Linux here; device names might be slightly different on other
-variants.
-
-. Download the NOOBS zip file from <<NOOBS>>.
-
-. Do "ls /dev/sd*".  Note which devices exist; they are most likely
-  to be sda (hard drive), sdb (hard drive) and sdc (CD-ROM/DVD).
-
-. Insert the card in the reader and plug the reader into a USB port.
-
-. Do "ls /dev/sd*". You should see an additional device, most likely /dev/sdd.
-  (One way to check this is to do "dmesg tail" and look for a recent
-  device creation.
-
-. If you don't see a new device, do "lsusb" to check what USB devices
-  exist, with the reader first unplugged and then plugged in.  You
-  should see one asdditional USB device line when it's plugged in. If you
-  don't, you have a USB-layer or hardware problem beyond the scope of
-  this HOWTO.
-
-. Format the SD. As root, do "fdisk /dev/sdd" (or substitute whatever
-  new device you found for sdd).  Use 'd' to delete any partitions.
-  Use 'n' to create a new partition, then 'p' and '1' to create a new
-  partition table with one partition (accept the defaults for size and
-  type).  The commands 't' and 'b' set it up as FAT32.  Finally, use
-  'w' to write the partition table.
-
-. Do 'l' to check the partition names.  What you should see is a
-  single partition named for the device with the suffix "1" - most
-  likely, sdd1.
-
-. As root, mount the card. The command "mount /dev/ssd1 /media" will
-  probably be right.  Any empty directory will do as as a mount point, 
-  there is noting magic about "/media".
-
-. Change current directory to the root dictory of the card
-  (e.g."/media") and run "unzip" with the NOOBS zip as argument.
-
-. Unmount the card (e.g. "umount /dev/sdd").
-
-You will now have a card that can be booted in the Pi.
-
 == References ==
 
 [bibliography]
@@ -885,7 +840,10 @@ You will now have a card that can be booted in the Pi.
 
 - [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
-- [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
+- [[RASPBIAN]] https://www.raspberrypi.org/downloads/raspbian/[Raspbian downloads]
+
+- [[[INSTALLATION]]]
+  https://www.raspberrypi.org/documentation/installation/installing-images/linux.md[Installing Operating System Images Under Linux]
 
 - [[[NTPSEC]]] https://www.ntpsec.org/[The NTPsec project]
 
@@ -904,7 +862,7 @@ You will now have a card that can be booted in the Pi.
 
 - [[NMEA-DRIVER]] https://docs.ntpsec.org/latest/driver20.html
 
-- [[[NOOBS]]] https://www.raspberrypi.org/downloads/noobs/[NOOBS]
+- [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
 == Acknwledgememts ==
 
@@ -917,8 +875,6 @@ Phil Salkie.
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
 
 //TO DO:
-// 1. Try installing the Jessie Light image to start headless.
-// 2. Try not modifying /etc/modules
 // SKU 424254
 // http://www.raspberrypiwiki.com/index.php/Raspberry_Pi_Add-On_GPS_HAT_Module
 // http://www.digikey.com/product-detail/en/seiko-instruments/XH414H-IV01E/728-1038-1-ND/1631941?WT.srch=1&gclid=Cj0KEQjwo_y4BRD0nMnfoqqnxtEBEiQAWdA121uytiEWyuT3qkSmZFXC2OVk8SEZOOc6iLZEvuKx3nAaAvgp8P8HAQ#substitute-section
