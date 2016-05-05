@@ -546,7 +546,7 @@ can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
 
-Uninstall the stock NTP and tell apt-get upgrade:
+Uninstall the stock NTP and tell apt-get not to upgrade it:
 
 ------------------------------------------------------------------------
 # apt-get -y remove --purge ntp
@@ -825,10 +825,6 @@ some pointers towards making it work.
 ------------------------------------------------------------------------
 # ./gpsd -n -N -D 5 /dev/ttyS2 /dev/pps0
 ------------------------------------------------------------------------
-
-* The recipe described in the next section for reverting to a stock
-  Raspbian won't work.  The Odroid doesn't run Raspbian, it runs
-  Ubuntu.
 
 We would welcome field reports to complete this recipe.
 
