@@ -359,7 +359,6 @@ Edit the /boot/config.txt file to append these lines:
 ------------------------------------------------------------------------
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
 dtoverlay=pi3-miniuart-bt-overlay
-force_turbo=1
 ------------------------------------------------------------------------
 
 This change restores the behavior of the Pi2 and earlier, in which the
@@ -571,8 +570,8 @@ NMEA and 1PPS support, excluding all other drivers.
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
 $ cd ntpsec
-$ waf configure --refclock=20,22
-$ waf build
+$ ./waf configure --refclock=20,22
+$ ./waf build
 ------------------------------------------------------------------------
 
 Next, create symlinks to the GPS devices to make them easier to refer
@@ -585,7 +584,7 @@ KERNEL=="pps0", OWNER="root", GROUP="tty", MODE="0660", SYMLINK+="gpspps0"
 ------------------------------------------------------------------------
 
 At boot time this will ensure that device aliases /dev/gps0 and
-/dev/gpsps0 exist.  These are special names that NTPsec expects to see
+/dev/gpspp s0 exist.  These are special names that NTPsec expects to see
 when its Generic NMEA drive is active.
 
 According to <<NEVILL>>, "[dhcpcd5] has a nasty habit of interfering where
