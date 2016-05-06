@@ -584,7 +584,7 @@ KERNEL=="pps0", OWNER="root", GROUP="tty", MODE="0660", SYMLINK+="gpspps0"
 ------------------------------------------------------------------------
 
 At boot time this will ensure that device aliases /dev/gps0 and
-/dev/gpspp s0 exist.  These are special names that NTPsec expects to see
+/dev/gpspps0 exist.  These are special names that NTPsec expects to see
 when its Generic NMEA drive is active.
 
 According to <<NEVILL>>, "[dhcpcd5] has a nasty habit of interfering where
@@ -606,8 +606,8 @@ Create your own /etc/ntp.conf with this contents:
 server 127.127.1.0  
 fudge 127.127.1.0 stratum 10
 
-# GPS with PPS enabled
-server 127.127.20.0 mode 17 minpoll 4 maxpoll 4 iburst true prefer  
+i# GPS with PPS enabled - mode 18 means expect 9600bps, use $GPGGA
+server 127.127.20.0 mode 18 minpoll 4 maxpoll 4 iburst true prefer  
 fudge 127.127.20.0 flag1 1 refid GPS
 
 # Internet time servers for sanity
@@ -640,7 +640,7 @@ GPS with PPS enabled::
 The line beginning "server 127.127.20.0" tells it that we have a serial GPS
 receiver on /dev/gps0.
 
-The text "mode 17" tells it to look for $GPRMC messages at a baud of 9600bps.
+The text "mode 18" tells it to look for $GPGGA messages at a baud of 9600bps.
 
 The text "prefer" declares the GPS your favored timeserver.
 
@@ -667,9 +667,12 @@ Internet time servers for sanity::
 
 //FIXME: More to go here.
 
+In /etc/init.d/ntp, comment out these lines
+
 ------------------------------------------------------------------------
-# systemctl enable ntpd
-# timedatectl set-ntp
+if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
+      NTPD_OPTS="$NTPD_OPTS -c /var/lib/ntp/ntp.conf.dhcp"
+fi
 ------------------------------------------------------------------------
 
 == Simplification and optimization ==
@@ -703,19 +706,19 @@ Purge the remnants of systemd and packages that depend on it.
 # apt-get remove --purge --auto-remove systemd
 ------------------------------------------------------------------------
 
-Prevent apt from installing systemd packages in the future.
+Prevent apt from installing systemd packages in the future by
+creating an /etc/apt/preferences.d/systemd that looks like this.
 
 ------------------------------------------------------------------------
-# echo -e 'Package: systemd\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/systemd
+# Prevent apt from installing systemd packages in the future
+Package: systemd
+Pin: release *
+Pin-Priority: -1
+# Prevent apt from installing any systemd like packages in the future
+Package: *systemd*
+Pin: release *
+Pin-Priority: -1
 ------------------------------------------------------------------------
-
-Prevent apt from installing any systemd like packages in the future (note the star before and after systemd)
-
-------------------------------------------------------------------------
-# echo -e '\n\nPackage: *systemd*\nPin: release *\nPin-Priority: -1' >> /etc/apt/preferences.d/systemd
-------------------------------------------------------------------------
-
-//FIXME: Show what /etc/apt/preferences.d/systemd will look like after this.
 
 === Thin out the system processes on your Pi ===
 
