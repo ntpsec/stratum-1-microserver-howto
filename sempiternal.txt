@@ -98,7 +98,7 @@ on one edge of the SBC, such that when fully assembled the SBC and HAT will
 make a neat stack with all four pairs of corner holes vertically aligned.
 
 . Find "north" on the HAT.  It's the edge the GPS module is
-closest to and has a rectagular notch in it.  On the Adafruit HAT,
+closest to and has a rectangular notch in it.  On the Adafruit HAT,
 if you hold up the board so the "north" edge is at the top the
 Adafruit logo will be right-side up.
 
@@ -108,7 +108,7 @@ support the HAT.
 
 . Mate the female side of the detached 40-pin header with the
 40-pin GPIO connector on the east edge of the SBC.  If your HAT
-is presoldered, your boards are now stacked and you skip the next step.
+is pre-soldered, your boards are now stacked and you skip the next step.
 
 . Lay the HAT over the board in such a way that the two sets of 4
 corner holes line up and the header pins poke through a matching 40
@@ -141,7 +141,7 @@ backward-compatible.
 
 The GPIO pins are sometimes referenced by physical pin location on the
 header (1-26 or 1-40), and sometimes as the GPIO line connected to the
-CPU.  This can cause confusion, especially since some kitbuilders use
+CPU.  This can cause confusion, especially since some kit-builders use
 variant GPIO numberings.  All GPIO numbers in this HOWTO reference
 <<PI-PINOUT>>.
 
@@ -220,11 +220,11 @@ Install dcfldd on your host machine:
 ------------------------------------------------------------------------
 
 You can use the older 'dd' for the next step, but dfcldd is better
-about giving you progress messages duting the operation.
+about giving you progress messages during the operation.
 
 Insert an SD card in the reader and plug the reader into a USB port on your host.
 
-Follow the directions at <<INSTALLATION>>, using dfcldd.  Under On a
+Follow the directions at <<INSTALLATION>>, using dfcldd.  On a
 host running Debian or Ubuntu, the device will likely be /dev/sdd and
 your command will look something like:
 
@@ -234,7 +234,7 @@ your command will look something like:
 
 When this command complete, take the card out of the SD reader and
 insert it into your Pi. Make sure your Pi has a live Ethernet cable
-plugged in. Power it up and wait a few seconds, then do this
+plugged in. Power it up and wait about 60 seconds footnote, then do this
 from your host:
 
 ------------------------------------------------------------------------
@@ -267,12 +267,13 @@ who gets access to your network.  Here's how to fix this:
 . On the SBC, create an account for "me" (whatever username you like)
   using 'adduser' run as root.
 
-. On the SBC, add "me" to the sudo group by editing /etc/group (append your
-  username, preceded by a comma, to the "sudo" line; you will
-  need to be root to do this).
-
-. Also, add yourself to the 'dialout' group.  This will make some
+. On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
+  The first is necessary; the second is optional but will make some
   later test steps easier.
++
+------------------------------------------------------------------------
+# usermod -a -G sudo,dialout me
+------------------------------------------------------------------------
 
 . From the host, verify that you can log in via "ssh me@raspberrypi.local"
   and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
@@ -287,7 +288,7 @@ who gets access to your network.  Here's how to fix this:
 . Reboot the SBC. Verify that you can login via ssh from "me" on your host
   machine to "me" on the SBC without giving a password.
 
-. On the SBC, disable root login and password tunnelling. To do
+. On the SBC, disable root login and password tunneling. To do
   this, edit its /etc/ssh/sshd_config file.  Change the
   "PermitRootLogin" and "PasswordAuthentication" lines so the
   second token is "no".
@@ -298,7 +299,7 @@ Call 'sudo raspi-config' on the Pi.
 
 Request 'Expand Filesystem' by keying Return with the select bar on
 that entry.  This will make all the space on the SD above the end of
-your copied OS image avaolable on next reboot.
+your copied OS image available on next reboot.
 
 Request 'Wait for Network at Boot'.  This makes recovery a little
 more convenient if you power up the SBC forgetting to plug in
@@ -338,7 +339,7 @@ use of the SBC anyway.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
-The Pi 3 Raspbian implementors made a design decision on the Raspberry
+The Raspberry Pi Foundation made a design decision on the Raspberry
 Pi 3 that ties the serial baud rate to the CPU clock rate (by
 default).  This was done because the normal lines that fed the serial
 port were used for the built-in Bluetooth. This does not affect any
@@ -371,7 +372,7 @@ dtoverlay and force_turbo lines.
 
 You'll need NTPsec to be able to see the high-precision PPS
 (pulse-per-second) signal from the GPS.  But the serial interface from
-an HAT only supplies TX/RX; the PPS signal is shipped on a different
+a HAT only supplies TX/RX; the PPS signal is shipped on a different
 pin of the GPIO connector.
 
 The RX/TX signals are always expected on the same two pins of the GPIO
@@ -431,6 +432,7 @@ intervals for the fix LED; "on" means the device does not blink.
 //FIXME: Fill in missing blink intervals.
 //FIXME: Verify SKU 424254 info
 
+.Blink interval in seconds
 [width="50%",frame="topbot",options="header"]
 |=======================================================================
 | HAT type                        | No fix |  Fix
