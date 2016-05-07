@@ -1,11 +1,13 @@
-== SemPiTernal: A Raspberry Pi Stratum 1 timeserver build ==
-:description: Building and configuring a tiny Stratum 1 timeserver with RasPi
-:keywords: Raspberry Pi, odroid, NTP, NTPsec, time service
+== Stratum-1-Microserver HOWTO ==
+:description: Building and configuring a tiny Stratum 1 timeserver
+:keywords: Raspberry Pi, Odroid, BeagleBone, NTP, NTPsec, time service
 :adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat:http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-version 0.5
+version 0.6
+
+THIS IS AN INCOMPLETE DRAFT
 
 == Introduction ==
 
@@ -179,7 +181,6 @@ more on your SBC.  A '#' before a command line means you need to be
 root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
 "sudo bash" or (after you haves set a root password) "su -".
-
 
 == Early configuration ==
 
@@ -496,14 +497,10 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 
 == Live-test the GPS ==
 
-Now install GPSD.  You won't use this for production, as we plan to
-direct-connect NTPsec to the GPS, but its diagnostic tools (especially
-gpsmon) are useful for sanity-checking the output of the HAT.
-
-It's best to clone the GPSD repository and build from that rather
-than installing the Raspbian package.  This both guarantees you
-the latest fixes and avoids installing a start-on-boot script
-that you don't want in this build.
+Now build GPSD.  It's best to clone the GPSD repository and build
+from that rather than installing the Raspbian package.  This both
+guarantees you the latest fixes and avoids installing a start-on-boot
+script that you don't want in this build.
 
 The prerequisites not present in a stock Raspbian can be covered with
 this import:
@@ -517,8 +514,12 @@ Then do this:
 ------------------------------------------------------------------------
 $ git clone git://git.savannah.nongnu.org/gpsd.git
 $ cd gpsd
-$ scons
+$ scons timeservice=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1
 ------------------------------------------------------------------------
+
+This builds gpsd in a minimal, fixed-speed timeserver mode with only
+the driver for the Adafruit HAT on it.  If you're using the Uputronics
+or SKU 424254, use ublox=yes rather than mtk3301=yes.
 
 Then run this: 
 
@@ -831,6 +832,11 @@ some pointers towards making it work.
 ------------------------------------------------------------------------
 
 We would welcome field reports to complete this recipe.
+
+== Future Direction ==
+
+Future versions of this HOWTO will broaden the hardware base to
+include some BeagleBone variant.
 
 == References ==
 
