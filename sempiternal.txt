@@ -657,7 +657,7 @@ Internet time servers::
    but they will be monitored so in the next step we can tune our
    Stratum 1 configuration to track their mean time.
 
-=== Test and tune NTPsec ===
+=== Smoke-test NTPsec ===
 
 Turn off the default ntpd service running on your SBC
 
@@ -689,6 +689,38 @@ You're hoping for a display like the above, with two local devices and
 four pool sources.  A nonzero "reach" column on a source line
 indicates that your ntp is getting time notifications from that
 source.
+
+If the value under "reach" for the SHM lines remains zero, check again that
+gpsd is running and ntpshmmon reports fix lines.
+
+=== Installation and boot-time setup ===
+
+Uninstall the stock NTP:
+
+------------------------------------------------------------------------
+# apt-get -y remove --purge ntp
+------------------------------------------------------------------------
+
+Change to the directory your gpsd and ntpsec repository clones live and
+install both suites:
+
+------------------------------------------------------------------------
+# cd gpsd; scons install
+# cd ../ntpsec; ./waf install; cp ntp.conf /etc
+------------------------------------------------------------------------
+
+Add these lines to /etc/rc.local, before any final "exit 0"
+
+------------------------------------------------------------------------
+# Time service customization
+stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
+gpsd /dev/ttyAMA0
+sleep 2
+ntpd -g
+------------------------------------------------------------------------
+
+Reboot.  Check that gpsd and ntpd are running, and use ntp -p to
+verify that uou can see time samples coming in.
 
 == Simplification and optimization ==
 
