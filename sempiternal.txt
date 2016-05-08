@@ -82,11 +82,11 @@ You will need:
   felines.  Any case with a 30mm or greater exterior height should be
   able to hold both SBC and HAT.
 
-* (Optional) 2 hex standoffs, .625" with M2.5 threading, 2 compatible
-  nuts, 2 compatible screws.  These are the standard spacers used in
-  PC cases; if you keep the small parts from old PCs around you'll
-  have a dozen of them.  Adafruit sells the standoffs and nuts
-  <<STANDOFFS>> but doesn't include the screws.
+* (Optional) 2 hex standoffs, .625" with M2.5 threading, 4 compatible
+  screws.  Adafruit sells these <<STANDOFFS>>. They are the very
+  similar to standard spacers used in PC cases; if you keep the small
+  parts from old PCs around you'll have a dozen of them and probably
+  the screws to match.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.
@@ -94,6 +94,10 @@ board and a 40-pin header. The SKU 424254 comes presoldered.
 (HATs are shipped as parts almost certainly to evade a regulatory
 requirement for FCC conformance testing to RF emission standards,
 which is expensive and would have added to the unit cost.)
+
+Note that if you're going to use a CR2032 with the Uputronics, a
+jumper on ther board needs to be desoldered.  It lives in a white box
+outline near the + pole of the battery cradle.
 
 The header on the assembled HAT will fit down over the double row of pins
 on one edge of the SBC, such that when fully assembled the SBC and HAT will
@@ -104,7 +108,7 @@ closest to and has a rectangular notch in it.  On the Adafruit HAT,
 if you hold up the board so the "north" edge is at the top the
 Adafruit logo will be right-side up.
 
-. If you have them, bolt the the two hex standoffs to the corner
+. If you have them, screw the the two hex standoffs to the corner
 holes on the west side of the SBC, female end up.  These will
 support the HAT.
 
@@ -125,9 +129,11 @@ protect the headers and pins from mechanical stress if the
 assembly is dropped or has something sat on it.
 
 . Optional: put the combination into a case.  Anything sold as a
-"Raspberry Pi" case ought to do as long as it is flat-topped with an
-exterior height of at least 30mm.  The Raspberry Pi Foundation Case
-qualifies, but for functional reasons we recommend a transparent case.
+"Raspberry Pi" case ought to do, because a single HAT doen't project
+above the USB & Ethernet connectors on the SBC. The Raspberry Pi
+Foundation Case qualifies, but for functional reasons we recommend a
+transparent case.  The Adafruit 2258 case <<2258>>, for example,
+should do nicely.
 
 == Understanding the GPIO connector ==
 
@@ -843,6 +849,8 @@ include some BeagleBone variant.
 [bibliography]
 
 - [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
+
+- [[2258]] https://www.adafruit.com/product/2258
 
 - [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
