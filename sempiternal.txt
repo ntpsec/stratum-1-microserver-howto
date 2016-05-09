@@ -327,7 +327,8 @@ that it is very vulnerable to being attacked and exploited by anyone
 who gets access to your network.  Here's how to fix this:
 
 . On the SBC, create an account for "me" (whatever username you like)
-  using 'adduser' run as root.
+  using 'adduser' run as root.  The restr of these instructions will
+  call this your "build account".
 
 . On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
@@ -513,8 +514,16 @@ device is alive and doing something reasonably sane.
 To test 1PPS, use ppstest from the pps-tools package.  Note,
 this will produce a false negative if the GPS has no fix.
 
+If you are doing these steps by hand rather than with ckockmaker.py,
+prepare with this step:
+
 ------------------------------------------------------------------------
 # apt-get install pps-tools
+------------------------------------------------------------------------
+
+Then run this test:
+
+------------------------------------------------------------------------
 # ppstest /dev/pps0
 ------------------------------------------------------------------------
 
@@ -528,19 +537,23 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 
 == Live-test the GPS ==
 
-Now build GPSD.  It's best to clone the GPSD repository and build
+Now exit root, returning to your build account, and build GPSD.  If
+you are using clockmaker.py, "./clockmaker.py --build" will automate
+the build steps (but not the test procedures).
+
+It's best to clone the GPSD repository and build
 from that rather than installing the Raspbian package.  This both
 guarantees you the latest fixes and avoids installing a start-on-boot
 script that you don't want in this build.
 
 The prerequisites not present in a stock Raspbian can be covered with
-this import:
+this import {--config}:
 
 ------------------------------------------------------------------------
 # apt-get install git scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
 
-Then do this:
+Then do this {--build}:
 
 ------------------------------------------------------------------------
 $ git clone git://git.savannah.nongnu.org/gpsd.git
@@ -552,7 +565,7 @@ This builds gpsd in a minimal, fixed-speed timeserver mode with only
 the driver for the Adafruit HAT on it.  If you're using the Uputronics
 or SKU 424254, use ublox=yes rather than mtk3301=yes.
 
-Then run this: 
+Then run this from the gpsd directory: 
 
 ------------------------------------------------------------------------
 # ./gpsmon /dev/ttyAMA0
@@ -573,7 +586,8 @@ should see time sample lines until you interrupt, looking something
 like this:
 
 ------------------------------------------------------------------------
-$ ./ntpshmmon
+# ./gpsd /dev/ttyAMA0
+# ./ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
 sample NTP0 1462725362.567068197 1462725362.475583880 1462725362.000000000 0  -1
@@ -590,7 +604,7 @@ lines, you forgot to go root before starting gpsd.
 
 Having run this step, you now know that both data and 1PPS from the
 HAT are fully visible on your SBC and gpsd collects them and prodes
-them over its shard-memory interface.  You can now proceed with
+them over its shared-memory interface.  You can now proceed with
 specializing your SBC to be a time server.
 
 (If you are already familar with ntpd and wonder why this recipe uses
@@ -608,15 +622,15 @@ can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
 
-Install the build prerequisites
+Install the build prerequisites {--config}:
 
 ------------------------------------------------------------------------
 # apt-get install bison libevent-dev libcap-dev libssl-dev
 # apt-get install libreadline-dev
 ------------------------------------------------------------------------
 
-Build NTPsec.  The --refclock option says to include only shared-memory
-refclock support, excluding all other drivers.
+Build NTPsec {--build}.  The --refclock option says to include only
+shared-memory refclock support, excluding all other drivers.
 
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
@@ -626,8 +640,8 @@ $ ./waf build
 ------------------------------------------------------------------------
 
 Create your own NTP configuration with this contents as ntp.conf, but
-don't copy it to /etc yet.  We're going to test this configuration in
-place before installing it.
+don't copy it to /etc yet {--build}}.  We're going to test this
+configuration in place before installing it.
 
 ------------------------------------------------------------------------
 # /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
@@ -687,13 +701,13 @@ Turn off the default ntpd service running on your SBC
 Run your newly built ntpd, telling it to step time if required:
 
 ------------------------------------------------------------------------
-# build/main/ntpd/ntpd -g -c ntp.conf
+# ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
 Run build/main/ntpq/ntpq -p and look at what it returns. Be patient,
 as it can sometimes take a few seconds to complete.
 ------------------------------------------------------------------------
-# build/main/ntpq/ntpq -p
+# ntpsec/build/main/ntpq/ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
 +SHM(0)          .GPS.            0 l   58   64    3    0.000  -421.25 373.969
