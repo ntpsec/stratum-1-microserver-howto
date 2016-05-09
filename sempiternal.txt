@@ -188,7 +188,29 @@ root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
 "sudo bash" or (after you haves set a root password) "su -".
 
-== Early configuration ==
+== Using clockmaker.py ==
+
+Most of these instructions do not have to be done by hand.  You can
+download link::clockmaker.py[clockmaker.py], a Python script which
+does much of this recipe for you. Herre's how to use it:
+
+1. Once you have a build account set up on the SBC (which you will
+   do as an early step) copy clockmaker.py to its home directory.
+
+2. Go root.  Run "clockmaker.py --config" . This will do most of the
+   tricky OS and hardware configuration; also system software
+   downloads and prerequisites for the timeserver software
+
+3. Leave root. Do "clockmaker.py --build".  This will clone and build the
+   special timeserver software.
+
+The clockmaker.py script is intelligent about not redoing steps it has
+already done; it is safe to run each stage multiple times.
+
+In the recipe that follows, steps marked "{--config}" or "{--build}"
+are parts clockmaker.py will do for you if you run it.  It is
+recommended that you read the steps to understand the process, then
+use clockmaker.py to avoid most of the typing.
 
 === Making a bootable SD ===
 
@@ -265,42 +287,10 @@ a shell prompt.
 
 The hardest part is now done.
 
-=== Secure the machine ===
-
-The fact that your SBC has a known default name and default user means
-that it is very vulnerable to being attacked and exploited by anyone
-who gets access to your network.  Here's how to fix this:
-
-. On the SBC, create an account for "me" (whatever username you like)
-  using 'adduser' run as root.
-
-. On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
-  The first is necessary; the second is optional but will make some
-  later test steps easier.
-+
-------------------------------------------------------------------------
-# usermod -a -G sudo,dialout me
-------------------------------------------------------------------------
-
-. From the host, verify that you can log in via "ssh me@raspberrypi.local"
-  and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
-
-. On the SBC, disable the 'pi' login ("deluser pi" as root).
-
-. From the host, export an ssh key from the "me" account to the
-  SBC. If you don't understand this instruction, search for "ssh
-  tutorial on the web and learn.  The
-  http://www.catb.org/~esr/sshexport/[sshexport] tool may be useful.
-
-. Reboot the SBC. Verify that you can login via ssh from "me" on your host
-  machine to "me" on the SBC without giving a password.
-
-. On the SBC, disable root login and password tunneling. To do
-  this, edit its /etc/ssh/sshd_config file.  Change the
-  "PermitRootLogin" and "PasswordAuthentication" lines so the
-  second token is "no".
-
 === Initial configuration ===
+
+To change the machine's hostname, edit '/etc/hostname'.  You will
+need to be root to do this.
 
 Call 'sudo raspi-config' on the Pi.  
 
@@ -327,12 +317,50 @@ uses, and it's easiest to disable from the GUI configurator.  This
 change is easily reversed until and unless you strip out the GUI
 later.
 
-To change the machine's hostname, edit '/etc/hostname'.  You will
-need to be root to do this.
+You will be asked if you want to reboot afterconfiguring.  Tell it
+yes, then log back in using the new hostname followed by ".local".
+
+=== Secure the machine ===
+
+The fact that your SBC has a known default name and default user means
+that it is very vulnerable to being attacked and exploited by anyone
+who gets access to your network.  Here's how to fix this:
+
+. On the SBC, create an account for "me" (whatever username you like)
+  using 'adduser' run as root.
+
+. On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
+  The first is necessary; the second is optional but will make some
+  later test steps easier.
++
+------------------------------------------------------------------------
+# usermod -a -G sudo,dialout me
+------------------------------------------------------------------------
+
+. From the host, verify that you can log in via "ssh me@raspberrypi.local"
+  and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
+
+. From the host, export an ssh key from the "me" account to the
+  SBC. If you don't understand this instruction, search for "ssh
+  tutorial on the web and learn.  The
+  http://www.catb.org/~esr/sshexport/[sshexport] tool may be useful.
+
+. Reboot the SBC. Verify that you can login via ssh from "me" on your host
+  machine to "me" on the SBC without giving a password.
+
+At this point the steps you can automate with clockmaker.py begin.  Go root
+on the SBC and run "./clockmaker.py --config".
+
+. {--config} On the SBC, disable the 'pi' login ("deluser pi" as root).  
+
+. {--config} On the SBC, disable root login and password tunneling. To do
+  this, edit its /etc/ssh/sshd_config file.  Change the
+  "PermitRootLogin" and "PasswordAuthentication" lines so the
+  second token is "no".
 
 === Fully update Your OS ===
 
-Fully update the Linux on your SBC.  The easiest way to do this is
+{--config} Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
 
 ------------------------------------------------------------------------
@@ -357,12 +385,7 @@ disable it and remap the devices.  Our instructions come from
 <<DOREY>>, which explains the problem in more detail.  We don't use
 some of his steps because this build is designed to run headless.
 
-Check that you have the file
-/boot/overlay/pi3-miniuart-bt-overlay.dtb; if you don't, you can
-http://www.briandorey.com/docs/Raspberry-Pi-3-UART-to-gpio-workaround/pi3-miniuart-bt-overlay.zip[download]
-it.
-
-Edit the /boot/config.txt file to append these lines:
+{--config} Edit the /boot/config.txt file to append these lines:
 
 ------------------------------------------------------------------------
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
@@ -413,7 +436,7 @@ The procedure for declaring the GPIO pin varies by Raspbian version.
 We only give the formula for the current Raspbian here; you can
 find details about older versions at <<TAYLOR>>;
 
-Edit /boot/config.txt to contain these options, replacing '4' with
+{--config} Edit /boot/config.txt to contain these options, replacing '4' with
 the logical pin number for your HAT if it's not an Adafruit:
 
 ------------------------------------------------------------------------
@@ -421,7 +444,9 @@ the logical pin number for your HAT if it's not an Adafruit:
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
 
-You must reboot your SBC for this change to take effect.
+You must reboot your SBC for this change to take effect.  The
+clockmaker.py script will do this for you, but not before 
+installing some packages need for the next step.
 
 == Smoke-test the GPS/HAT combination ==
 
@@ -582,12 +607,6 @@ client instance, not a server.  It doesn't do 1PPS, and therefore
 can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
 lighter and more securely and can do more accurate time stepping.
-
-First, clone the NTPsec repository:
-
-------------------------------------------------------------------------
-$ git clone https://gitlab.com/NTPsec/ntpsec.git
-------------------------------------------------------------------------
 
 Install the build prerequisites
 
