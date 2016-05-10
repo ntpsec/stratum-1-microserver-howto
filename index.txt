@@ -323,8 +323,12 @@ later.
 Make a link named /dev/gps0 to the device the GS wull use {--config}.
 Later on this will make some procedures easier to read.
 
+Next, create a symlink to the GPS device to make it easier to refer
+to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
+accomplish this {--config}:
+
 ------------------------------------------------------------------------
-# ln -sf /dev/ttyAMA0 /dev/gps0
+KERNEL=="ttyAMA0", SYMLINK+="gps0"
 ------------------------------------------------------------------------
 
 You will be asked if you want to reboot after configuring.  Tell it

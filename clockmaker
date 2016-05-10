@@ -82,10 +82,6 @@ def config():
     else:
         print("Default login has been removed.")
 
-    print("Linking /dev/gps to %s" % gpsdev)
-    os.system("ln -sf %s /dev/gps" % gpsdev)
-
-
     rp = open("/etc/ssh/sshd_config", "r")
     wp = open("/etc/ssh/sshd_config-new", "w")
     modified = False
@@ -167,6 +163,12 @@ dtoverlay=pps-gpio,gpiopin=%s
             with open(bc, "a") as ap:
                 ap.write(gpio % pin)
             reboot_required = True
+        if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
+            print("")
+            print("Creating /dev/gps symlink rule")
+            with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
+                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gps0"')
+                reboot_required = True
 
         print("")
 
