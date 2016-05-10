@@ -650,8 +650,8 @@ configuration in place before installing it.
 server 127.127.28.0
 fudge 127.127.28.0 refid GPS
 
-# GPS PPS reference (NTP1)
-server 127.127.28.1 time2 0.0 prefer
+# GPS PPS reference (NTP1) with fudge specific to Raspberry Pi.
+server 127.127.28.1 time2 0.480 prefer
 fudge 127.127.28.1 refid PPS
 
 # Internet time servers
