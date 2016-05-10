@@ -18,7 +18,8 @@ try:
 except NameError:
     my_input = input
 
-# If this changes, the corresponding Makefile declration must as well.
+# If this changes, the corresponding Makefile declaration and asciidoc macro
+# must as well.
 webfaq = "http://www.catb.org/esr/faqs/stratum-1-microserver-howto/"
 
 # Map hardware revision numbers to Raspeberry Pi versions

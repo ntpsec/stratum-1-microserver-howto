@@ -1,11 +1,12 @@
 .SUFFIXES: .html .asc .txt .1
 
-# If this changes, the corresponding clockmaker.py declaration must as well.
+# If this changes, the corresponding clockmaker declaration and asciidov macro
+# must as well.
 HOSTDIR = esr@login.ibiblio.org:/public/html/catb/esr/faqs/stratum-1-microserver-howto
 
 all: index.html
 
-SNIPPETS = $(shell ls *.py) ntp.conf
+SNIPPETS = clockmaker ntp.conf
 index.html: index.txt $(SNIPPETS)
 	asciidoc index.txt
 

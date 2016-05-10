@@ -1,6 +1,7 @@
 == Stratum-1-Microserver HOWTO ==
 :description: Building and configuring a tiny Stratum 1 timeserver
 :keywords: Raspberry Pi, Odroid, BeagleBone, NTP, NTPsec, time service
+:home: http://www.catb.org/esr/faqs/stratum-1-microserver-howto/
 :adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat:http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
@@ -188,35 +189,37 @@ root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
 "sudo bash" or (after you haves set a root password) "su -".
 
-== Using clockmaker.py ==
+== Using clockmaker ==
 
 Most of these instructions do not have to be done by hand.  You can
-download link::clockmaker.py[clockmaker.py], a Python script which
+download link:clockmaker[clockmaker], a Python script which
 does much of this recipe for you. Herre's how to use it:
 
 1. Once you have a build account set up on the SBC (which you will
-   do as an early step) copy clockmaker.py to its home directory.
+   do as an early step) copy clockmaker to its home directory with
+   this command: "wget {home}clockmaker"
 
-2. Go root.  Run "clockmaker.py --config" . This will do most of the
+2. Go root.  Run "clockmaker --config" . This will do most of the
    tricky OS and hardware configuration; also system software
    downloads and prerequisites for the timeserver software
 
-3. Leave root. Do "clockmaker.py --build".  This will clone and build the
+3. Leave root. Do "clockmaker --build".  This will clone and build the
    special timeserver software.
 
-The clockmaker.py script is intelligent about not redoing steps it has
-already done; it is safe to run each stage multiple times.
+The clockmaker script is intelligent about not redoing steps it has
+already done; it is safe to run each stage multiple times.  Redoing
+the --build steff re-pulls from the software repositories.
 
 In the recipe that follows, steps marked "{--config}" or "{--build}"
-are parts clockmaker.py will do for you if you run it.  It is
+are parts clockmaker will do for you if you run it.  It is
 recommended that you read the steps to understand the process, then
-use clockmaker.py to avoid most of the typing.
+use clockmaker to avoid most of the typing.
 
 === Making a bootable SD ===
 
 Download the Raspbian Lite image zip file from <<RASPBIAN>> to your
 host.  The link will be named 'raspbian_lite_latest'.  The actual file
-will be named something like '2016-03-18-raspbian-jessie-lite.img',
+will be named something like '2016-03-18-raspbian-jessie-lite.zip',
 though probably with a later date.
 
 Use sha1sum to verify the correctness of the image.  Something like
@@ -239,7 +242,7 @@ of steps in removing unnecessary desktop software.
 Unzip it to get an img file:
 
 ------------------------------------------------------------------------
-$ sha1sum 2016-03-18-raspbian-jessie-lite.zip
+$ unzip 2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
 Install dcfldd on your host machine:
@@ -349,8 +352,8 @@ who gets access to your network.  Here's how to fix this:
 . Reboot the SBC. Verify that you can login via ssh from "me" on your host
   machine to "me" on the SBC without giving a password.
 
-At this point the steps you can automate with clockmaker.py begin.  Go root
-on the SBC and run "./clockmaker.py --config".
+At this point the steps you can automate with clockmaker begin.  Go root
+on the SBC and run "./clockmaker --config".
 
 . {--config} On the SBC, disable the 'pi' login ("deluser pi" as root).  
 
@@ -446,7 +449,7 @@ dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
 
 You must reboot your SBC for this change to take effect.  The
-clockmaker.py script will do this for you, but not before 
+clockmaker script will do this for you, but not before 
 installing some packages need for the next step.
 
 == Smoke-test the GPS/HAT combination ==
@@ -538,7 +541,7 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 == Live-test the GPS ==
 
 Now exit root, returning to your build account, and build GPSD.  If
-you are using clockmaker.py, "./clockmaker.py --build" will automate
+you are using clockmaker, "./clockmaker --build" will automate
 the build steps (but not the test procedures).
 
 It's best to clone the GPSD repository and build
@@ -603,16 +606,9 @@ time-service mode and your GPS has a fix.  If you see only "NTP2"
 lines, you forgot to go root before starting gpsd.
 
 Having run this step, you now know that both data and 1PPS from the
-HAT are fully visible on your SBC and gpsd collects them and prodes
+HAT are fully visible on your SBC and gpsd collects them and provides
 them over its shared-memory interface.  You can now proceed with
 specializing your SBC to be a time server.
-
-(If you are already familar with ntpd and wonder why this recipe uses
-gpsd rather than ntpd's native reflock 20 GPS driver, the answer is
-this: when refclock 20 is configured to use 1PPS, it mixes in-band
-time data with 1PPS in a way that causes it to behave badly, and
-possibly get rejected as a falseticker, when 1PPS is only occasionally
-available.)
 
 == Build and configure NTPsec ==
 
