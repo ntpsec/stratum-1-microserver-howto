@@ -18,7 +18,7 @@ try:
 except NameError:
     my_input = input
 
-# If this changes, the corresponding Makefile declrationm must as well.
+# If this changes, the corresponding Makefile declration must as well.
 webfaq = "http://www.catb.org/esr/faqs/stratum-1-microserver-howto/"
 
 # Map hardware revision numbers to Raspeberry Pi versions
@@ -183,57 +183,24 @@ def build():
         print("This function should not run as root.")
         raise SystemExit(0)
 
-    builds = 0
-
     if not os.path.isdir("gpsd"):
         os.system("git clone git://git.savannah.nongnu.org/gpsd.git")
-        os.chdir("gpsd")
-        os.system("scons timeservice=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1")
-        os.chdir("..")
-        builds += 1
+    else:
+        os.system("(chdir gpsd; git pull)")
+    os.chdir("gpsd")
+    os.system("scons timeservice=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1")
+    os.chdir("..")
 
     if not os.path.isdir("ntpsec"):
         os.system("git clone https://gitlab.com/NTPsec/ntpsec.git")
-        os.chdir("ntpsec")
-        os.system("./waf configure --refclock=28")
-        os.system("./waf build")
-        os.chdir("..")
-        builds += 1
+    else:
+        os.system("(chdir ntpsec; git pull)")
+    os.chdir("ntpsec")
+    os.system("./waf configure --refclock=28")
+    os.system("./waf build")
+    os.chdir("..")
 
-    localconf = """\
-# /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
-
-# GPS Serial data reference (NTP0)
-server 127.127.28.0
-fudge 127.127.28.0 refid GPS
-
-# GPS PPS reference (NTP1)
-server 127.127.28.1 time2 0.0 prefer
-fudge 127.127.28.1 refid PPS
-
-# Internet time servers
-server 0.pool.ntp.org iburst noselect
-server 1.pool.ntp.org iburst noselect
-server 2.pool.ntp.org iburst noselect
-server 3.pool.ntp.org iburst noselect
-
-# By default, exchange time with everybody, but don't allow configuration.
-restrict default kod nomodify notrap nopeer noquery  
-restrict -6 default kod nomodify notrap nopeer noquery
-
-# Local users may interrogate the ntp server more closely.
-restrict 127.0.0.1  
-restrict -6 ::1
-
-# Drift file etc.
-driftfile /var/lib/ntp/ntp.drift
-"""
-    if not os.path.exists("ntp.conf"):
-        os.system("wget %s/ntp.conf" % webfaq)
-        builds += 1
-
-    if builds == 0:
-        print("All components are built.")
+    os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config", "--build"):

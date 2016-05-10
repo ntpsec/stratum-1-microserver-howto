@@ -63,7 +63,7 @@ You will need:
 | HAT type                                 | Battery | Build status
 | {adahat}[Adafruit GPS HAT]               | CR1220  | Tested
 | {upuhat}[Uputronics GPS Expansion Board] | CR2032  | Untested
-| {dxhat}SKU 424254                        |    -    | Untested
+| {dxhat}[SKU 424254]                      |    -    | Untested
 |=======================================================================
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
