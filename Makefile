@@ -1,6 +1,7 @@
 .SUFFIXES: .html .asc .txt .1
 
-HOSTDIR = esr@login.ibiblio.org:/public/html/catb/esr/faqs/
+# If this changes, the corresponding clockmaker.py declarationm must as well.
+HOSTDIR = esr@login.ibiblio.org:/public/html/catb/esr/faqs/stratum-1-microserver-howto
 
 all: index.html
 
@@ -12,7 +13,7 @@ MANIFEST = index.html $(SNIPPETS)
 manifest:
 	@echo $(MANIFEST)
 
-LANDING = $(HOSTDIR)/index
+LANDING = $(HOSTDIR)
 upload: index.html
 	scp -q $(SNIPPETS) $(LANDING)
 	scp -q index.html $(LANDING)/index.html

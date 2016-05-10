@@ -18,6 +18,9 @@ try:
 except NameError:
     my_input = input
 
+# If this changes, the corresponding Makefile declrationm must as well.
+webfaq = "http://www.catb.org/esr/faqs/stratum-1-microserver-howto/"
+
 # Map hardware revision numbers to Raspeberry Pi versions
 version_dict = {
     "0002" : "Model B Revision 1.0",
@@ -226,8 +229,7 @@ restrict -6 ::1
 driftfile /var/lib/ntp/ntp.drift
 """
     if not os.path.exists("ntp.conf"):
-        with open("ntp.conf", "w") as wp:
-            wp.write(localconf)
+        os.system("wget %s/ntp.conf" % webfaq)
         builds += 1
 
     if builds == 0:

@@ -644,32 +644,7 @@ don't copy it to /etc yet {--build}}.  We're going to test this
 configuration in place before installing it.
 
 ------------------------------------------------------------------------
-# /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
-
-# GPS Serial data reference (NTP0)
-server 127.127.28.0
-fudge 127.127.28.0 refid GPS
-
-# GPS PPS reference (NTP1) with fudge specific to Raspberry Pi.
-server 127.127.28.1 time2 0.480 prefer
-fudge 127.127.28.1 refid PPS
-
-# Internet time servers
-server 0.pool.ntp.org iburst noselect
-server 1.pool.ntp.org iburst noselect
-server 2.pool.ntp.org iburst noselect
-server 3.pool.ntp.org iburst noselect
-
-# By default, exchange time with everybody, but don't allow configuration.
-restrict default kod nomodify notrap nopeer noquery  
-restrict -6 default kod nomodify notrap nopeer noquery
-
-# Local users may interrogate the ntp server more closely.
-restrict 127.0.0.1  
-restrict -6 ::1
-
-# Drift file etc.
-driftfile /var/lib/ntp/ntp.drift
+include::ntp.conf[]
 ------------------------------------------------------------------------
 
 Here's what the parts mean:
