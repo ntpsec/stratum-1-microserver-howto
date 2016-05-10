@@ -714,7 +714,7 @@ gpsd is running and ntpshmmon reports fix lines.
 
 === Installation and boot-time setup ===
 
-Uninstall the stock NTP:
+Uninstall the stock NTP {--install}:
 
 ------------------------------------------------------------------------
 # apt-get -y remove --purge ntp
@@ -728,7 +728,7 @@ install both suites:
 # cd ../ntpsec; ./waf install; cp ntp.conf /etc
 ------------------------------------------------------------------------
 
-Add these lines to /etc/rc.local, before any final "exit 0"
+Add these lines to /etc/rc.local, before any final "exit 0" {--install}
 
 ------------------------------------------------------------------------
 # Time service customization
@@ -738,53 +738,10 @@ sleep 2
 ntpd -g
 ------------------------------------------------------------------------
 
-Reboot.  Check that gpsd and ntpd are running, and use ntp -p to
+Reboot.  Check that gpsd and ntpd are running, and use ntpq -p to
 verify that uou can see time samples coming in.
 
 == Simplification and optimization ==
-
-=== On Jessie: uninstall systemd ===
-
-If you are running on Raspbian Jessie, an optional but recommended
-step is to uninstall systemd.  It is a CPU hog (not just on the Pi;
-similar problems have been reported across many architectures) and a
-complexity sinkhole. The things that have it as a dependency are
-things you don't want on a headless NTP server.
-
-Note that if you do this you may lose the ability to upgrade from
-jessie to the upcoming stretch release, and might need to rebuild your
-image from scratch as a result.
-
-(Our instructions are based on <<NO-SYSTEMD>>)
-
-First, pull in the core of sysvinit, preserving the inittab that
-systemd generated. Then reboot.
-
-------------------------------------------------------------------------
-# apt-get install sysvinit-core sysvinit-utils
-# cp /usr/share/sysvinit/inittab /etc/inittab
-# reboot
-------------------------------------------------------------------------
-
-Purge the remnants of systemd and packages that depend on it.
-
-------------------------------------------------------------------------
-# apt-get remove --purge --auto-remove systemd
-------------------------------------------------------------------------
-
-Prevent apt from installing systemd packages in the future by
-creating an /etc/apt/preferences.d/systemd that looks like this.
-
-------------------------------------------------------------------------
-# Prevent apt from installing systemd packages in the future
-Package: systemd
-Pin: release *
-Pin-Priority: -1
-# Prevent apt from installing any systemd like packages in the future
-Package: *systemd*
-Pin: release *
-Pin-Priority: -1
-------------------------------------------------------------------------
 
 === Thin out the system processes on your Pi ===
 
