@@ -320,7 +320,14 @@ uses, and it's easiest to disable from the GUI configurator.  This
 change is easily reversed until and unless you strip out the GUI
 later.
 
-You will be asked if you want to reboot afterconfiguring.  Tell it
+Make a link named /dev/gps0 to the device the GS wull use {--config}.
+Later on this will make some procedures easier to read.
+
+------------------------------------------------------------------------
+# ln -sf /dev/ttyAMA0 /dev/gps0
+------------------------------------------------------------------------
+
+You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
 
 === Secure the machine ===
@@ -489,8 +496,8 @@ seem longer than it is first time: have patience.
 To test that you can read data from the device, do this:
 
 ------------------------------------------------------------------------
-$ stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/ttyAMA0
+$ stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/gps0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
@@ -571,7 +578,7 @@ or SKU 424254, use ublox=yes rather than mtk3301=yes.
 Then run this from the gpsd directory: 
 
 ------------------------------------------------------------------------
-# ./gpsmon /dev/ttyAMA0
+# ./gpsmon /dev/gps0
 ------------------------------------------------------------------------
 
 Running gpsmon should give you a nice panel display with a scrolling
@@ -589,7 +596,7 @@ should see time sample lines until you interrupt, looking something
 like this:
 
 ------------------------------------------------------------------------
-# ./gpsd /dev/ttyAMA0
+# ./gpsd /dev/gps0
 # ./ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
@@ -636,7 +643,7 @@ $ ./waf build
 ------------------------------------------------------------------------
 
 Create your own NTP configuration with this contents as ntp.conf, but
-don't copy it to /etc yet {--build}}.  We're going to test this
+don't copy it to /etc yet {--build}.  We're going to test this
 configuration in place before installing it.
 
 ------------------------------------------------------------------------
@@ -656,10 +663,8 @@ GPS Serial data reference (NTP0)::
    because they come from the GPS's 1PPS.
 
 Internet time servers::
-   This section specifies some NTP pool servers to act as a sanity
-   check for our GPS time. These won't actually be used for time sync,
-   but they will be monitored so in the next step we can tune our
-   Stratum 1 configuration to track their mean time.
+   This section specifies some NTP servers to act as a sanity
+   check for our GPS time.
 
 === Smoke-test NTPsec ===
 
@@ -669,13 +674,20 @@ Turn off the default ntpd service running on your SBC
 # systemctl stop ntp
 ------------------------------------------------------------------------
 
+Run gpsd, telling it to look at the GPS device
+
+------------------------------------------------------------------------
+# gpsd/gpsd /dev/gps0
+------------------------------------------------------------------------
+
+
 Run your newly built ntpd, telling it to step time if required:
 
 ------------------------------------------------------------------------
 # ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
-Run build/main/ntpq/ntpq -p and look at what it returns. Be patient,
+Run ntpsec/build/main/ntpq/ntpq -p and look at what it returns. Be patient,
 as it can sometimes take a few seconds to complete.
 ------------------------------------------------------------------------
 # ntpsec/build/main/ntpq/ntpq -p
@@ -717,8 +729,8 @@ Add these lines to /etc/rc.local, before any final "exit 0"
 
 ------------------------------------------------------------------------
 # Time service customization
-stty -F /dev/ttyAMA0 raw 9600 cs8 clocal -cstopb
-gpsd /dev/ttyAMA0
+stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
+gpsd /dev/gps0
 sleep 2
 ntpd -g
 ------------------------------------------------------------------------
@@ -864,20 +876,9 @@ some pointers towards making it work.
   as your Odroid will be running a stock Ubuntu rather than Raspbian.
 
 * The company rep says that the UART device is /dev/ttyS2 rather
-  than /dev/ttyAMA0.
+  than /dev/ttyAMA0, so ypu'll need to link /dev/ttyS2 to /dev/gps.
 
 * The RPi 3 hack to disable serial interfaces won't be required.
-
-* You will not be able to see PPS in a stock gpsmon. GPSD has a
-  magic kludge for this that recognizes /dev/ttyAMA0 as special,
-  but not /dev/ttyS2.
-
-* For the same reason, you need to give gpsd /dev/ppsS0 as a
-  command-line argument for it to see PPS. Thus:
- 
-------------------------------------------------------------------------
-# ./gpsd -n -N -D 5 /dev/ttyS2 /dev/pps0
-------------------------------------------------------------------------
 
 We would welcome field reports to complete this recipe.
 
