@@ -57,7 +57,7 @@ def config():
         raise SystemExit(1)
 
     if os.geteuid() != 0:
-        print("This functiopm must run as root.")
+        print("The --config function must run as root.")
         raise SystemExit(0)
 
     # Determine the Pi version
@@ -188,7 +188,7 @@ dtoverlay=pps-gpio,gpiopin=%s
 def build():
     "Perform fetch and build of the software."
     if os.geteuid() == 0:
-        print("This function should not run as root.")
+        print("The --build function should not be run as root.")
         raise SystemExit(0)
 
     if not os.path.isdir("gpsd"):
@@ -210,15 +210,57 @@ def build():
 
     os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
 
+def install():
+    "Install timeserver software & start script once everything has been tested."
+    if os.geteuid() != 0:
+        print("The --install function must run as root.")
+        raise SystemExit(0)
+
+    print("Removing stock NTP")
+    os.system("apt-get -y remove --purge ntp")
+
+    print("Installing GPSD")
+    os.system("(cd gpsd && scons install)")
+
+    print("Installing NTPsec")
+    os.system("(cd ntpsec && ./waf install) && cp ntp.conf /etc")
+
+    if "Time service customization" in open("/etc/rc.local").read():
+        print("Time service setup already installed.")
+    else:
+        print("Installing startup in /etc/rc.local")
+        startup = """
+# Time service customization
+stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
+gpsd /dev/gps0
+sleep 2
+ntpd -g
+
+"""
+        shexit = None
+        with open("/etc/rc.local-new", "w") as wp:
+            for line in open("/etc/rc.local"):
+                if line.startswith("exit 0"):
+                    shexit = line
+                else:
+                    wp.write(line)
+            wp.write(startup)
+            if shexit:
+                wp.write(shexit)
+        os.rename("/etc/rc.local-new", "/etc/rc.local")
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ("--config", "--build"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install"):
         print("Please specify a configueration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeserver software")
+        print("  --install = install timeserver software")
         raise SystemExit(1)
 
     if sys.argv[1] == "--config":
         config()
     if sys.argv[1] == "--build":
         build()
+    if sys.argv[1] == "--install":
+        install()
 

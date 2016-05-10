@@ -684,7 +684,6 @@ Run gpsd, telling it to look at the GPS device
 # gpsd/gpsd /dev/gps0
 ------------------------------------------------------------------------
 
-
 Run your newly built ntpd, telling it to step time if required:
 
 ------------------------------------------------------------------------
