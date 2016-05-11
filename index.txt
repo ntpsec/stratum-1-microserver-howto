@@ -193,7 +193,7 @@ will be marked with "$".  Remember that you go root with the command
 
 Most of these instructions do not have to be done by hand.  You can
 download link:clockmaker[clockmaker], a Python script which
-does much of this recipe for you. Herre's how to use it:
+does much of this recipe for you. Here's how to use it:
 
 1. Once you have a build account set up on the SBC (which you will
    do as an early step) copy clockmaker to its home directory with
@@ -208,7 +208,7 @@ does much of this recipe for you. Herre's how to use it:
 
 The clockmaker script is intelligent about not redoing steps it has
 already done; it is safe to run each stage multiple times.  Redoing
-the --build steff re-pulls from the software repositories.
+the --build step re-pulls from the software repositories.
 
 In the recipe that follows, steps marked "{--config}" or "{--build}"
 are parts clockmaker will do for you if you run it.  It is
@@ -320,17 +320,6 @@ uses, and it's easiest to disable from the GUI configurator.  This
 change is easily reversed until and unless you strip out the GUI
 later.
 
-Make a link named /dev/gps0 to the device the GS wull use {--config}.
-Later on this will make some procedures easier to read.
-
-Next, create a symlink to the GPS device to make it easier to refer
-to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
-accomplish this {--config}:
-
-------------------------------------------------------------------------
-KERNEL=="ttyAMA0", SYMLINK+="gps0"
-------------------------------------------------------------------------
-
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
 
@@ -412,6 +401,14 @@ serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
 
 This change can effectively be reversed by commenting out the
 dtoverlay and force_turbo lines.
+
+Create a symlink to the GPS device to make it easier to refer
+to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
+accomplish this {--config}:
+
+------------------------------------------------------------------------
+KERNEL=="ttyAMA0", SYMLINK+="gps0"
+------------------------------------------------------------------------
 
 === Configure the 1PPS GPIO pin ==
 
@@ -500,8 +497,8 @@ seem longer than it is first time: have patience.
 To test that you can read data from the device, do this:
 
 ------------------------------------------------------------------------
-$ stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/gps0
+$ stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/gpsd0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
@@ -582,7 +579,7 @@ or SKU 424254, use ublox=yes rather than mtk3301=yes.
 Then run this from the gpsd directory: 
 
 ------------------------------------------------------------------------
-# ./gpsmon /dev/gps0
+# ./gpsmon /dev/gpsd0
 ------------------------------------------------------------------------
 
 Running gpsmon should give you a nice panel display with a scrolling
@@ -600,7 +597,7 @@ should see time sample lines until you interrupt, looking something
 like this:
 
 ------------------------------------------------------------------------
-# ./gpsd /dev/gps0
+# ./gpsd /dev/gpsd0
 # ./ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
@@ -681,7 +678,7 @@ Turn off the default ntpd service running on your SBC
 Run gpsd, telling it to look at the GPS device
 
 ------------------------------------------------------------------------
-# gpsd/gpsd /dev/gps0
+# gpsd/gpsd /dev/gpsd0
 ------------------------------------------------------------------------
 
 Run your newly built ntpd, telling it to step time if required:
@@ -732,8 +729,8 @@ Add these lines to /etc/rc.local, before any final "exit 0" {--install}
 
 ------------------------------------------------------------------------
 # Time service customization
-stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
-gpsd /dev/gps0
+stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+gpsd /dev/gpsd0
 sleep 2
 ntpd -g
 ------------------------------------------------------------------------

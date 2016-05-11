@@ -231,8 +231,8 @@ def install():
         print("Installing startup in /etc/rc.local")
         startup = """
 # Time service customization
-stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
-gpsd /dev/gps0
+stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+gpsd /dev/gpsd0
 sleep 2
 ntpd -g
 
