@@ -401,7 +401,7 @@ some of his steps because this build is designed to run headless.
 
 ------------------------------------------------------------------------
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
-dtoverlay=pi3-miniuart-bt-overlay
+dtoverlay=pi3-miniuart-bt
 ------------------------------------------------------------------------
 
 This change restores the behavior of the Pi2 and earlier, in which the
@@ -533,8 +533,8 @@ device is alive and doing something reasonably sane.
 To test 1PPS, use ppstest from the pps-tools package.  Note,
 this will produce a false negative if the GPS has no fix.
 
-If you are doing these steps by hand rather than with ckockmaker.py,
-prepare with this step:
+If you are doing these steps by hand rather than with clockmaker,
+prepare with this step {--config}:
 
 ------------------------------------------------------------------------
 # apt-get install pps-tools
@@ -584,10 +584,10 @@ This builds gpsd in a minimal, fixed-speed timeserver mode with only
 the driver for the Adafruit HAT on it.  If you're using the Uputronics
 or SKU 424254, use ublox=yes rather than mtk3301=yes.
 
-Then run this from the gpsd directory: 
+Then run this: 
 
 ------------------------------------------------------------------------
-# ./gpsmon /dev/gpsd0
+# ./gpsd/gpsmon /dev/gpsd0
 ------------------------------------------------------------------------
 
 Running gpsmon should give you a nice panel display with a scrolling
@@ -605,8 +605,8 @@ should see time sample lines until you interrupt, looking something
 like this:
 
 ------------------------------------------------------------------------
-# ./gpsd /dev/gpsd0
-# ./ntpshmmon
+# ./gpsd/gpsd /dev/gpsd0
+# ./gpsd/ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
 sample NTP0 1462725362.567068197 1462725362.475583880 1462725362.000000000 0  -1
