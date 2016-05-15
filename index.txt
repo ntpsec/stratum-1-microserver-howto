@@ -29,8 +29,7 @@ latency and jitter compared to a USB GPS, and provides the 1PPS signal
 required for precision time service.  Generic USB GPSes do not deliver
 this signal and therefore cannot be used for Stratum 1 service
 footnote[There is one line of USB GPSes, the Navisys
-GR601-W/GR701-W/GR801-W, that provides 1PPS.  Unfortunately, it is
-difficult to purchase in the U.S.].
+GR601-W/GR701-W/GR801-W, that provides 1PPS. <<ETSY-GR601W>>].
 
 Most of this build is actually independent of any one daughterboard's
 hardware idiosyncracies. The recipe was tested using an Adafruit GPS
@@ -877,6 +876,8 @@ include some BeagleBone variant.
 - [[NMEA-DRIVER]] https://docs.ntpsec.org/latest/driver20.html
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
+
+- [[[ETSY-GR601W]]] https://etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gps[Purchase a GR601W]]
 
 == Acknwledgememts ==
 
