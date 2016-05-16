@@ -29,7 +29,7 @@ latency and jitter compared to a USB GPS, and provides the 1PPS signal
 required for precision time service.  Generic USB GPSes do not deliver
 this signal and therefore cannot be used for Stratum 1 service
 footnote[There is one line of USB GPSes, the Navisys
-GR601-W/GR701-W/GR801-W, that provides 1PPS. <<ETSY-GR601W>>].
+GR601-W/GR701-W/GR801-W, that provides 1PPS.].
 
 Most of this build is actually independent of any one daughterboard's
 hardware idiosyncracies. The recipe was tested using an Adafruit GPS
@@ -196,11 +196,11 @@ does much of this recipe for you. Here's how to use it:
 
 2. Make clockmaker executable with "chmod a+x clockmaker".
 
-3. Go root.  Run "clockmaker --config" . This will do most of the
+3. Go root. Then run "clockmaker --config". This will do most of the
    tricky OS and hardware configuration; also system software
    downloads and prerequisites for the timeserver software
 
-4. Leave root. Do "clockmaker --build".  This will clone and build the
+4. Leave root. Then run "clockmaker --build".  This will clone and build the
    special timeserver software.
 
 The clockmaker script is intelligent about not redoing steps it has
@@ -304,7 +304,7 @@ more convenient if you power up the SBC forgetting to plug in
 the Ethernet cable.
 
 Go through your normal configuration - timezone, locale, etc.  These
-are under "Internationalization Options".  In the U.S., you probably
+are under "Internationalization Options".  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
 code followed by ".UTF-8". Also, set up WiFi country.
 
@@ -503,7 +503,7 @@ You should see NMEA0183 sentences issuing in bursts once per second -
 text lines usually beginning with "$GP", and possibly a "$PMTK"
 sentence.  These will issue whether or not the GPS has satellite lock.
 
-If you see no output or random baud barf, re-do the stty command being
+If you see no output or see random baud barf, re-do the stty command being
 very careful that all the arguments are correct. If you still don't
 see output, check that the HAT is correctly seated on the GPIO and
 powered up (a red light near the north edge should blink at least once
@@ -618,7 +618,7 @@ specializing your SBC to be a time server.
 
 == Build and configure NTPsec ==
 
-The stock ntpd shipped with your OS is intended to be used as a
+The stock ntpd shipped with your distribution is intended to be used as a
 client instance, not a server.  It doesn't do 1PPS, and therefore
 can't be used for precision timekeeping.  Thus, we're going to build a
 better version from source.  That version is NTPsec, which runs
@@ -738,7 +738,7 @@ verify that uou can see time samples coming in.
 
 == Simplification and optimization ==
 
-=== Thin out the system processes on your Pi ===
+=== Thin out the system processes ===
 
 The Raspbian default is to install a lot of background processes that
 exist to support a graphical desktop. Installing from the Lite image
@@ -782,7 +782,7 @@ address.
 
 == Edge-detection issues and new HATs ==
 
-As the pps-gpio module is in April 2016 it has a flaw. It catches only
+The pps-gpio module as of April 2016 has a flaw. It catches only
 one edge of the PPS. You have a 50/50 chance you are seeing the
 trailing edge rather than the leading edge (which is the actual top of
 second).  A patch to fix this has been submitted to the Linux kernel
@@ -874,9 +874,7 @@ include some BeagleBone variant.
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
-- [[[ETSY-GR601W]]] https://etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gps[Purchase a GR601W]]
-
-== Acknwledgememts ==
+== Acknowledgements ==
 
 Various devteam members and friends of the GPSD and NTPsec projects
 assisted with this HOWTO, including: Gary E. Miller, Hal Murray, and
