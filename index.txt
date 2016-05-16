@@ -1,4 +1,4 @@
-== Stratum-1-Microserver HOWTO ==
+ttr== Stratum-1-Microserver HOWTO ==
 :description: Building and configuring a tiny Stratum 1 timeserver
 :keywords: Raspberry Pi, Odroid, BeagleBone, NTP, NTPsec, time service
 :home: http://www.catb.org/esr/faqs/stratum-1-microserver-howto/
@@ -82,7 +82,7 @@ You will need:
   felines.  Any case with a 30mm or greater exterior height should be
   able to hold both SBC and HAT.
 
-* (Optional) 2 hex standoffs, .625" with M2.5 threading, 4 compatible
+* (Optional) 2 hex standoffs, 11mm with M2.5 threading, 4 compatible
   screws.  Adafruit sells these <<STANDOFFS>>. They are the very
   similar to standard spacers used in PC cases; if you keep the small
   parts from old PCs around you'll have a dozen of them and probably
@@ -198,11 +198,13 @@ does much of this recipe for you. Here's how to use it:
    do as an early step) copy clockmaker to its home directory with
    this command: "wget {home}clockmaker"
 
-2. Go root.  Run "clockmaker --config" . This will do most of the
+2. Make clockmaker executable with "chmod a+x clockmaker".
+
+3. Go root.  Run "clockmaker --config" . This will do most of the
    tricky OS and hardware configuration; also system software
    downloads and prerequisites for the timeserver software
 
-3. Leave root. Do "clockmaker --build".  This will clone and build the
+4. Leave root. Do "clockmaker --build".  This will clone and build the
    special timeserver software.
 
 The clockmaker script is intelligent about not redoing steps it has
@@ -232,7 +234,7 @@ The hex string this command returns should match the SHA-1 checksum
 on the web page.  If it doesn't, you have a corrupted image and should
 re-fetch it.
 
-Note that this is not the regular NOOBS image. but one specifically
+Note that this is not the regular NOOBS image, but one specifically
 designed to boot the Pi as a headless server, communicated with only
 by Ethernet. By going this route we get to avoid some hardware
 prerequisites that would never be used after install, and skip a bunch
@@ -253,20 +255,24 @@ Install dcfldd on your host machine:
 You can use the older 'dd' for the next step, but dfcldd is better
 about giving you progress messages during the operation.
 
-Insert an SD card in the reader and plug the reader into a USB port on your host.
+Insert an SD card in the reader and plug the reader into a USB port on
+your host.  Note: your host may automount the card if it has been set
+up for Linux before.  You should unmount it.
 
 Follow the directions at <<INSTALLATION>>, using dfcldd.  On a
 host running Debian or Ubuntu, the device will likely be /dev/sdd and
 your command will look something like:
 
 ------------------------------------------------------------------------
-# dcfldd bs=4M if=2016-03-18-raspbian-jessie.img of=/dev/sdd
+# dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
-When this command complete, take the card out of the SD reader and
+When this command completes, take the card out of the SD reader and
 insert it into your Pi. Make sure your Pi has a live Ethernet cable
-plugged in. Power it up and wait about 60 seconds footnote, then do this
-from your host:
+plugged in and connected to the same network as your host (because it
+will also need to see the general Internet, direct-connecting to your
+PC is insufficlent). Power it up and wait about 60 seconds, then do
+this from your host:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
@@ -291,9 +297,6 @@ The hardest part is now done.
 
 === Initial configuration ===
 
-To change the machine's hostname, edit '/etc/hostname'.  You will
-need to be root to do this.
-
 Call 'sudo raspi-config' on the Pi.  
 
 Request 'Expand Filesystem' by keying Return with the select bar on
@@ -304,20 +307,24 @@ Request 'Wait for Network at Boot'.  This makes recovery a little
 more convenient if you power up the SBC forgetting to plug in
 the Ethernet cable.
 
-Go through your normal configuration - keyboard layout, timezone,
-locale, etc.  In the U.S., you probably want en_US.UTF-8; in any other
-country, look for your ISO language code followed by ".UTF-8".
+Go through your normal configuration - timezone, locale, etc.  These
+are under "Internationalization Options".  In the U.S., you probably
+want en_US.UTF-8; in any other country, look for your ISO language
+code followed by ".UTF-8".
 
 Note: raspi-config seems to be a bit glitchy about building locales.
 You may have to uncomment your locale in /etc/locale-gen, run
 "locale-gen: as root, and then run raspi-config again in order to
 select the one you want.
 
-One special thing you should do is disable the serial interface (might
-be A8 under 'Advanced Options').  Your HAT needs the GPIO pins it
-uses, and it's easiest to disable from the GUI configurator.  This
-change is easily reversed until and unless you strip out the GUI
-later.
+Under "Advanced Options" (A2), change your hostname to something
+entertaining. If you forget to do this, you can edit /etc/hostname
+later on.
+
+One special thing you should do is disable the serial interface (A7).
+Your HAT needs the GPIO pins it uses, and it's easiest to disable from
+the GUI configurator.  This change is easily reversed until and unless
+you strip out the GUI later.
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -334,25 +341,27 @@ who gets access to your network.  Here's how to fix this:
 
 . On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
-  later test steps easier.
+  later test steps easier.  Replace 'me' with the username you desire.
 +
 ------------------------------------------------------------------------
 # usermod -a -G sudo,dialout me
 ------------------------------------------------------------------------
 
-. From the host, verify that you can log in via "ssh me@raspberrypi.local"
-  and sudo to a root shell with "sudo bash"; you should see a "#" prompt.
+. From the host, verify that you can log in via ssh under your build
+  account name and sudo to a root shell with "sudo bash"; you should
+  see a "#" prompt.
 
 . From the host, export an ssh key from the "me" account to the
   SBC. If you don't understand this instruction, search for "ssh
   tutorial on the web and learn.  The
   http://www.catb.org/~esr/sshexport/[sshexport] tool may be useful.
 
-. Reboot the SBC. Verify that you can login via ssh from "me" on your host
-  machine to "me" on the SBC without giving a password.
+. Reboot the SBC. Verify that you can login via ssh from your host
+  machine to the build account on the SBC without giving a password.
 
-At this point the steps you can automate with clockmaker begin.  Go root
-on the SBC and run "./clockmaker --config".
+At this point the steps you can automate with clockmaker begin.  If
+you have not downloaded clockmaker, refer to "Using Clockmaker" above. 
+Go root on the SBC and run "./clockmaker --config".
 
 . {--config} On the SBC, disable the 'pi' login ("deluser pi" as root).  
 
@@ -853,7 +862,7 @@ include some BeagleBone variant.
 
 - [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
-- [[RASPBIAN]] https://www.raspberrypi.org/downloads/raspbian/[Raspbian downloads]
+- [[[RASPBIAN]]] https://www.raspberrypi.org/downloads/raspbian/[Raspbian downloads]
 
 - [[[INSTALLATION]]]
   https://www.raspberrypi.org/documentation/installation/installing-images/linux.md[Installing Operating System Images Under Linux]

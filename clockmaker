@@ -113,24 +113,23 @@ def config():
 
     print("")
 
-    if sbc_type == "RPi" and "3" in version_dict[revno]:
-        # This should only be done conditionally, on a 
+    if sbc_type == "RPi":
         bc = "/boot/config.txt"
-        rp3_overlay = """
+        if "3" in version_dict[revno]:
+            # This should only be done conditionally, on a 
+            rp3_overlay = """
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
 dtoverlay=pi3-miniuart-bt-overlay
 """
-    if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
-        print("Bluetooth use of UART already disabled.")
-    else:
-        print("Reclaiming serial UART.")
-        with open(bc, "a") as ap:
-            ap.write(rp3_overlay)
-        reboot_required = True
+            if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
+                print("Bluetooth use of UART already disabled.")
+            else:
+                print("Reclaiming serial UART.")
+                with open(bc, "a") as ap:
+                    ap.write(rp3_overlay)
+                reboot_required = True
 
-    print("")
-    if sbc_type == "RPi":
-        bc = "/boot/config.txt"
+        print("")
         gpio_re = re.compile("dtoverlay=pps-gpio,gpiopin=([0-9]*)")
         m = gpio_re.search(open(bc).read())
         if m:
@@ -173,7 +172,7 @@ dtoverlay=pps-gpio,gpiopin=%s
         print("")
 
         print("Getting build and test prerequisites")
-        prerequisites = "apt-get install pps-tools git scons ncurses-dev "\
+        prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
                         "python-dev bc bison libevent-dev libreadline-dev "\
                         "libcap-dev libssl-dev"
         os.system(prerequisites)
