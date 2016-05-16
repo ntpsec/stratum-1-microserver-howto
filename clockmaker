@@ -141,7 +141,7 @@ dtoverlay=pi3-miniuart-bt-overlay
             #   GPIO05      |      PI-29    | SKU 424254
             pin_dict = {
                 "Adafruit HAT" : 4,
-                "Uputronics HAT" : 12,
+                "Uputronics HAT" : 18,
                 "SKU 42425" : 5,
                 }
             while True:
