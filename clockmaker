@@ -168,7 +168,7 @@ dtoverlay=pps-gpio,gpiopin=%s
             reboot_required = True
         if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
             print("")
-            print("Creating /dev/gps symlink rule")
+            print("Creating /dev/gpsd0 symlink rule")
             with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
                 wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gpsd0"')
                 reboot_required = True
