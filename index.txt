@@ -841,7 +841,7 @@ some pointers towards making it work.
   as your Odroid will be running a stock Ubuntu rather than Raspbian.
 
 * The company rep says that the UART device is /dev/ttyS2 rather
-  than /dev/ttyAMA0, so ypu'll need to link /dev/ttyS2 to /dev/gps.
+  than /dev/ttyAMA0, so you'll need to link /dev/ttyS2 to /dev/gps.
 
 * The RPi 3 hack to disable serial interfaces won't be required.
 
@@ -881,8 +881,6 @@ include some BeagleBone variant.
 - [[[TAYLOR]]] http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
 
 - [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
-
-- [[NMEA-DRIVER]] https://docs.ntpsec.org/latest/driver20.html
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
