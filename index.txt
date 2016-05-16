@@ -1,10 +1,10 @@
-ttr== Stratum-1-Microserver HOWTO ==
+== Stratum-1-Microserver HOWTO ==
 :description: Building and configuring a tiny Stratum 1 timeserver
 :keywords: Raspberry Pi, Odroid, BeagleBone, NTP, NTPsec, time service
 :home: http://www.catb.org/esr/faqs/stratum-1-microserver-howto/
 :adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
-:dxhat:http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
+:dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
 version 0.6
 
@@ -310,12 +310,7 @@ the Ethernet cable.
 Go through your normal configuration - timezone, locale, etc.  These
 are under "Internationalization Options".  In the U.S., you probably
 want en_US.UTF-8; in any other country, look for your ISO language
-code followed by ".UTF-8".
-
-Note: raspi-config seems to be a bit glitchy about building locales.
-You may have to uncomment your locale in /etc/locale-gen, run
-"locale-gen: as root, and then run raspi-config again in order to
-select the one you want.
+code followed by ".UTF-8". Also, set up WiFi country.
 
 Under "Advanced Options" (A2), change your hostname to something
 entertaining. If you forget to do this, you can edit /etc/hostname
@@ -323,8 +318,7 @@ later on.
 
 One special thing you should do is disable the serial interface (A7).
 Your HAT needs the GPIO pins it uses, and it's easiest to disable from
-the GUI configurator.  This change is easily reversed until and unless
-you strip out the GUI later.
+the configurator.
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -336,7 +330,7 @@ that it is very vulnerable to being attacked and exploited by anyone
 who gets access to your network.  Here's how to fix this:
 
 . On the SBC, create an account for "me" (whatever username you like)
-  using 'adduser' run as root.  The restr of these instructions will
+  using 'adduser' run as root.  The rest of these instructions will
   call this your "build account".
 
 . On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
