@@ -115,19 +115,19 @@ def config():
 
     if sbc_type == "RPi":
         bc = "/boot/config.txt"
-        if "3" in version_dict[revno]:
-            # This should only be done conditionally, on a 
-            rp3_overlay = """
+        # Has no effect on a Pi 2.  Do it everywhere, in case we swap
+        # an SD from a 3 to a 2 and have to wonder why it fails.
+        rp3_overlay = """
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
 dtoverlay=pi3-miniuart-bt-overlay
 """
-            if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
-                print("Bluetooth use of UART already disabled.")
-            else:
-                print("Reclaiming serial UART.")
-                with open(bc, "a") as ap:
-                    ap.write(rp3_overlay)
-                reboot_required = True
+        if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
+            print("Bluetooth use of UART already disabled.")
+        else:
+            print("Reclaiming serial UART.")
+            with open(bc, "a") as ap:
+                ap.write(rp3_overlay)
+            reboot_required = True
 
         print("")
         gpio_re = re.compile("dtoverlay=pps-gpio,gpiopin=([0-9]*)")
