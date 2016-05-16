@@ -91,10 +91,6 @@ You will need:
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.
 
-(HATs are shipped as parts almost certainly to evade a regulatory
-requirement for FCC conformance testing to RF emission standards,
-which is expensive and would have added to the unit cost.)
-
 Note that if you're going to use a CR2032 with the Uputronics, a
 jumper on ther board needs to be desoldered.  It lives in a white box
 outline near the + pole of the battery cradle.
