@@ -109,7 +109,7 @@ def config():
     print("")
 
     print("About to upgrade your OS")
-    os.system("apt-get update; apt-get dist-upgrade")
+    os.system("apt-get -y update; apt-get -y dist-upgrade")
 
     print("")
 
