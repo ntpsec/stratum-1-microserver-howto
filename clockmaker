@@ -75,6 +75,10 @@ def config():
 
     reboot_required = False
 
+    if not os.path/isdir(".ssh"):
+        print("No ssh keys have been installed, bailing out.")
+        raise SystemExit(1)
+
     if ("\n"+ default_login + ":") in open("/etc/passwd").read():
         print("Default login is still present.")
         os.system("deluser %s" % default_login)
@@ -166,7 +170,7 @@ dtoverlay=pps-gpio,gpiopin=%s
             print("")
             print("Creating /dev/gps symlink rule")
             with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
-                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gps0"')
+                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gpsd0"')
                 reboot_required = True
 
         print("")
