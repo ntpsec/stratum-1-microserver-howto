@@ -75,17 +75,6 @@ def config():
 
     reboot_required = False
 
-    if not os.path/isdir(".ssh"):
-        print("No ssh keys have been installed, bailing out.")
-        raise SystemExit(1)
-
-    if ("\n"+ default_login + ":") in open("/etc/passwd").read():
-        print("Default login is still present.")
-        os.system("deluser %s" % default_login)
-        reboot_required = True
-    else:
-        print("Default login has been removed.")
-
     rp = open("/etc/ssh/sshd_config", "r")
     wp = open("/etc/ssh/sshd_config-new", "w")
     modified = False
@@ -252,6 +241,18 @@ ntpd -g
                 wp.write(shexit)
         os.rename("/etc/rc.local-new", "/etc/rc.local")
 
+def secure():
+    if not os.path/isdir(".ssh"):
+        print("No ssh keys have been installed, bailing out.")
+        raise SystemExit(1)
+
+    if ("\n"+ default_login + ":") in open("/etc/passwd").read():
+        print("Default login is still present.")
+        os.system("deluser %s" % default_login)
+        reboot_required = True
+    else:
+        print("Default login has been removed.")
+
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install"):
         print("Please specify a configueration stage argument:")
@@ -265,5 +266,7 @@ if __name__ == "__main__":
     if sys.argv[1] == "--build":
         build()
     if sys.argv[1] == "--install":
+        install()
+    if sys.argv[1] == "--secure":
         install()
 
