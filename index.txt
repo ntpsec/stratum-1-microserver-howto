@@ -49,6 +49,9 @@ This tutorial assumes some basic Unix competence. You will not need to
 be a programmer or an expert system administrator; you will need to
 know your way around the command line a little and how to edit files.
 
+Final note: if you're looking for instructions on stting up time
+service with a conventional PS and cable-attached GPS, see <<GPSD-SERVICE>>.
+
 == Parts list and hardware assembly ==
 
 You will need:
@@ -243,6 +246,22 @@ Read it. You should always read any script that will run with root
 permissions, to check that it doesn't do anything nefarious.  Give
 it 'sdd', the basename of your SD reader. It will do some sanity
 checks, then generate a command like the above.
+
+Your ddimage command execution should look like this:
+
+------------------------------------------------------------------------
+# ddimage sdd
+Checking /dev/sdd
+/dev/sdd exists as a mountable device.
+/dev/sdd is not mounted
+Copying...
+256 blocks (1024Mb) written.
+324+1 records in
+324+1 records out
+Done.
+------------------------------------------------------------------------
+
+Note: this can take a while.
 
 When this command completes, take the card out of the SD reader and
 insert it into your Pi. Make sure your Pi has a live Ethernet cable
@@ -452,7 +471,7 @@ intervals for the fix LED; "on" means the device does not blink.
 | HAT type                        | No fix |  Fix
 | Adafruit GPS HAT                | 1      |  10
 | Uputronics GPS Expansion Board  | ?      |  ?
-| SKU 424254                      | on     |  1
+| SKU 424254                      | 0.5    |  ?
 |=======================================================================
 
 On first (cold) boot, the device may take 20-30 minutes to download a
@@ -518,7 +537,7 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 
 == Live-test the GPS ==
 
-Now exit root, returning to your build account, and build GPSD.  If
+Now exit root, returning to the default-user account, and build GPSD.  If
 you are using clockmaker, "./clockmaker --build" will automate
 the build steps (but not the test procedures).
 
@@ -717,6 +736,9 @@ who gets access to your network.  Here's how to fix this:
 . On the SBC, create an account for "me" (whatever username you like)
   using 'adduser' run as root.
 
+. Move everything from the default-user $HOME to your new one. Don't
+  forget to fix the oership permissions with "chmod -R . ~".
+
 . On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
   later test steps easier.  Replace 'me' with the username you desire.
@@ -725,9 +747,9 @@ who gets access to your network.  Here's how to fix this:
 # usermod -a -G sudo,dialout me
 ------------------------------------------------------------------------
 
-. From the host, verify that you can log in via ssh under your build
-  account name and sudo to a root shell with "sudo bash"; you should
-  see a "#" prompt.
+. From the host, verify that you can log in via ssh under your own
+  name and sudo to a root shell with "sudo bash"; you should see a "#"
+  prompt.
 
 . From the host, export an ssh key from the "me" account to the
   SBC. If you don't understand this instruction, search for "ssh
@@ -737,7 +759,8 @@ who gets access to your network.  Here's how to fix this:
 . Reboot the SBC. Verify that you can login via ssh from your host
   machine to the build account on the SBC without giving a password.
 
-. On the SBC, disable the 'pi' login ("deluser pi" as root).  
+. On the SBC, disable the default-user login (on the RPi "deluser pi"
+  as root).  
 
 . On the SBC, disable root login and password tunneling. To do
   this, edit its /etc/ssh/sshd_config file.  Change the
@@ -853,6 +876,8 @@ include some BeagleBone variant.
 == References ==
 
 [bibliography]
+
+- [[[GPSD-SERVICE]]] http://www.catb.org/gpsd/gpsd-time-service-howto.html[GPSD Time Service HOWTO]
 
 - [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
 
