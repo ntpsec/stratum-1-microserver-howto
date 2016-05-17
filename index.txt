@@ -171,7 +171,7 @@ The work divides into the following phases:
 
 4. Build and configure NTPsec
 
-5. Set up ntpd to run at boot time
+5. Installation and boot-time setup
 
 6. Simplification and optimization
 
@@ -214,21 +214,22 @@ use clockmaker to avoid most of the typing.
 
 === Making a bootable SD ===
 
-Download the Raspbian Lite image zip file from <<RASPBIAN>> to your
-host.  The link will be named 'raspbian_lite_latest'.  The actual file
-will be named something like '2016-03-18-raspbian-jessie-lite.zip',
-though probably with a later date.
+Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
+Raspbian Lite image zip file] to your host.  Note: due to brain-dead
+configuration of the GPIO pins <<UART-ISSUE>>, you cannot use the
+2016-05-10 image from <<RASPBIAN>>. We hope this will be fixed in a
+future release.
 
-Use sha1sum to verify the correctness of the image.  Something like
-this:
+Use sha1sum to verify the correctness of the image.
 
 ------------------------------------------------------------------------
 $ sha1sum 2016-03-18-raspbian-jessie-lite.zip
+9d4c33fe027a0411bf78181f4c2a0a5ba1f97e31  2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
 The hex string this command returns should match the SHA-1 checksum
-on the web page.  If it doesn't, you have a corrupted image and should
-re-fetch it.
+above.  If it doesn't, you have a corrupted image and should re-fetch
+it.
 
 Note that this is not the regular NOOBS image, but one specifically
 designed to boot the Pi as a headless server, communicated with only
@@ -308,11 +309,11 @@ are under "Internationalization Options".  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
 code followed by ".UTF-8". Also, set up WiFi country.
 
-Under "Advanced Options" (A2), change your hostname to something
-entertaining. If you forget to do this, you can edit /etc/hostname
+Under "Advanced Options" (9), change your hostname to something
+entertaining (A2). If you forget to do this, you can edit /etc/hostname
 later on.
 
-One special thing you should do is disable the serial interface (A7).
+One special thing you should do is disable the serial interface (A8).
 Your HAT needs the GPIO pins it uses, and it's easiest to disable from
 the configurator.
 
@@ -851,6 +852,8 @@ include some BeagleBone variant.
 - [[2258]] https://www.adafruit.com/product/2258
 
 - [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
+
+- [[[UART-ISSUE]]] https://www.raspberrypi.org/forums/viewtopic.php?uid=191178&f=28&t=148218&start=0[UART Issue]
 
 - [[[RASPBIAN]]] https://www.raspberrypi.org/downloads/raspbian/[Raspbian downloads]
 
