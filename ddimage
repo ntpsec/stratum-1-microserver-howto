@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Copy a good Raspbian image to an SD writer
+
+target=/dev/${1-dd}
+echo "Checking $target"
+
+if [ -b $target ]
+then
+   echo "$target exists as a mountable device."
+else
+   echo "$target does not exist or is not mountable"
+   exit 1
+fi
+
+if df | grep $target >/dev/null
+then
+    echo "$target is mounted and cannot be used."
+    exit 1
+else
+    echo "$target is not mounted"
+fi
+
+image=2016-03-18-raspbian-jessie-lite.img
+
+echo "Copying..."
+echo dcfldd bs=4M if=$image of=$target
+echo "Done"
+exit 0

@@ -8,7 +8,7 @@ GOODIMAGE = 2016-03-18-raspbian-jessie-lite.zip
 
 all: index.html
 
-SNIPPETS = clockmaker ntp.conf
+SNIPPETS = ddimage clockmaker ntp.conf
 index.html: index.txt $(SNIPPETS)
 	asciidoc index.txt
 

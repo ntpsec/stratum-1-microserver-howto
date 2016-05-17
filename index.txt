@@ -186,34 +186,6 @@ root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
 "sudo bash" or (after you haves set a root password) "su -".
 
-== Using clockmaker ==
-
-Most of these instructions do not have to be done by hand.  You can
-download link:clockmaker[clockmaker], a Python script which
-does much of this recipe for you. Here's how to use it:
-
-1. Once you have a build account set up on the SBC (which you will
-   do as an early step) copy clockmaker to its home directory with
-   this command: "wget {home}clockmaker"
-
-2. Make clockmaker executable with "chmod a+x clockmaker".
-
-3. Go root. Then run "clockmaker --config". This will do most of the
-   tricky OS and hardware configuration; also system software
-   downloads and prerequisites for the timeserver software
-
-4. Leave root. Then run "clockmaker --build".  This will clone and build the
-   special timeserver software.
-
-The clockmaker script is intelligent about not redoing steps it has
-already done; it is safe to run each stage multiple times.  Redoing
-the --build step re-pulls from the software repositories.
-
-In the recipe that follows, steps marked "{--config}" or "{--build}"
-are parts clockmaker will do for you if you run it.  It is
-recommended that you read the steps to understand the process, then
-use clockmaker to avoid most of the typing.
-
 === Making a bootable SD ===
 
 Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
@@ -265,6 +237,12 @@ your command will look something like:
 ------------------------------------------------------------------------
 # dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
+
+We provide a script, link:ddimage[ddimage], to semi-automate this process.
+Read it. You should always read any script that will run with root
+permissions, to check that it doesn't do anything nefarious.  Give
+it 'sdd', the basename of your SD reader. It will do some sanity
+checks, then generate a command like the above.
 
 When this command completes, take the card out of the SD reader and
 insert it into your Pi. Make sure your Pi has a live Ethernet cable
@@ -323,6 +301,34 @@ You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
 
 === Fully update Your OS ===
+
+Most of the remaining instructions do not have to be done by hand.  You can
+download link:clockmaker[clockmaker], a Python script which
+does much of this recipe for you. Here's how to use it:
+
+1. Copy clockmaker to to the pi user's home directory with
+   this command: "wget {home}clockmaker"
+
+2. Read it. You should always read any script that will run with root
+   permissions, to check that it doesn't do anything nefarious.
+
+3. Make clockmaker executable with "chmod a+x clockmaker".
+
+4. Go root. Then run "clockmaker --config". This will do most of the
+   tricky OS and hardware configuration; also system software
+   downloads and prerequisites for the timeserver software
+
+5. Leave root. Then run "clockmaker --build".  This will clone and build the
+   special timeserver software.
+
+The clockmaker script is intelligent about not redoing steps it has
+already done; it is safe to run each stage multiple times.  Redoing
+the --build step re-pulls from the software repositories.
+
+In the recipe that follows, steps marked "{--config}" or "{--build}"
+are parts clockmaker will do for you if you run it.  It is
+recommended that you read the steps to understand the process, then
+use clockmaker to avoid most of the typing.
 
 At this point the steps you can automate with clockmaker begin.  If
 you have not downloaded clockmaker, refer to "Using Clockmaker" above. 
