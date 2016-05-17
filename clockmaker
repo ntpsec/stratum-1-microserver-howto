@@ -75,32 +75,6 @@ def config():
 
     reboot_required = False
 
-    rp = open("/etc/ssh/sshd_config", "r")
-    wp = open("/etc/ssh/sshd_config-new", "w")
-    modified = False
-    for line in rp:
-        if line.startswith("PermitRootLogin") and "no" not in line:
-            modified = True
-            line = "PermitRootLogin no\n"
-        elif line.startswith("#PermitRootLogin"):
-            modified = True
-            line = "PermitRootLogin no\n"
-        elif line.startswith("PasswordAuthentication") and "no" not in line:
-            modified = True
-            line = "PasswordAuthentication no\n"
-        elif line.startswith("#PasswordAuthentication"):
-            modified = True
-            line = "PasswordAuthentication no\n"
-        wp.write(line)
-    if modified:
-        print("Disabling root login and password tunneling.")
-        os.rename("/etc/ssh/sshd_config-new", "/etc/ssh/sshd_config")
-        reboot_required = True
-    else:
-        print("Root login and password tunneling are already disabled.")
-
-    print("")
-
     print("About to upgrade your OS")
     os.system("apt-get -y update; apt-get -y dist-upgrade")
 
@@ -242,10 +216,40 @@ ntpd -g
         os.rename("/etc/rc.local-new", "/etc/rc.local")
 
 def secure():
+    "Secure system after a non-default user account has been ssh-enabled."
     if not os.path/isdir(".ssh"):
         print("No ssh keys have been installed, bailing out.")
         raise SystemExit(1)
 
+    if os.geteuid() != 0:
+        print("The --secure function must run as root.")
+        raise SystemExit(0)
+
+    rp = open("/etc/ssh/sshd_config", "r")
+    wp = open("/etc/ssh/sshd_config-new", "w")
+    modified = False
+    for line in rp:
+        if line.startswith("PermitRootLogin") and "no" not in line:
+            modified = True
+            line = "PermitRootLogin no\n"
+        elif line.startswith("#PermitRootLogin"):
+            modified = True
+            line = "PermitRootLogin no\n"
+        elif line.startswith("PasswordAuthentication") and "no" not in line:
+            modified = True
+            line = "PasswordAuthentication no\n"
+        elif line.startswith("#PasswordAuthentication"):
+            modified = True
+            line = "PasswordAuthentication no\n"
+        wp.write(line)
+    if modified:
+        print("Disabling root login and password tunneling.")
+        os.rename("/etc/ssh/sshd_config-new", "/etc/ssh/sshd_config")
+        reboot_required = True
+    else:
+        print("Root login and password tunneling are already disabled.")
+
+    print("")
     if ("\n"+ default_login + ":") in open("/etc/passwd").read():
         print("Default login is still present.")
         os.system("deluser %s" % default_login)

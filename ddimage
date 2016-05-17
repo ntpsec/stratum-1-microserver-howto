@@ -24,6 +24,6 @@ fi
 image=2016-03-18-raspbian-jessie-lite.img
 
 echo "Copying..."
-echo dcfldd bs=4M if=$image of=$target
+dcfldd bs=4M if=$image of=$target
 echo "Done"
 exit 0

@@ -65,8 +65,8 @@ You will need:
 |=======================================================================
 | HAT type                                 | Battery | Build status
 | {adahat}[Adafruit GPS HAT]               | CR1220  | Tested
-| {upuhat}[Uputronics GPS Expansion Board] | CR2032  | Untested
-| {dxhat}[SKU 424254]                      |    -    | Untested
+| {upuhat}[Uputronics GPS Expansion Board] | CR2032  | Tested
+| {dxhat}[SKU 424254]                      |    -    | Tested
 |=======================================================================
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
@@ -128,11 +128,13 @@ protect the headers and pins from mechanical stress if the
 assembly is dropped or has something sat on it.
 
 . Optional: put the combination into a case.  Anything sold as a
-"Raspberry Pi" case ought to do, because a single HAT doen't project
-above the USB & Ethernet connectors on the SBC. The Raspberry Pi
-Foundation Case qualifies, but for functional reasons we recommend a
-transparent case.  The Adafruit 2258 case <<2258>>, for example,
-should do nicely.
+"Raspberry Pi" case ought to do for the Adafruit HAT, because a single
+HAT doen't project above the USB & Ethernet connectors on the SBC. The
+Raspberry Pi Foundation Case qualifies, but for functional reasons we
+recommend a transparent case.  The Adafruit 2258 case <<2258>>, for
+example, should do nicely.  The Uputronic and SKU 424254 HATs, alas,
+have projecting SMA antenna jacks that won't fit in a stock case. A
+bit of work with a dremel will fix that.
 
 == Understanding the GPIO connector ==
 
@@ -471,7 +473,7 @@ intervals for the fix LED; "on" means the device does not blink.
 | HAT type                        | No fix |  Fix
 | Adafruit GPS HAT                | 1      |  10
 | Uputronics GPS Expansion Board  | ?      |  ?
-| SKU 424254                      | 0.5    |  ?
+| SKU 424254                      | 0.5    |  0.5
 |=======================================================================
 
 On first (cold) boot, the device may take 20-30 minutes to download a
@@ -700,6 +702,8 @@ gpsd is running and ntpshmmon reports fix lines.
 
 === Installation and boot-time setup ===
 
+This step can be automated with "./clocmaker --install" done as root.
+
 Uninstall the stock NTP {--install}:
 
 ------------------------------------------------------------------------
@@ -728,6 +732,8 @@ Reboot.  Check that gpsd and ntpd are running, and use ntpq -p to
 verify that uou can see time samples coming in.
 
 === Secure the machine ===
+
+Final parts step can be automated with "./clocmaker --secure" done as root.
 
 The fact that your SBC has a known default name and default user means
 that it is very vulnerable to being attacked and exploited by anyone
@@ -759,13 +765,13 @@ who gets access to your network.  Here's how to fix this:
 . Reboot the SBC. Verify that you can login via ssh from your host
   machine to the build account on the SBC without giving a password.
 
-. On the SBC, disable the default-user login (on the RPi "deluser pi"
-  as root).  
+. {--secure} On the SBC, disable the default-user login (on the RPi
+  "deluser pi" as root).
 
-. On the SBC, disable root login and password tunneling. To do
-  this, edit its /etc/ssh/sshd_config file.  Change the
-  "PermitRootLogin" and "PasswordAuthentication" lines so the
-  second token is "no".
+. {--secure} On the SBC, disable root login and password tunneling. To
+  do this, edit its /etc/ssh/sshd_config file.  Change the
+  "PermitRootLogin" and "PasswordAuthentication" lines so the second
+  token is "no".
 
 == Simplification and optimization ==
 
