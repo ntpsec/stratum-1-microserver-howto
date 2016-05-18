@@ -180,6 +180,7 @@ def build():
     os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
     os.system("rm -f pinup; wget %s/pinup" % webfaq)
     os.system("rm -f timeservice; wget %s/timeservice" % webfaq)
+    os.system("rm -f timeservice.service; wget %s/timeservice.service" % webfaq)
 
 def install():
     "Install timeserver software & start script once everything has been tested."
@@ -189,7 +190,7 @@ def install():
 
     print("Removing stock NTP")
     os.system("apt-get -y remove --purge ntp")
-    os.sysyem("apt-get -y autoremove")
+    os.system("apt-get -y autoremove")
 
     print("Installing GPSD")
     os.system("(cd gpsd && scons install)")
@@ -198,34 +199,16 @@ def install():
     os.system("(cd ntpsec && ./waf install) && cp ntp.conf /etc")
 
     print("Installing pinup")
-    os.system("cp pinup /usr/local/bin")
+    os.system("cp pinup /usr/local/bin; chmod a+x /usr/local/bin/pinup")
 
     print("Installing timeservice init script")
-    os.system("cp timeservice /etc/init.d")
+    os.system("cp timeservice /etc/init.d; chmod a+x /etc/init.d/timeservice")
 
-    if "Time service customization" in open("/etc/rc.local").read():
-        print("Time service setup already installed.")
-    else:
-        print("Installing startup in /etc/rc.local")
-        startup = """
-# Time service customization
-stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
-gpsd /dev/gpsd0
-sleep 2
-ntpd -g
+    print("Installing timeservice service file")
+    os.system("cp timeservice.service /etc/systemd/system/")
 
-"""
-        shexit = None
-        with open("/etc/rc.local-new", "w") as wp:
-            for line in open("/etc/rc.local"):
-                if line.startswith("exit 0"):
-                    shexit = line
-                else:
-                    wp.write(line)
-            wp.write(startup)
-            if shexit:
-                wp.write(shexit)
-        os.rename("/etc/rc.local-new", "/etc/rc.local")
+    print("Enabling time service")
+    os.system("systemctl enable timeservice")
 
 def secure():
     "Secure system after a non-default user account has been ssh-enabled."

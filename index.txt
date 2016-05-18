@@ -8,9 +8,7 @@
 by Eric S. Raymond
 version 0.7
 
-THIS IS AN INCOMPLETE DRAFT. Instructions are tested and working up to
-but not including the very last step - getting the timeservice script
-to run at boot time. Also I haven't seen 1PPS out of the SKU 424254 yet.
+THIS IS AN INCOMPLETE DRAFT. I haven't seen 1PPS out of the SKU 424254 yet.
 
 == Introduction ==
 
@@ -728,15 +726,45 @@ Install the pinup script:
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Install this text as the file /etc/init.d/timeservice:
+Install this text as the file /etc/init.d/timeservice and make it executable:
 
 ------------------------------------------------------------------------
 include::timeservice[]
 ------------------------------------------------------------------------
 
+The commands to do this are:
+
+------------------------------------------------------------------------
+# cp timeservice /etc/init.d; chmod a+x /etc/init.d/timeservice
+------------------------------------------------------------------------
+
+Install this text in the directory /etc/systemd/system/:
+
+------------------------------------------------------------------------
+include::timeservice.service[]
+------------------------------------------------------------------------
+
+The commands to do this are:
+
+------------------------------------------------------------------------
+# cp timeservice.service /etc/systemd/system/
+------------------------------------------------------------------------
+
+Enable startup at boot with:
+
+------------------------------------------------------------------------
+# systemctl enable timeservice
+------------------------------------------------------------------------
+
+What's going on here: the file /etc/init.d/timeservice is a System V init
+script conforming to LSB conventions.  If you decide to ditch systemd
+you can mame a link to it from, e.g. /etc/rc3.d and the right thing
+will happen.  The file /etc/systemd/system/timeservice.service is
+a systemd unit file that will call the System V init script to do the
+real work.
 
 Reboot.  Check that gpsd and ntpd are running, and use ntpq -p to
-verify that uou can see time samples coming in.
+verify that you can see time samples coming in.
 
 === Secure the machine ===
 

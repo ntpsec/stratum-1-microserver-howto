@@ -1,0 +1,11 @@
+[Unit]
+Description=Manage time service daemons
+
+[Service]
+Type=oneshot
+ExecStart=/etc/init.d/timeservice start
+ExecStop=/etc/init.d/timeservice stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
