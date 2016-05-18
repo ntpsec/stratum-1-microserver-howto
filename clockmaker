@@ -124,7 +124,7 @@ dtoverlay=pi3-miniuart-bt-overlay
                 if pin is not None:
                     print("Configuring for PPS via GPIO pin %s" % pin)
                     break
-            gpio = """
+            gpio = """\
 # Get 1PPS from HAT pin 
 dtoverlay=pps-gpio,gpiopin=%s
 """
@@ -135,7 +135,7 @@ dtoverlay=pps-gpio,gpiopin=%s
             print("")
             print("Creating /dev/gpsd0 symlink rule")
             with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
-                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gpsd0"')
+                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gpsd0"\n')
                 reboot_required = True
 
         print("")
@@ -188,6 +188,7 @@ def install():
 
     print("Removing stock NTP")
     os.system("apt-get -y remove --purge ntp")
+    os.sysyem("apt-get -y autoremove")
 
     print("Installing GPSD")
     os.system("(cd gpsd && scons install)")
@@ -269,7 +270,7 @@ def secure():
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install"):
-        print("Please specify a configueration stage argument:")
+        print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeservice software")
         print("  --install = install timeservice software")
