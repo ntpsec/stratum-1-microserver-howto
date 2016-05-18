@@ -47,12 +47,13 @@ version_dict = {
     "a22082" : "Pi 3 Model B",
 }
 
+sbc_type = None
+default_login = None
+gpsdev = None
+
 def config():
     "Perform root-mode preconfiguration of the SBC"
-    if os.path.exists("/dev/ttyAMA0"):
-        sbc_type = "RPi"
-        default_login = "pi"
-        gpsdev = "/dev/ttyAMA0"
+    if sbc_type == "RPi":
         print("This is a Raspberry Pi")
     else:
         print("Unknown SBC type.")
@@ -250,7 +251,7 @@ def secure():
     print("")
     if ("\n"+ default_login + ":") in open("/etc/passwd").read():
         print("Default login is still present.")
-        os.system("deluser %s" % default_login)
+        os.system("deluser --remove-all-files %s" % default_login)
         reboot_required = True
     else:
         print("Default login has been removed.")
@@ -264,6 +265,11 @@ if __name__ == "__main__":
         print("  --install = install timeservice software")
         print("  --secure = secure the timeserver")
         raise SystemExit(1)
+
+    if os.path.exists("/dev/ttyAMA0"):
+        sbc_type = "RPi"
+        default_login = "pi"
+        gpsdev = "/dev/ttyAMA0"
 
     if sys.argv[1] == "--config":
         config()
