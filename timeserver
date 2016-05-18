@@ -9,14 +9,14 @@
 # Short-Description: Start time service
 ### END INIT INFO
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+PATH=/sbin:/bin:/usr/sbin:/usr/bin/:/usr/local/bin
 
 . /lib/lsb/init-functions
 
-DAEMON1=/usr/sbin/local/ntpd
+DAEMON1=/usr/local/sbin/ntpd
 PIDFILE1=/var/run/ntpd.pid
-DAEMON2=/usr/bin/local/gpsd
-PSDFILE2=/var/run/gpsd.pid
+DAEMON2=/usr/local/sbin/gpsd
+PIDFILE2=/var/run/gpsd.pid
 
 test -x $DAEMON1 || exit 5
 test -x $DAEMON2 || exit 5
@@ -50,7 +50,7 @@ case $1 in
 	start)
 		lock_ntpdate       		
 		# Clock skew can be so severe that ntpd -g loses its cookies
-		ntpdig -t 2 -S -M 1 $NTPDIG_CHIMER
+		ntpdig -t 2 -S -M 1 $NTPDIG_CHIMER >/dev/null
 		# Launch ntpd
 		log_daemon_msg "Starting NTP server" "timeservice"
   		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -p $PIDFILE1 $NTPD_OPTS
@@ -66,9 +66,10 @@ case $1 in
 		log_end_msg $status
   		;;
 	stop)
-		log_daemon_msg "Stopping timeservice" "timeservice"
+		log_daemon_msg "Stopping ntpd" "timeservice"
   		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE1
 		log_end_msg $?
+		log_daemon_msg "Stopping gpsd" "timeservice"
   		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE2
 		log_end_msg $?
 		rm -f $PIDFILE1 $PIDFILE2
