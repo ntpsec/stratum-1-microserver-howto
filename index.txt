@@ -180,7 +180,9 @@ The work divides into the following phases:
 
 6. Secure the machine.
 
-7. Simplification and optimization
+7. Performance tuning
+
+8. Simplification and optimization
 
 Within each phase, we try to indicate how difficult each operation is
 to back out.
@@ -807,6 +809,20 @@ who gets access to your network.  Here's how to fix this:
   do this, edit its /etc/ssh/sshd_config file.  Change the
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
+
+== Performance tuning ==
+
+Don't be overly concerned if ntpq -p initially shows large jitter.
+This probably just means your clock was off by a few seconds - not
+uncommon on SBCs without a battery-backed real-time clock.  Initially,
+ntpd has no way to separate actual jitter from the clock offset
+This will probably fix itself in a few hours of operation once ntpd
+has pulled your system clock close to the PPS time.
+
+For more about performance tuning and how to fudge your configuration,
+see
+http://www.catb.org/gpsd/gpsd-time-service-howto.html#_performance_tuning[the
+GPSD Time Service HOWTO's section on tuning].
 
 == Simplification and optimization ==
 
