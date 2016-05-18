@@ -37,6 +37,12 @@ version_dict = {
     "a22082" : "Pi 3 Model B",
 }
 
+pin_pairs = (
+    ("Adafruit HAT", 4),
+    ("Uputronics HAT", 18),
+    ("SKU 42425", 5),
+    )
+
 if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "p")
@@ -45,12 +51,23 @@ if __name__ == "__main__":
         sys.exit(1)
     pin = False
 
+    for (switch, val) in options:
+        if switch == '-p':
+            pin = True
+        elif switch == '-h':
+            print(__doc__)
+            raise SystemExit(0)
+
+    if pin and os.geteuid() != 0:
+        print("The config function must run as root.")
+        raise SystemExit(0)
+
     # Identify the SBC
     if os.path.exists("/dev/ttyAMA0"):
         sbc_type = "RPi"
         default_login = "pi"
         gpsdev = "/dev/ttyAMA0"
-        sys.stdout.write("This is a Raspberry Pi, ")
+        sys.stdout.write("Raspberry ")
     else:
         print("Unknown SBC type.")
         raise SystemExit(1)
@@ -64,32 +81,20 @@ if __name__ == "__main__":
         sys.stdout.write("can't identify SBC version.\n")
         raise SystemExit(0)
     else:
-        sys.stdout.write(" %s, %s" % (revno, version_dict[revno]))
+        sys.stdout.write("%s, " % (version_dict[revno]))
 
-    for (switch, val) in options:
-        if switch == '-p':
-            pin = True
-        elif switch == '-h':
-            print(__doc__)
-            raise SystemExit(0)
-
-    if pin and os.geteuid() != 0:
-        print("The config function must run as root.")
-        raise SystemExit(0)
-
-    print("")
 
     reboot_required = False
 
     if sbc_type == "RPi":
-        print("")
         bc = "/boot/config.txt"
         dtoverlay = "dtoverlay=pps-gpio,gpiopin="
         gpio_re = re.compile(dtoverlay + "([0-9]*)")
         config_txt = open(bc).read()
         m = gpio_re.search(config_txt)
         if m:
-            print("GPIO pin configured to %s." % m.group(1))
+            ptype = dict([(str(y), x) for (x, y) in pin_pairs])[m.group(1)]
+            sys.stdout.write("configured for the %s.\n" % ptype)
         else:
             print("GPIO not configured")
             raise SysyemExit(1)
@@ -99,13 +104,9 @@ if __name__ == "__main__":
             #   GPIO04      |      P1-7     | Adafruit
             #   GPIO18      |      P1-12    | Uputronics
             #   GPIO05      |      PI-29    | SKU 424254
-            pin_dict = {
-                "Adafruit HAT" : 4,
-                "Uputronics HAT" : 18,
-                "SKU 42425" : 5,
-                }
             while True:
                 newpin = None
+                pin_dict = dict(pin_pairs)
                 for k in pin_dict:
                     print("%s = %s" % (k[0], k))
                 sel = my_input("Select a GPS daughterboard type: ").upper()
@@ -124,11 +125,10 @@ if __name__ == "__main__":
                 wp.write(new_config)
             reboot_required = True
 
-        print("")
         if reboot_required:
-            print("A reboot is required for configuration changes to take effect")
-            #os.system("reboot")
-        else:
+            print("")
+            print("A reboot is required for the GPIO change to take effect.")
+        elif pin:
             print("No configuration changes - no reboot is required.")
 
 #end

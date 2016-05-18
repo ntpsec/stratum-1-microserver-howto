@@ -702,9 +702,9 @@ gpsd is running and ntpshmmon reports fix lines.
 
 === Installation and boot-time setup ===
 
-This step can be automated with "./clocmaker --install" done as root.
+This step can be automated with "./clockmaker --install" done as root.
 
-Uninstall the stock NTP {--install}:
+Uninstall the stock NTP:
 
 ------------------------------------------------------------------------
 # apt-get -y remove --purge ntp
@@ -716,6 +716,12 @@ install both suites:
 ------------------------------------------------------------------------
 # cd gpsd; scons install
 # cd ../ntpsec; ./waf install; cp ntp.conf /etc
+------------------------------------------------------------------------
+
+Install the pinup script:
+
+------------------------------------------------------------------------
+# cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
 Add these lines to /etc/rc.local, before any final "exit 0" {--install}
@@ -733,7 +739,7 @@ verify that uou can see time samples coming in.
 
 === Secure the machine ===
 
-Final parts step can be automated with "./clocmaker --secure" done as root.
+Final parts of this step can be automated with "./clocmaker --secure" done as root.
 
 The fact that your SBC has a known default name and default user means
 that it is very vulnerable to being attacked and exploited by anyone
@@ -816,6 +822,22 @@ cutting the number of service processes running.
 
 Once you do this, the SBC will no longer be accessible at a ".local"
 address.
+
+== Using pinup ==
+
+We provide a script called link:pinup[pinup] that makes it easy to
+query the configuration of your timserver, and change its 1PPS
+GPIO pin when required.
+
+Call "pinup" without arguments to query the configuration:
+
+------------------------------------------------------------------------
+$ ./pinup
+Raspberry Pi 3 Model B, configured for the Adafruit HAT.
+------------------------------------------------------------------------
+
+Calling "pinup -p" as root allows you to choose a GPIO pin for 1PPS
+from a menu of daughterboard types.
 
 == Edge-detection issues and new HATs ==
 

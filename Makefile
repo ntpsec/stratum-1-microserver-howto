@@ -8,7 +8,7 @@ HOSTDIR = esr@login.ibiblio.org:/public/html/catb/esr/faqs/stratum-1-microserver
 
 all: index.html
 
-SNIPPETS = ddimage clockmaker ntp.conf
+SNIPPETS = ddimage clockmaker pinup ntp.conf
 index.html: index.txt $(SNIPPETS)
 	asciidoc index.txt
 

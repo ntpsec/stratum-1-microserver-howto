@@ -175,6 +175,7 @@ def build():
     os.chdir("..")
 
     os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
+    os.system("rm -f ntp.conf; wget %s/pinup" % webfaq)
 
 def install():
     "Install timeserver software & start script once everything has been tested."
