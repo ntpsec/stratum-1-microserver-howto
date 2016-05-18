@@ -560,12 +560,10 @@ Then do this {--build}:
 ------------------------------------------------------------------------
 $ git clone git://git.savannah.nongnu.org/gpsd.git
 $ cd gpsd
-$ scons timeservice=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1
+$ scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
 ------------------------------------------------------------------------
 
-This builds gpsd in a minimal, fixed-speed timeserver mode with only
-the driver for the Adafruit HAT on it.  If you're using the Uputronics
-or SKU 424254, use ublox=yes rather than mtk3301=yes.
+This builds gpsd in a minimal, fixed-speed timeserver mode.
 
 Then run this: 
 
@@ -724,10 +722,10 @@ Install the pinup script:
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Install this text as the file /etc/init.d/timeserver:
+Install this text as the file /etc/init.d/timeservice:
 
 ------------------------------------------------------------------------
-include::timeserver[]
+include::timeservice[]
 ------------------------------------------------------------------------
 
 

@@ -164,7 +164,7 @@ def build():
     else:
         os.system("(chdir gpsd; git pull)")
     os.chdir("gpsd")
-    os.system("scons timeservice=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1")
+    os.system("scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1")
     os.chdir("..")
 
     if not os.path.isdir("ntpsec"):
@@ -178,7 +178,7 @@ def build():
 
     os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
     os.system("rm -f pinup; wget %s/pinup" % webfaq)
-    os.system("rm -f timeserver; wget %s/timeserver" % webfaq)
+    os.system("rm -f timeservice; wget %s/timeservice" % webfaq)
 
 def install():
     "Install timeserver software & start script once everything has been tested."
@@ -198,8 +198,8 @@ def install():
     print("Installing pinup")
     os.system("cp pinup /usr/local/bin")
 
-    print("Installing timeserver inut script")
-    os.system("cp timeserver /etc/init.d")
+    print("Installing timeservice init script")
+    os.system("cp timeservice /etc/init.d")
 
     if "Time service customization" in open("/etc/rc.local").read():
         print("Time service setup already installed.")
@@ -271,8 +271,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install"):
         print("Please specify a configueration stage argument:")
         print("  --config = basic SBC configuration")
-        print("  --build = build timeserver software")
-        print("  --install = install timeserver software")
+        print("  --build = build timeservice software")
+        print("  --install = install timeservice software")
         print("  --secure = secure the timeserver")
         raise SystemExit(1)
 
