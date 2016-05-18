@@ -1,0 +1,135 @@
+#!/usr/bin/env python
+#
+# Query a microserver for its hardware configuration
+#
+# If there is a local config utility such as raspi-config on the
+# Raspberry Pi, you should already have run it before this.
+#
+# The evironment is assumed to be Debian Linux variant.
+#
+import sys, os, re, getopt
+
+try:
+    my_input = raw_input
+except NameError:
+    my_input = input
+
+# Map hardware revision numbers to Raspeberry Pi versions
+version_dict = {
+    "0002" : "Model B Revision 1.0",
+    "0003" : "Model B Revision 1.0",
+    "0004" : "Model B Revision 2.0",
+    "0005" : "Model B Revision 2.0",
+    "0006" : "Model B Revision 2.0",
+    "0007" : "Model A",
+    "0008" : "Model A",
+    "0009" : "Model A",
+    "000d" : "Model B Revision 2.0",
+    "000e" : "Model B Revision 2.0",
+    "000f" : "Model B Revision 2.0",
+    "0010" : "Model B+",
+    "0011" : "Compute Module",
+    "0012" : "Model A+",
+    "a01041" : "Pi 2 Model B",
+    "a21041" : "Pi 2 Model B",
+    "900092" : "PiZero",
+    "a02082" : "Pi 3 Model B",
+    "a22082" : "Pi 3 Model B",
+}
+
+if __name__ == "__main__":
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "p")
+    except getopt.GetoptError as e:
+        print(e)
+        sys.exit(1)
+    pin = False
+
+    # Identify the SBC
+    if os.path.exists("/dev/ttyAMA0"):
+        sbc_type = "RPi"
+        default_login = "pi"
+        gpsdev = "/dev/ttyAMA0"
+        sys.stdout.write("This is a Raspberry Pi, ")
+    else:
+        print("Unknown SBC type.")
+        raise SystemExit(1)
+
+    # Determine the version
+    revno = None
+    for line in open("/proc/cpuinfo"):
+        if line.startswith("Revision"):
+            revno = line.split()[2]
+    if revno is None or revno not in version_dict:
+        sys.stdout.write("can't identify SBC version.\n")
+        raise SystemExit(0)
+    else:
+        sys.stdout.write(" %s, %s" % (revno, version_dict[revno]))
+
+    for (switch, val) in options:
+        if switch == '-p':
+            pin = True
+        elif switch == '-h':
+            print(__doc__)
+            raise SystemExit(0)
+
+    if pin and os.geteuid() != 0:
+        print("The config function must run as root.")
+        raise SystemExit(0)
+
+    print("")
+
+    reboot_required = False
+
+    if sbc_type == "RPi":
+        print("")
+        bc = "/boot/config.txt"
+        dtoverlay = "dtoverlay=pps-gpio,gpiopin="
+        gpio_re = re.compile(dtoverlay + "([0-9]*)")
+        config_txt = open(bc).read()
+        m = gpio_re.search(config_txt)
+        if m:
+            print("GPIO pin configured to %s." % m.group(1))
+        else:
+            print("GPIO not configured")
+            raise SysyemExit(1)
+
+        if pin:
+            print("Configuring GPIO pin....")
+            #   GPIO04      |      P1-7     | Adafruit
+            #   GPIO18      |      P1-12    | Uputronics
+            #   GPIO05      |      PI-29    | SKU 424254
+            pin_dict = {
+                "Adafruit HAT" : 4,
+                "Uputronics HAT" : 18,
+                "SKU 42425" : 5,
+                }
+            while True:
+                newpin = None
+                for k in pin_dict:
+                    print("%s = %s" % (k[0], k))
+                sel = my_input("Select a GPS daughterboard type: ").upper()
+                for k in pin_dict:
+                    if k.startswith(sel):
+                        newpin = pin_dict[k]
+                if newpin is not None:
+                    print("Configuring for PPS via GPIO pin %s" % newpin)
+                    break
+
+            new_config = re.sub(gpio_re, dtoverlay + str(newpin), config_txt)
+            if new_config == config_txt:
+                print("internal error - no substitution")
+                raise SystemExit(1)
+            with open(bc, "w") as wp:
+                wp.write(new_config)
+            reboot_required = True
+
+        print("")
+        if reboot_required:
+            print("A reboot is required for configuration changes to take effect")
+            #os.system("reboot")
+        else:
+            print("No configuration changes - no reboot is required.")
+
+#end
+
