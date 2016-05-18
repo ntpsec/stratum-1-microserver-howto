@@ -839,7 +839,18 @@ Raspberry Pi 3 Model B, configured for the Adafruit HAT.
 Calling "pinup -p" as root allows you to choose a GPIO pin for 1PPS
 from a menu of daughterboard types.
 
-== Edge-detection issues and new HATs ==
+== Technical notes for advanced users ==
+
+=== Why GPSD? ===
+
+If you are already familar with ntpd and wonder why this recipe uses
+gpsd through SHM rather than ntpd's native refclock 20 GPS driver, the
+answer is this: when refclock 20 is configured to use 1PPS, it mixes
+in-band time data with 1PPS in a way that causes it to behave badly,
+and possibly get rejected as a falseticker, when 1PPS is only
+occasionally available.
+
+=== Edge-detection issues and new HATs ===
 
 The pps-gpio module as of April 2016 has a flaw. It catches only
 one edge of the PPS. You have a 50/50 chance you are seeing the

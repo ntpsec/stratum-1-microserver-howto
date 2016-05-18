@@ -1,31 +1,25 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:        ntp
+# Provides:        timeserver
 # Required-Start:  $network $remote_fs $syslog
 # Required-Stop:   $network $remote_fs $syslog
 # Default-Start:   2 3 4 5
 # Default-Stop:    1
-# Short-Description: Start NTP daemon
+# Short-Description: Start time service
 ### END INIT INFO
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 . /lib/lsb/init-functions
 
-DAEMON=/usr/sbin/ntpd
-PIDFILE=/var/run/ntpd.pid
+DAEMON1=/usr/sbin/local/ntpd
+PIDFILE1=/var/run/ntpd.pid
+DAEMON2=/usr/bin/local/gpsd
+PSDFILE2=/var/run/gpsd.pid
 
-test -x $DAEMON || exit 5
-
-if [ -r /etc/default/ntp ]; then
-	. /etc/default/ntp
-fi
-
-if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
-	NTPD_OPTS="$NTPD_OPTS -c /var/lib/ntp/ntp.conf.dhcp"
-fi
-
+test -x $DAEMON1 || exit 5
+test -x $DAEMON2 || exit 5
 
 LOCKFILE=/var/lock/ntpdate
 
@@ -44,7 +38,7 @@ unlock_ntpdate() {
 	fi
 }
 
-RUNASUSER=ntp
+RUNASUSER=nobody
 UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
 if test "$(uname -s)" = "Linux"; then
         NTPD_OPTS="$NTPD_OPTS -u $UGID"
@@ -52,22 +46,30 @@ fi
 
 case $1 in
 	start)
-		log_daemon_msg "Starting NTP server" "ntpd"
-		if [ -z "$UGID" ]; then
-			log_failure_msg "user \"$RUNASUSER\" does not exist"
-			exit 1
-		fi
-		lock_ntpdate
-  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE --startas $DAEMON -- -p $PIDFILE $NTPD_OPTS
+		lock_ntpdate       		
+		# Clock skew can be so severe that ntpd -g loses its cookies
+		ntpdig -t 2 -S -M 1 clock.isc.org
+		# Launch ntpd
+		log_daemon_msg "Starting NTP server" "timeservice"
+  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -p $PIDFILE1 $NTPD_OPTS
 		status=$?
+		log_end_msg $status
 		unlock_ntpdate
+		# Make sure the UART device is in a good state
+		stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+		# Launch gpsd
+		log_daemon_msg "Starting GPSD server" "timeservice"
+  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE2 --startas $DAEMON2 -- -P $PIDFILE2 $GPSD_OPTS /dev/gpsd0
+		status=$?
 		log_end_msg $status
   		;;
 	stop)
-		log_daemon_msg "Stopping NTP server" "ntpd"
-  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
+		log_daemon_msg "Stopping timeservice" "timeservice"
+  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE1
 		log_end_msg $?
-		rm -f $PIDFILE
+  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE2
+		log_end_msg $?
+		rm -f $PIDFILE1 $PIDFILE2
   		;;
 	restart|force-reload)
 		$0 stop && sleep 2 && $0 start
@@ -83,10 +85,12 @@ case $1 in
 		exit 3
 		;;
 	status)
-		status_of_proc $DAEMON "NTP server"
+		status_of_proc $DAEMON1 "time service"
 		;;
 	*)
 		echo "Usage: $0 {start|stop|restart|try-restart|force-reload|status}"
 		exit 2
 		;;
 esac
+
+# end
