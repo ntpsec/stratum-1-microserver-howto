@@ -83,6 +83,7 @@ def config():
     print("")
 
     if sbc_type == "RPi":
+        os.system("systemctl disable hciuart")
         bc = "/boot/config.txt"
         # Has no effect on a Pi 2.  Do it everywhere, in case we swap
         # an SD from a 3 to a 2 and have to wonder why it fails.

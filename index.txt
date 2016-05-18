@@ -393,9 +393,15 @@ serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
 This change can effectively be reversed by commenting out the
 dtoverlay and force_turbo lines.
 
-Create a symlink to the GPS device to make it easier to refer
+{--config} To go with this, do:
+
+------------------------------------------------------------------------
+# systemctl disable hciuart
+------------------------------------------------------------------------
+
+{--config} Create a symlink to the GPS device to make it easier to refer
 to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
-accomplish this {--config}:
+accomplish this:
 
 ------------------------------------------------------------------------
 KERNEL=="ttyAMA0", SYMLINK+="gps0"
