@@ -269,6 +269,7 @@ if __name__ == "__main__":
         print("  --config = basic SBC configuration")
         print("  --build = build timeserver software")
         print("  --install = install timeserver software")
+        print("  --secure = secure the timeserver")
         raise SystemExit(1)
 
     if sys.argv[1] == "--config":
