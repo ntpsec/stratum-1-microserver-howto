@@ -256,7 +256,8 @@ def secure():
         print("Default login has been removed.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build",
+                                                "--install", "--secure"):
         print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeservice software")
