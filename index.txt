@@ -770,7 +770,8 @@ verify that you can see time samples coming in.
 
 === Secure the machine ===
 
-Final parts of this step can be automated with "./clocmaker --secure" done as root.
+Final parts of this step can be automated with "./clocmaker --secure"
+done as root.
 
 The fact that your SBC has a known default name and default user means
 that it is very vulnerable to being attacked and exploited by anyone
@@ -778,9 +779,6 @@ who gets access to your network.  Here's how to fix this:
 
 . On the SBC, create an account for "me" (whatever username you like)
   using 'adduser' run as root.
-
-. Move everything from the default-user $HOME to your new one. Don't
-  forget to fix the oership permissions with "chmod -R . ~".
 
 . On the SBC, add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
@@ -801,6 +799,7 @@ who gets access to your network.  Here's how to fix this:
 
 . Reboot the SBC. Verify that you can login via ssh from your host
   machine to the build account on the SBC without giving a password.
+  Then go root.
 
 . {--secure} On the SBC, disable the default-user login (on the RPi
   "deluser pi" as root).
@@ -809,6 +808,9 @@ who gets access to your network.  Here's how to fix this:
   do this, edit its /etc/ssh/sshd_config file.  Change the
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
+
+You will probably want to re-fetch clockmaker and do a "clockmaker
+--build" in your home directory.
 
 == Performance tuning ==
 

@@ -215,7 +215,7 @@ def install():
 
 def secure():
     "Secure system after a non-default user account has been ssh-enabled."
-    if not os.path/isdir(".ssh"):
+    if not os.path.isdir(".ssh"):
         print("No ssh keys have been installed, bailing out.")
         raise SystemExit(1)
 
