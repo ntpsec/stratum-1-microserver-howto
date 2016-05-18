@@ -210,6 +210,9 @@ def install():
     print("Enabling time service")
     os.system("systemctl enable timeservice")
 
+    print("A reboot is fequired for these changes to take effect.")
+    os.system("reboot")
+
 def secure():
     "Secure system after a non-default user account has been ssh-enabled."
     if not os.path/isdir(".ssh"):
