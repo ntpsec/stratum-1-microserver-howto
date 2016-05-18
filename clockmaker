@@ -2,14 +2,16 @@
 #
 # Configure an SBC as a single-purpose timeserver.
 #
-# To run this, you must have created a non-root, non-default account
-# on the SBC. Copy it to the account's $HOME, go root there, and
-# run it.
+# To run this, use either the default user account or non-root,
+# non-default account on the SBC. Copy it to the account's $HOME, go
+# root there, and run it.  The --build mode copies over some files
+# that the --nstall mode will install.
 #
 # If there is a local config utility such as raspi-config on the
-# Raspberry Pi, you should already have run it before this.
+# Raspberry Pi, you should already have run it before calling the
+# --config mode.
 #
-# The evironment is assumed to be Debian Linux variant.
+# The evironment is assumed to be a Debian Linux variant.
 #
 import sys, os, re
 
@@ -191,6 +193,9 @@ def install():
 
     print("Installing NTPsec")
     os.system("(cd ntpsec && ./waf install) && cp ntp.conf /etc")
+
+    print("Installing pinup")
+    os.system("cp pinup /usr/local/bin")
 
     if "Time service customization" in open("/etc/rc.local").read():
         print("Time service setup already installed.")
