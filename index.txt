@@ -6,9 +6,11 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-version 0.6
+version 0.7
 
-THIS IS AN INCOMPLETE DRAFT
+THIS IS AN INCOMPLETE DRAFT. Instructions are tested and working up to
+but not including the very last step - getting the timeservice script
+to run at boot time. Also I haven't seen 1PPS out of the SKU 424254 yet.
 
 == Introduction ==
 
