@@ -44,11 +44,13 @@ if test "$(uname -s)" = "Linux"; then
         NTPD_OPTS="$NTPD_OPTS -u $UGID"
 fi
 
+NTPDIG_CHIMER=clock.isc.org
+
 case $1 in
 	start)
 		lock_ntpdate       		
 		# Clock skew can be so severe that ntpd -g loses its cookies
-		ntpdig -t 2 -S -M 1 clock.isc.org
+		ntpdig -t 2 -S -M 1 $NTPDIG_CHIMER
 		# Launch ntpd
 		log_daemon_msg "Starting NTP server" "timeservice"
   		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -p $PIDFILE1 $NTPD_OPTS
@@ -86,6 +88,7 @@ case $1 in
 		;;
 	status)
 		status_of_proc $DAEMON1 "time service"
+		status_of_proc $DAEMON2 "time service"
 		;;
 	*)
 		echo "Usage: $0 {start|stop|restart|try-restart|force-reload|status}"

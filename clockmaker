@@ -177,7 +177,8 @@ def build():
     os.chdir("..")
 
     os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
-    os.system("rm -f ntp.conf; wget %s/pinup" % webfaq)
+    os.system("rm -f pinup; wget %s/pinup" % webfaq)
+    os.system("rm -f timeserver; wget %s/timeserver" % webfaq)
 
 def install():
     "Install timeserver software & start script once everything has been tested."
@@ -196,6 +197,9 @@ def install():
 
     print("Installing pinup")
     os.system("cp pinup /usr/local/bin")
+
+    print("Installing timeserver inut script")
+    os.system("cp timeserver /etc/init.d")
 
     if "Time service customization" in open("/etc/rc.local").read():
         print("Time service setup already installed.")

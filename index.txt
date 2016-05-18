@@ -724,15 +724,12 @@ Install the pinup script:
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Add these lines to /etc/rc.local, before any final "exit 0" {--install}
+Install this text as the file /etc/init.d/timeserver:
 
 ------------------------------------------------------------------------
-# Time service customization
-stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
-gpsd /dev/gpsd0
-sleep 2
-ntpd -g
+include::timeserver[]
 ------------------------------------------------------------------------
+
 
 Reboot.  Check that gpsd and ntpd are running, and use ntpq -p to
 verify that uou can see time samples coming in.
@@ -826,7 +823,7 @@ address.
 == Using pinup ==
 
 We provide a script called link:pinup[pinup] that makes it easy to
-query the configuration of your timserver, and change its 1PPS
+query the configuration of your timeserver, and change its 1PPS
 GPIO pin when required.
 
 Call "pinup" without arguments to query the configuration:
