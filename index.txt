@@ -932,9 +932,6 @@ include some BeagleBone variant.
 
 - [[[NTPSEC]]] https://www.ntpsec.org/[The NTPsec project]
 
-- [[[REMOVE-SYSTEMD]]]
-  http://without-systemd.org/wiki/index.php/How_to_remove_systemd_from_a_Debian_jessie/sid_installation[How to remove systemd from a Debian jessie/sid installation]
-
 - [[[DOREY]]] http://www.briandorey.com/post/Raspberry-Pi-3-UART-Overlay-Workaround[Raspberry Pi 3 UART Overlay Workaround]
 
 - [[[ADAFRUIT-SETUP]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup[Pi GPS Setup]
@@ -942,8 +939,6 @@ include some BeagleBone variant.
 - [[[ADAFRUIT-TEST]]] https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/basic-test[Basic Test]
 
 - [[[TAYLOR]]] http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
-
-- [[[NEVILL]]] https://darksky.io/setting-up-a-stratum-1-ntp-server-on-a-raspberry-pi.html[Setting up a Stratum 1 NTP server on a Raspberry Pi]
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
 
@@ -956,9 +951,5 @@ Phil Salkie.
 == Other resources ==
 
 http://ava.upuaut.net/?p=726[Not quite 5 minute guide to making an NTP Server]
-
-//TO DO:
-// http://www.digikey.com/product-detail/en/seiko-instruments/XH414H-IV01E/728-1038-1-ND/1631941?WT.srch=1&gclid=Cj0KEQjwo_y4BRD0nMnfoqqnxtEBEiQAWdA121uytiEWyuT3qkSmZFXC2OVk8SEZOOc6iLZEvuKx3nAaAvgp8P8HAQ#substitute-section
-// How to set stationary mode on the u-blox 8.
 
 //end
