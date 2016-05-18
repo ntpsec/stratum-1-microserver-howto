@@ -782,7 +782,7 @@ who gets access to your network.  Here's how to fix this:
 . Move everything from the default-user $HOME to your new one. Don't
   forget to fix the oership permissions with "chmod -R . ~".
 
-. On the SBC, add add yourself to the 'sudo' and 'dialout' groups.
+. On the SBC, add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
   later test steps easier.  Replace 'me' with the username you desire.
 +
