@@ -248,7 +248,7 @@ your command will look something like:
 We provide a script, link:ddimage[ddimage], to semi-automate this process.
 Read it. You should always read any script that will run with root
 permissions, to check that it doesn't do anything nefarious.  Give
-it 'sdd', the basename of your SD reader. It will do some sanity
+it the basename of your SD reader (usually "sdd"). It will do some sanity
 checks, then generate a command like the above.
 
 Your ddimage command execution should look like this:
@@ -330,7 +330,12 @@ download link:clockmaker[clockmaker], a Python script which
 does much of this recipe for you. Here's how to use it:
 
 1. Copy clockmaker to to the pi user's home directory with
-   this command: "wget {home}clockmaker"
+   this command:
++
+[subs="attributes"]
+------------------------------------------------------------------------
+wget {home}clockmaker
+------------------------------------------------------------------------
 
 2. Read it. You should always read any script that will run with root
    permissions, to check that it doesn't do anything nefarious.
@@ -343,6 +348,8 @@ does much of this recipe for you. Here's how to use it:
 
 5. Leave root. Then run "clockmaker --build".  This will clone and build the
    special timeserver software.
+
+Some further uses of clocmaker are discussed in later steps.
 
 The clockmaker script is intelligent about not redoing steps it has
 already done; it is safe to run each stage multiple times.  Redoing
