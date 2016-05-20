@@ -6,9 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-version 0.7
-
-THIS IS AN INCOMPLETE DRAFT. I haven't seen 1PPS out of the SKU 424254 yet.
+version 0.8
 
 == Introduction ==
 
@@ -28,18 +26,16 @@ external GPS because a HAT uses an internal RS-232 interface that cuts
 latency and jitter compared to a USB GPS, and provides the 1PPS signal
 required for precision time service.  Generic USB GPSes do not deliver
 this signal and therefore cannot be used for Stratum 1 service
-footnote[There is one line of USB GPSes, the Navisys
+footnote:[There is one line of USB GPSes, the Navisys
 GR601-W/GR701-W/GR801-W, that provides 1PPS.].
 
 Most of this build is actually independent of any one daughterboard's
-hardware idiosyncracies. The recipe was tested using an Adafruit GPS
-HAT, but some alternatives are given in a table in the parts list.
-
-The build may also generalize to other HAT-compatible Unix SBCs such as
-the Odroid C2, though details of those remain to be filled in. To
-emphasize which parts of the build won't vary versus those that
-will, we will refer to the main board as "SBC" for the invariant parts
-and as "Pi", "Pi 2", "Pi 3", or "Odroid" for the board-specific parts.
+hardware idiosyncracies. The build may also generalize to other
+HAT-compatible Unix SBCs such as the Odroid C2, though details of
+those remain to be filled in. To emphasize which parts of the build
+won't vary versus those that will, we will refer to the main board as
+"SBC" for the invariant parts and as "Pi", "Pi 2", "Pi 3", or "Odroid"
+for the board-specific parts.
 
 Where this HOWTO says "I" it refers to the author's direct experience;
 "we" includes both the author and various technical experts who
@@ -49,7 +45,7 @@ This tutorial assumes some basic Unix competence. You will not need to
 be a programmer or an expert system administrator; you will need to
 know your way around the command line a little and how to edit files.
 
-Final note: if you're looking for instructions on stting up time
+Final note: if you're looking for instructions on setting up time
 service with a conventional PS and cable-attached GPS, see <<GPSD-SERVICE>>.
 
 == Parts list and hardware assembly ==
@@ -76,27 +72,29 @@ You will need:
 
 * A micro-SD reader/writer for making bootable OS images.
 
-* A micro-SD card.  1GB is minimal. 4GB is plenty.
+* A micro-SD card. 1GB is minimal. 4GB is plenty.
 
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
 
 * (Optional) A case to protect your hardware from dust and curious
-  felines.  Any case with a 30mm or greater exterior height should be
-  able to hold both SBC and HAT.
+  felines.
 
-* (Optional) 2 hex standoffs, 11mm with M2.5 threading, 4 compatible
+* (Optional) 2 hex standoffs, 11mm with M2.5 threading, compatible
   screws.  Adafruit sells these <<STANDOFFS>>. They are the very
   similar to standard spacers used in PC cases; if you keep the small
   parts from old PCs around you'll have a dozen of them and probably
   the screws to match.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
-board and a 40-pin header. The SKU 424254 comes presoldered.
+board and a 40-pin header. The SKU 424254 comes presoldered.  The
+header on the Uputronics board snugs ino an on-board fitting and does
+not requre soldering.
 
 Note that if you're going to use a CR2032 with the Uputronics, a
-jumper on ther board needs to be desoldered.  It lives in a white box
-outline near the + pole of the battery cradle.
+jumper on the board needs to be desoldered.  It lives in a white box
+outline near the + pole of the battery cradle. As shipped, it is
+covered by a small dome of solder.
 
 The header on the assembled HAT will fit down over the double row of pins
 on one edge of the SBC, such that when fully assembled the SBC and HAT will
@@ -312,7 +310,7 @@ are under "Internationalization Options".  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
 code followed by ".UTF-8". Also, set up WiFi country.
 
-Under "Advanced Options" (9), change your hostname to something
+Under 'Advanced Options' (9), change your hostname to something
 entertaining (A2). If you forget to do this, you can edit /etc/hostname
 later on.
 
@@ -349,7 +347,7 @@ wget {home}clockmaker
 5. Leave root. Then run "clockmaker --build".  This will clone and build the
    special timeserver software.
 
-Some further uses of clocmaker are discussed in later steps.
+Some further uses of clockmaker are discussed in later steps.
 
 The clockmaker script is intelligent about not redoing steps it has
 already done; it is safe to run each stage multiple times.  Redoing
@@ -777,7 +775,7 @@ verify that you can see time samples coming in.
 
 === Secure the machine ===
 
-Final parts of this step can be automated with "./clocmaker --secure"
+Final parts of this step can be automated with "./clockmaker --secure"
 done as root.
 
 The fact that your SBC has a known default name and default user means
