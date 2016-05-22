@@ -46,7 +46,7 @@ be a programmer or an expert system administrator; you will need to
 know your way around the command line a little and how to edit files.
 
 Final note: if you're looking for instructions on setting up time
-service with a conventional PS and cable-attached GPS, see <<GPSD-SERVICE>>.
+service with a conventional PC and cable-attached GPS, see <<GPSD-SERVICE>>.
 
 == Parts list and hardware assembly ==
 
@@ -72,7 +72,7 @@ You will need:
 
 * A micro-SD reader/writer for making bootable OS images.
 
-* A micro-SD card. 1GB is minimal. 4GB is plenty.
+* A micro-SD card. 4GB is minimal. 8GB is plenty.
 
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
@@ -88,8 +88,8 @@ You will need:
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.  The
-header on the Uputronics board snugs ino an on-board fitting and does
-not requre soldering.
+header on the Uputronics board snugs into an on-board fitting and does
+not require soldering.
 
 Note that if you're going to use a CR2032 with the Uputronics, a
 jumper on the board needs to be desoldered.  It lives in a white box
@@ -125,24 +125,22 @@ female-threaded upper ends using the screws.  This will help
 protect the headers and pins from mechanical stress if the
 assembly is dropped or has something sat on it.
 
-. Optional: put the combination into a case.  Anything sold as a
-"Raspberry Pi" case ought to do for the Adafruit HAT, because a single
-HAT doen't project above the USB & Ethernet connectors on the SBC. The
-Raspberry Pi Foundation Case qualifies, but for functional reasons we
-recommend a transparent case.  The Adafruit 2258 case <<2258>>, for
-example, should do nicely.  The Uputronic and SKU 424254 HATs, alas,
-have projecting SMA antenna jacks that won't fit in a stock case. A
-bit of work with a dremel will fix that.
+. Optional: fit the SBC into a case bottom before plugging in the HAT.
+Anything sold as a "Raspberry Pi" case ought to do for the Adafruit
+HAT, because a single HAT doen't project above the USB & Ethernet
+connectors on the SBC. The Raspberry Pi Foundation Case qualifies, but
+for functional reasons we recommend a transparent case.  The Adafruit
+2258 case <<2258>>, for example, should do nicely.  The Uputronic and
+SKU 424254 HATs, alas, have projecting SMA antenna jacks that won't
+fit in a stock case. A bit of work with a dremel tool will fix that.
 
 == Understanding the GPIO connector ==
 
-The pins you'll plug the HAT into are the SBC's primary or P1 GPIO
-(General Purpose I/O) header.  There's a second or P5 GPIO connector
-near it consisting of a 2x3 array of through holes. This build won't
-use that.
+The pins you'll plug the HAT into are the SBC's primary GPIO
+(General Purpose I/O) header.
 
 The Pi 3, other recent Pi variants, and the Odroid have 40 pins in the
-P1 header.  Older variants, the original Pi A and B, have only 26
+GPIO header.  Older variants, the original Pi A and B, have only 26
 pins.  The assignments for those pins on later versions are
 backward-compatible.
 
@@ -152,7 +150,7 @@ CPU.  This can cause confusion, especially since some kit-builders use
 variant GPIO numberings.  All GPIO numbers in this HOWTO reference
 <<PI-PINOUT>>.
 
-Physical pins are best referred to as P1-[1-40], P5-[1-8] or as
+Physical pins are best referred to as P-[1-40] or as
 GPIO[0-31].  Some are typically pre-configured for specific functions
 (serial, i2c, etc.)  Two that will be important for this build are the
 TX and RX serial lines attached to the SBC's UART.
@@ -189,7 +187,7 @@ This recipe consists of a few commands run on your host machine, and
 more on your SBC.  A '#' before a command line means you need to be
 root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
-"sudo bash" or (after you haves set a root password) "su -".
+"sudo bash" or (after you haves set a +root password) "su -".
 
 === Making a bootable SD ===
 
@@ -243,6 +241,9 @@ your command will look something like:
 # dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
+If you're using a built-in SD reader port, e.g. on a laptop, the
+devicename might be something like '/dev/mmcblk0'
+
 We provide a script, link:ddimage[ddimage], to semi-automate this process.
 Read it. You should always read any script that will run with root
 permissions, to check that it doesn't do anything nefarious.  Give
@@ -282,6 +283,11 @@ panic. Check for a green light on the Pi's Ethernet port to be sure
 it's plugged in properly. Make sure your SD card is right-side-up and
 properly seated. Wait 30 seconds and try again.
 
+Another possibility is that your host doesn't have a zeroconf
+implementation like Linux's 'avahi-daemon' installed.  Try to fix
+that.  If you can't, your host setup is outside the scope of what
+this HOWTO can handle; get expert help.
+
 Only persistent failure after you've tried these things mean you need
 to rebuild the SD card image. Try with a different card, as sometimes
 older ones go flaky.
@@ -297,6 +303,10 @@ The hardest part is now done.
 
 Call 'sudo raspi-config' on the Pi.  
 
+------------------------------------------------------------------------
+# raspi-config
+------------------------------------------------------------------------
+
 Request 'Expand Filesystem' by keying Return with the select bar on
 that entry.  This will make all the space on the SD above the end of
 your copied OS image available on next reboot.
@@ -309,6 +319,13 @@ Go through your normal configuration - timezone, locale, etc.  These
 are under "Internationalization Options".  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
 code followed by ".UTF-8". Also, set up WiFi country.
+
+It is not likely you will ever use a direct keyboard with this machine
+(as opposed to getting to it with ssh). But just in case, you might
+want to set the keyboard type.  Raspbian defaults to a "Generic
+105-key (Intl) PC" rather than US keyboard layout.  If you are not
+expecting this, the differenced (for example, " and @ being swapped)
+can trip you up.
 
 Under 'Advanced Options' (9), change your hostname to something
 entertaining (A2). If you forget to do this, you can edit /etc/hostname
@@ -398,7 +415,7 @@ This change restores the behavior of the Pi2 and earlier, in which the
 serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
 
 This change can effectively be reversed by commenting out the
-dtoverlay and force_turbo lines.
+dtoverlay line.
 
 {--config} To go with this, do:
 
@@ -431,15 +448,15 @@ table:
 [width="25%",frame="topbot",options="header"]
 |============================================
 | Logical pin   | Physical pin  | HAT
-|   GPIO04      |      P1-7     | Adafruit
-|   GPIO18      |      P1-12    | Uputronics
-|   GPIO05      |      PI-29    | SKU 424254
+|   GPIO04      |      P-7     | Adafruit
+|   GPIO18      |      P-12    | Uputronics
+|   GPIO05      |      P-29    | SKU 424254
 |============================================
 
 //FIXME: Verify SKU 424254 info - check PI 29 with a scope
 
 There is a different, non-HAT Adafruit product, the "Ultimate GPS
-Breakout Board", that also uses GPIO18/P1-12.  This may be a source of
+Breakout Board", that also uses GPIO18/P-12.  This may be a source of
 confusion if you read some of the references in this document.
 
 There is a Linux kernel driver called pps-gpio which,
@@ -470,7 +487,7 @@ installing some packages need for the next step.
 
 Next thing you want to do is verify that the GPS works.  Put your
 SBC+HAT combination on someplace like a windowsill with a good sky
-view outside.  The HATs this HOWTO describes have very good
+view outside.  The HATs described in this HOWTO have very good
 weak-signal discrimination and are much less fussy about siting than
 older GPS receivers.
 
@@ -657,7 +674,7 @@ GPS Serial data reference (NTP0)::
    via the shared-memory mailbox, unit 0.  These will be labeled GPS
    because they are the GPS's in-band time reports.
 
-GPS Serial data reference (NTP0)::
+GPS Serial data reference (NTP1)::
    The line beginning "server 127.127.28.1" tells it we're expecting fixes
    via the shared-memory mailbox, unit 1.  These will be labeled PPS
    because they come from the GPS's 1PPS.
@@ -699,6 +716,8 @@ as it can sometimes take a few seconds to complete.
  2001:470:8d1c:c .GPPS.           1 u   28   64    1   56.784   23.883  19.294
  caprica.willgly 142.66.101.13    2 u   37   64    1   34.297   23.901  17.210
 ------------------------------------------------------------------------
+
+//FIXME: No longer matches ntp.conf
 
 You're hoping for a display like the above, with two local devices and
 four pool sources.  A nonzero "reach" column on a source line
@@ -765,7 +784,7 @@ Enable startup at boot with:
 
 What's going on here: the file /etc/init.d/timeservice is a System V init
 script conforming to LSB conventions.  If you decide to ditch systemd
-you can mame a link to it from, e.g. /etc/rc3.d and the right thing
+you can make a link to it from, e.g. /etc/rc3.d and the right thing
 will happen.  The file /etc/systemd/system/timeservice.service is
 a systemd unit file that will call the System V init script to do the
 real work.
@@ -803,7 +822,7 @@ who gets access to your network.  Here's how to fix this:
   http://www.catb.org/~esr/sshexport/[sshexport] tool may be useful.
 
 . Reboot the SBC. Verify that you can login via ssh from your host
-  machine to the build account on the SBC without giving a password.
+  machine to the "me" account on the SBC without giving a password.
   Then go root.
 
 . {--secure} On the SBC, disable the default-user login (on the RPi
@@ -856,10 +875,14 @@ The resulting configuration is pretty minimal, as you can verify by
 running "ps ax" and noticing that most of the background processes are
 kernel threads.
 
+Note that triggerhappy is required for raspi-config; after you remove
+it, 'apt-get autoremove' will remove raspi-config.  This is easily
+reversed by reinstalling raspi-config.
+
 WiFi is deliberately not removed, in order to give
 you a fallback TCP/IP access when a cable is inconvenient.
 
-=== Configuring for a static IP address ==
+=== Configuring for a static IP address ===
 
 You can choose to configure the SBC to use a fixed, static IP
 address. That process is described in <<EAT-STATIC>>.
@@ -939,10 +962,11 @@ the pps-gpio driver triggers on leading or trailing edge.
 
 == A note about the Odroid C2 ==
 
-The Odroid C2 is an ARM-based hackerboard strongly resembling the
-Raspberry Pi, but with better hardware and at a slighly higher price
-point. The main connector on the Odroid is pin-compatible with the
-40-pin Pi connector.  A company representative has stated that
+The http://www.hardkernel.com/main/products/prdt_info.php[Odroid C2]
+is an ARM-based hackerboard strongly resembling the Raspberry Pi, but
+with better hardware and at a slighly higher price point. The main
+connector on the Odroid is pin-compatible with the 40-pin Pi
+connector.  A company representative has stated that
 forum.odroid.com/viewtopic.php?f=111&t=7660[the Adafruit HAT should
 work with it]
 
@@ -972,7 +996,7 @@ include some BeagleBone variant.
 
 - [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
 
-- [[2258]] https://www.adafruit.com/product/2258
+- [[[2258]]] https://www.adafruit.com/product/2258[Adafruit Raspberry Pi B+ / Pi 2 / Pi 3 Case - Smoke Base - w/ Clear Top]
 
 - [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
