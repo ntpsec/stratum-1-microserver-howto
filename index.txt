@@ -6,7 +6,6 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-version 0.8
 
 == Introduction ==
 
@@ -56,7 +55,7 @@ You will need:
   Raspberry Pi 3: these instructions cover older variants as well.
 
 * One compatible GPS HAT.  Possibilities are:
-
++
 [width="50%",frame="topbot",options="header"]
 |=======================================================================
 | HAT type                                 | Battery | Build status
@@ -64,6 +63,11 @@ You will need:
 | {upuhat}[Uputronics GPS Expansion Board] | CR2032  | Tested
 | {dxhat}[SKU 424254]                      |    -    | Tested
 |=======================================================================
++
+Special note about the SKU 424254: despite vendor claims, the trace
+thast should have connected GPIO5 to the GPS 1PPS was absent the
+revision of the board I received. To use it for time-service,
+link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
   powered by an on-board supercap, included).  The CR1220 is cheapest
@@ -452,8 +456,6 @@ table:
 |   GPIO18      |      P-12    | Uputronics
 |   GPIO05      |      P-29    | SKU 424254
 |============================================
-
-//FIXME: Verify SKU 424254 info - check PI 29 with a scope
 
 There is a different, non-HAT Adafruit product, the "Ultimate GPS
 Breakout Board", that also uses GPIO18/P-12.  This may be a source of
@@ -953,8 +955,6 @@ HATs marked "leading edge" below do not require compensation.
 |Uputronics HAT | Ublox 8    |   100ms     | leading edge 
 |SKU 424254     | Ublox 6    |   100ms     | leading edge
 |===========================================================
-
-//FIXME: Verify SKU 424254 info with a scope
 
 These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
