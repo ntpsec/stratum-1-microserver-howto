@@ -263,7 +263,7 @@ Your command will look something like this:
 # dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
-To use ddimmage, read it. You should always read any script that will
+To use ddimage, first read it. You should always read any script that will
 run with root permissions, to check that it doesn't do anything
 nefarious.  Give it the basename of your SD reader (usually "sdd"). It
 will do some safety checks, then generate a command like the above.
@@ -305,7 +305,7 @@ properly seated. Wait 30 seconds and try again.
 Another possibility is that your host doesn't have a zeroconf
 implementation like Linux's 'avahi-daemon' installed.  Try to fix
 that. If that doesn't work, attach a physical keyboard and display to
-the SBC and figure out the assigned address with "ip a" command.
+the SBC and figure out the assigned address with the "ip a" command.
 
 Only persistent failure after you've tried these things mean you need
 to rebuild the SD card image. Try with a different card, as sometimes
@@ -344,7 +344,7 @@ It is not likely you will ever use a direct keyboard with this machine
 (as opposed to getting to it with ssh). But just in case, you might
 want to set the keyboard type.  Raspbian defaults to a "Generic
 105-key (Intl) PC" rather than US keyboard layout.  If you are not
-expecting this, the differenced (for example, " and @ being swapped)
+expecting this, the differences (for example, " and @ being swapped)
 can trip you up.
 
 Under 'Advanced Options' (9), change your hostname to something
@@ -467,7 +467,7 @@ table:
 
 [width="25%",frame="topbot",options="header"]
 |============================================
-| Logical pin   | Physical pin  | HAT
+| Logical pin   | Physical pin | HAT
 |   GPIO04      |      P-7     | Adafruit
 |   GPIO18      |      P-12    | Uputronics
 |   GPIO05      |      P-29    | SKU 424254
@@ -588,10 +588,10 @@ Now exit root, returning to the default-user account, and build GPSD.  If
 you are using clockmaker, "./clockmaker --build" will automate
 the build steps (but not the test procedures).
 
-It's best to clone the GPSD repository and build
-from that rather than installing the Raspbian package.  This both
-guarantees you the latest fixes and avoids installing a start-on-boot
-script that you don't want in this build.
+It's best to clone the GPSD repository and build from that rather than
+installing the Raspbian package.  This both guarantees you the latest
+fixes and avoids installing a start-on-boot script that you don't want
+in this build.
 
 The prerequisites not present in a stock Raspbian can be covered with
 this import {--config}:
@@ -733,8 +733,6 @@ as it can sometimes take a few seconds to complete.
 +clock.isc.org   .GPS.            1 u    7   64    3   74.901   -2.051   1.255
 -tick.apple.com  .GPS.            1 u    6   64    3  479.285  204.508 109.733
 ------------------------------------------------------------------------
-
-//FIXME: No longer matches ntp.conf
 
 You're hoping for a display like the above, with two local devices and
 four pool sources.  A nonzero "reach" column on a source line
