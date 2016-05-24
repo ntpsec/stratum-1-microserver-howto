@@ -18,7 +18,7 @@ manifest:
 
 LANDING = $(HOSTDIR)
 upload: index.html
-	scp -q $(SNIPPETS) $(GOODIMAGE) $(LANDING)
+	scp -q $(SNIPPETS) $(GOODIMAGE) *.jpg $(LANDING)
 	scp -q index.html $(LANDING)/index.html
 
 VERSION=$(shell sed <index.txt -n '/^version /s///p')

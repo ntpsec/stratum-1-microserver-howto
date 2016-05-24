@@ -90,7 +90,7 @@ def config():
         # an SD from a 3 to a 2 and have to wonder why it fails.
         rp3_overlay = """
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
-dtoverlay=pi3-miniuart-bt-overlay
+dtoverlay=pi3-miniuart-bt
 """
         if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
             print("Bluetooth use of UART already disabled.")

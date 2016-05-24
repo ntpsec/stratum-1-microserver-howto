@@ -25,5 +25,12 @@ image=2016-03-18-raspbian-jessie-lite.img
 
 echo "Copying..."
 dcfldd bs=4M if=$image of=$target
+
+if df | grep $target >/dev/null
+then
+    echo "Unmounting..."
+    umount
+fi
+
 echo "Done"
 exit 0

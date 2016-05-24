@@ -6,6 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
+v0.9, May 2015
 
 == Introduction ==
 
@@ -230,29 +231,42 @@ Install dcfldd on your host machine:
 # apt-get install dcfldd
 ------------------------------------------------------------------------
 
-You can use the older 'dd' for the next step, but dfcldd is better
-about giving you progress messages during the operation.
+Insert an SD card in the reader and, if it's a USB reader, plug the
+other end into a USB port on your host.
 
-Insert an SD card in the reader and plug the reader into a USB port on
-your host.  Note: your host may automount the card if it has been set
-up for Linux before.  You should unmount it.
+Note: your host may automount the card if it has been set up for Linux
+before - whether this happens depends on what distribution and desktop
+environment you are using. If your window manger pops up a
+file-browser view of the device, you should unmount it.
 
-Follow the directions at <<INSTALLATION>>, using dfcldd.  On a
-host running Debian or Ubuntu, the device will likely be /dev/sdd and
-your command will look something like:
+You can use the older 'dd' if you do the next step manually, but
+dfcldd is better about giving you progress messages during the
+operation.
+
+Better yet, we provide a script, link:ddimage[ddimage], to
+semi-automate the next step of the process; it's safer to use that,
+because it performs some sanity checks that should prevent you from
+scribbling on your disks. If you used clockmaker --build, ddimage will
+have been downloaded to the directory where that script was run.
+
+Either way, automatic or manual, you'll need to know the device name
+of your SD card reader.  On a host running Debian or Ubuntu, the USB
+device will most likely be /dev/sdd, but could have a different last letter
+depending on how many hard drives you have and how your reader firmware
+is set up. If you're using a built-in SD reader port, e.g. on a laptop, the
+devicename might be something like '/dev/mmcblk0'
+
+To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
+Your command will look something like this:
 
 ------------------------------------------------------------------------
 # dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
-If you're using a built-in SD reader port, e.g. on a laptop, the
-devicename might be something like '/dev/mmcblk0'
-
-We provide a script, link:ddimage[ddimage], to semi-automate this process.
-Read it. You should always read any script that will run with root
-permissions, to check that it doesn't do anything nefarious.  Give
-it the basename of your SD reader (usually "sdd"). It will do some sanity
-checks, then generate a command like the above.
+To use ddimmage, read it. You should always read any script that will
+run with root permissions, to check that it doesn't do anything
+nefarious.  Give it the basename of your SD reader (usually "sdd"). It
+will do some safety checks, then generate a command like the above.
 
 Your ddimage command execution should look like this:
 
@@ -284,13 +298,14 @@ $ ssh pi@raspberrypi.local
 If ssh tells you it can't see any host named 'raspberrypi.local',
 either the Pi hasn't yet booted or your network can't see it. Don't
 panic. Check for a green light on the Pi's Ethernet port to be sure
-it's plugged in properly. Make sure your SD card is right-side-up and
+it's plugged in properly. Make sure your SD card is electrode-side-up
+(unplugging the power before removing it, if you have to) and
 properly seated. Wait 30 seconds and try again.
 
 Another possibility is that your host doesn't have a zeroconf
 implementation like Linux's 'avahi-daemon' installed.  Try to fix
-that.  If you can't, your host setup is outside the scope of what
-this HOWTO can handle; get expert help.
+that. If that doesn't work, attach a physical keyboard and display to
+the SBC and figure out the assigned address with "ip a" command.
 
 Only persistent failure after you've tried these things mean you need
 to rebuild the SD card image. Try with a different card, as sometimes
@@ -313,7 +328,8 @@ Call 'sudo raspi-config' on the Pi.
 
 Request 'Expand Filesystem' by keying Return with the select bar on
 that entry.  This will make all the space on the SD above the end of
-your copied OS image available on next reboot.
+your copied OS image available on next reboot.  (Some Rasian images
+may do this autmatically.)
 
 Request 'Wait for Network at Boot'.  This makes recovery a little
 more convenient if you power up the SBC forgetting to plug in
@@ -711,12 +727,11 @@ as it can sometimes take a few seconds to complete.
 # ntpsec/build/main/ntpq/ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
-+SHM(0)          .GPS.            0 l   58   64    3    0.000  -421.25 373.969
-*SHM(1)          .PPS.            0 l   61   64    1    0.000   17.145   0.004
- nox.prolixium.c 200.98.196.212   2 u   26   64    1   44.090   20.648  16.170
- 173.44.32.10    LOCAL(0)         6 u   26   64    1   32.017  -96.449  15.923
- 2001:470:8d1c:c .GPPS.           1 u   28   64    1   56.784   23.883  19.294
- caprica.willgly 142.66.101.13    2 u   37   64    1   34.297   23.901  17.210
+-SHM(0)          .GPS.            0 l   15   64    1    0.000  -515.07   0.002
+*SHM(1)          .PPS.            0 l   14   64    1    0.000   -0.656   0.002
++tock.usshc.com  .GPS.            1 u   10   64    3   37.408    0.200   1.767
++clock.isc.org   .GPS.            1 u    7   64    3   74.901   -2.051   1.255
+-tick.apple.com  .GPS.            1 u    6   64    3  479.285  204.508 109.733
 ------------------------------------------------------------------------
 
 //FIXME: No longer matches ntp.conf
