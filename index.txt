@@ -82,6 +82,10 @@ link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
 
+* A USB keyboard and DVI-capable display display. You'll do most of
+  the software installation and configuration via ssh from your host
+  machine, but you need to be off-net for the next step.
+
 * (Optional) A case to protect your hardware from dust and curious
   felines.
 
@@ -90,10 +94,6 @@ link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
   similar to standard spacers used in PC cases; if you keep the small
   parts from old PCs around you'll have a dozen of them and probably
   the screws to match.
-
-Two things you will *not* need are a directly attached keyboard and
-display. You'll do the software installation and configuration via ssh
-from your host machine.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.  The
@@ -300,17 +300,50 @@ Done.
 
 Note: this can take a while.
 
-Now check your security.  You need to be behind a NAT box or firewall
-for the next several steps.  If anyone on the public Internet can
-reach your SBC via ssh before you remove the default account, your Pi
-could be enslaved by an attack bot within minutes.
+=== First boot ===
 
-Take the card out of the SD reader and insert it into your Pi. Make
-sure your Pi has a live Ethernet cable plugged in and connected to the
-same network as your host (because it will also need to see the
-general Internet, direct-connecting to your PC is insufficlent). Power
-it up and wait about 60 seconds (or, if you can see the Ethernet-port
-LEDs, wait for them to start flashing) then do this from your host:
+Take the card out of the SD reader and insert it into your SBC.
+Ethernet should *not* be plugged in!  Attach the keyboard and
+display. Power up.
+
+Log in as the default user, with the default password.  (On the
+Raspberry Pi this is 'pi' and 'raspberry')
+
+Use 'passwd' to change the password of the default user. Don't use
+anything obvious or cute.  Remember the password.
+
+You're now done with the keyboard and display.  You can unplug them, plug 
+in your ethernet cable, and do the rest of this recipe via ssh.
+
+The reason this step had to be done off-net is because there are
+attack bots on the public Internet dedicated to using the combination of a
+known login and known password to try to subvert machines before
+they can be secured. To see those hunting for Raspberry Pis, for
+example, do this on any Internet-facing machine:
+
+------------------------------------------------------------------------
+# lastb | grep -w pi
+------------------------------------------------------------------------
+
+You can't use anything obvious or cute as a password because those
+bots could very well run a specialized dictionary attack if they find
+a passworded SBC with one of the names they're expecting.
+
+You can skip this step only if your network lives behind a firewall
+with both IPv4 and IPv6 forwarding rules.  If anyone on the public
+Internet can reach your SBC via ssh before you either change rgw
+default-account password or remove the default account altogether,
+your Pi could be enslaved by an attack bot within minutes.
+
+=== Initial configuration ===
+
+Next, make sure your SBC has a live Ethernet cable plugged in and
+connected to the same network as your host (because it will also need
+to see the general Internet, direct-connecting to your PC is
+insufficient). Power it up and wait about 60 seconds (or, if you can
+see the Ethernet-port LEDs, wait for them to start flashing) then use
+the default machine name and login to ssh from your host.  For a
+Raspberryi Pi, that looks like this:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
