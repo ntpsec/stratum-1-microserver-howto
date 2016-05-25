@@ -91,6 +91,10 @@ link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
   parts from old PCs around you'll have a dozen of them and probably
   the screws to match.
 
+Two things you will *not* need are a directly attached keyboard and
+display. You'll do the software installation and configuration via ssh
+from your host machine.
+
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
 board and a 40-pin header. The SKU 424254 comes presoldered.  The
 header on the Uputronics board snugs into an on-board fitting and does
@@ -106,9 +110,9 @@ on one edge of the SBC, such that when fully assembled the SBC and HAT will
 make a neat stack with all four pairs of corner holes vertically aligned.
 
 . Find "north" on the HAT.  It's the edge the GPS module is
-closest to and has a rectangular notch in it.  On the Adafruit HAT,
-if you hold up the board so the "north" edge is at the top the
-Adafruit logo will be right-side up.
+closest to and has a rectangular notch in it (a cutout for a ribbon
+cable). The GPIO header will be 90 degrees clockwise.  If this isn't
+clear enough, see link:bluewire.jpg[this photograph].
 
 . If you have them, screw the the two hex standoffs to the corner
 holes on the west side of the SBC, female end up.  These will
@@ -137,7 +141,7 @@ connectors on the SBC. The Raspberry Pi Foundation Case qualifies, but
 for functional reasons we recommend a transparent case.  The Adafruit
 2258 case <<2258>>, for example, should do nicely.  The Uputronic and
 SKU 424254 HATs, alas, have projecting SMA antenna jacks that won't
-fit in a stock case. A bit of work with a dremel tool will fix that.
+fit in a stock case. A bit of work with a Dremel tool will fix that.
 
 == Understanding the GPIO connector ==
 
@@ -219,12 +223,6 @@ by Ethernet. By going this route we get to avoid some hardware
 prerequisites that would never be used after install, and skip a bunch
 of steps in removing unnecessary desktop software.
 
-Unzip it to get an img file:
-
-------------------------------------------------------------------------
-$ unzip 2016-03-18-raspbian-jessie-lite.zip
-------------------------------------------------------------------------
-
 Install dcfldd on your host machine:
 
 ------------------------------------------------------------------------
@@ -237,7 +235,8 @@ other end into a USB port on your host.
 Note: your host may automount the card if it has been set up for Linux
 before - whether this happens depends on what distribution and desktop
 environment you are using. If your window manger pops up a
-file-browser view of the device, you should unmount it.
+file-browser view of the device, you should unmount it through that
+GUI.
 
 You can use the older 'dd' if you do the next step manually, but
 dfcldd is better about giving you progress messages during the
@@ -246,8 +245,12 @@ operation.
 Better yet, we provide a script, link:ddimage[ddimage], to
 semi-automate the next step of the process; it's safer to use that,
 because it performs some sanity checks that should prevent you from
-scribbling on your disks. If you used clockmaker --build, ddimage will
-have been downloaded to the directory where that script was run.
+scribbling on your disks. Here's how to get it:
+
+[subs="attributes"]
+------------------------------------------------------------------------
+wget {home}ddimage
+------------------------------------------------------------------------
 
 Either way, automatic or manual, you'll need to know the device name
 of your SD card reader.  On a host running Debian or Ubuntu, the USB
@@ -256,17 +259,30 @@ depending on how many hard drives you have and how your reader firmware
 is set up. If you're using a built-in SD reader port, e.g. on a laptop, the
 devicename might be something like '/dev/mmcblk0'
 
-To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
+To proceed manually, first unpack the zip file it to get an img file:
+
+------------------------------------------------------------------------
+$ unzip 2016-03-18-raspbian-jessie-lite.zip
+------------------------------------------------------------------------
+
+Follow the directions at <<INSTALLATION>>, using dfcldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
 # dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
+For safety's sake, force pending I/O to the SD card before removing it.
+
+------------------------------------------------------------------------
+# sync
+------------------------------------------------------------------------
+
 To use ddimage, first read it. You should always read any script that will
 run with root permissions, to check that it doesn't do anything
 nefarious.  Give it the basename of your SD reader (usually "sdd"). It
-will do some safety checks, then generate a command like the above.
+will do some safety checks, then generate unzip and ddcfldd commands
+like the above.
 
 Your ddimage command execution should look like this:
 
@@ -284,12 +300,17 @@ Done.
 
 Note: this can take a while.
 
-When this command completes, take the card out of the SD reader and
-insert it into your Pi. Make sure your Pi has a live Ethernet cable
-plugged in and connected to the same network as your host (because it
-will also need to see the general Internet, direct-connecting to your
-PC is insufficlent). Power it up and wait about 60 seconds, then do
-this from your host:
+Now check your security.  You need to be behind a NAT box or firewall
+for the next several steps.  If anyone on the public Internet can
+reach your SBC via ssh before you remove the default account, your Pi
+could be enslaved by an attack bot within minutes.
+
+Take the card out of the SD reader and insert it into your Pi. Make
+sure your Pi has a live Ethernet cable plugged in and connected to the
+same network as your host (because it will also need to see the
+general Internet, direct-connecting to your PC is insufficlent). Power
+it up and wait about 60 seconds (or, if you can see the Ethernet-port
+LEDs, wait for them to start flashing) then do this from your host:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
@@ -304,7 +325,13 @@ properly seated. Wait 30 seconds and try again.
 
 Another possibility is that your host doesn't have a zeroconf
 implementation like Linux's 'avahi-daemon' installed.  Try to fix
-that. If that doesn't work, attach a physical keyboard and display to
+that.  This may work:
+
+------------------------------------------------------------------------
+# apt-get install libnss-mdns
+------------------------------------------------------------------------
+
+If that doesn't work, attach a physical keyboard and display to
 the SBC and figure out the assigned address with the "ip a" command.
 
 Only persistent failure after you've tried these things mean you need
@@ -382,7 +409,9 @@ wget {home}clockmaker
    downloads and prerequisites for the timeserver software
 
 5. Leave root. Then run "clockmaker --build".  This will clone and build the
-   special timeserver software.
+   special timeserver software.  It also copies in the current
+   versions of the 'pinup' script, and several configuration options
+   used in the installation phase.
 
 Some further uses of clockmaker are discussed in later steps.
 
@@ -409,7 +438,8 @@ $ sudo bash
 ------------------------------------------------------------------------
 
 These changes are not reversible, but you'd want them for any other
-use of the SBC anyway.
+use of the SBC anyway. You always want to be updated with security
+patches and other fixes.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
@@ -473,10 +503,6 @@ table:
 |   GPIO05      |      P-29    | SKU 424254
 |============================================
 
-There is a different, non-HAT Adafruit product, the "Ultimate GPS
-Breakout Board", that also uses GPIO18/P-12.  This may be a source of
-confusion if you read some of the references in this document.
-
 There is a Linux kernel driver called pps-gpio which,
 given one of these pins, uses the signal from it to support an
 RFC2783 interface to PPS that NTPsec (and GPSD) can use.  To
@@ -497,7 +523,7 @@ dtoverlay=pps-gpio,gpiopin=4
 
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
-installing some packages need for the next step.
+installing some packages needed for the next step.
 
 == Smoke-test the GPS/HAT combination ==
 
@@ -507,7 +533,7 @@ Next thing you want to do is verify that the GPS works.  Put your
 SBC+HAT combination on someplace like a windowsill with a good sky
 view outside.  The HATs described in this HOWTO have very good
 weak-signal discrimination and are much less fussy about siting than
-older GPS receivers.
+older GPS receivers; all should work quite well at or near a window.
 
 Here's how to tell if your HAT has a fix.  The numbers are blink
 intervals for the fix LED; "off" means the LED does not blink.
@@ -522,7 +548,7 @@ intervals for the fix LED; "off" means the LED does not blink.
 |=======================================================================
 
 On first (cold) boot, the device may take 20-30 minutes to download a
-satellite ephemeris. After that, time to get a fix should be much faster
+satellite almanac. After that, time to get a fix should be much faster
 unless you live in a canyon (including the urban kind) or dense forest.
 I, living in a suburb with the front of my house half-screened by tall
 trees, typically get lock about 30 seconds from power up.  It will
@@ -540,6 +566,21 @@ $ cat /dev/gpsd0
 You should see NMEA0183 sentences issuing in bursts once per second -
 text lines usually beginning with "$GP", and possibly a "$PMTK"
 sentence.  These will issue whether or not the GPS has satellite lock.
+
+This is what the output should resemble:
+
+------------------------------------------------------------------------
+$GPRMC,205251.00,A,4002.10161,N,07531.20383,W,0.100,,240516,,,A*6D
+$GPVTG,,T,,M,0.100,N,0.186,K,A*2D
+$GPGGA,205251.00,4002.10161,N,07531.20383,W,1,07,1.16,177.1,M,-34.4,M,,*6B
+$GPGSA,A,3,11,13,17,08,07,28,01,,,,,,2.02,1.16,1.66*05
+$GPGSV,3,1,11,01,64,097,37,03,07,136,,07,37,183,25,08,21,061,30*73
+$GPGSV,3,2,11,11,58,063,39,13,11,288,21,17,37,260,12,19,09,249,25*75
+$GPGSV,3,3,11,22,14,111,19,28,57,320,34,30,58,217,*41
+$GPGLL,4002.10161,N,07531.20383,W,205251.00,A,A*71
+$GPRMC,205252.00,A,4002.10169,N,07531.20380,W,0.092,,240516,,,A*6F
+$GPVTG,,T,,M,0.092,N,0.171,K,A*2F
+------------------------------------------------------------------------
 
 If you see no output or see random baud barf, re-do the stty command being
 very careful that all the arguments are correct. If you still don't
@@ -761,13 +802,14 @@ install both suites:
 # cd ../ntpsec; ./waf install; cp ntp.conf /etc
 ------------------------------------------------------------------------
 
-Install the pinup script:
+Install the link:pinup[pinup] script:
 
 ------------------------------------------------------------------------
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Install this text as the file /etc/init.d/timeservice and make it executable:
+Copy the following block of text ito the file 'timeserver'; copy it to
+/etc/init.d/timeservice and make it executable:
 
 ------------------------------------------------------------------------
 include::timeservice[]
@@ -779,13 +821,14 @@ The commands to do this are:
 # cp timeservice /etc/init.d; chmod a+x /etc/init.d/timeservice
 ------------------------------------------------------------------------
 
-Install this text in the directory /etc/systemd/system/:
+Copy the following block of text to the file 'timesevice.service', then
+install it in the directory /etc/systemd/system/:
 
 ------------------------------------------------------------------------
 include::timeservice.service[]
 ------------------------------------------------------------------------
 
-The commands to do this are:
+The command to do this is:
 
 ------------------------------------------------------------------------
 # cp timeservice.service /etc/systemd/system/
@@ -804,7 +847,7 @@ will happen.  The file /etc/systemd/system/timeservice.service is
 a systemd unit file that will call the System V init script to do the
 real work.
 
-Reboot.  Check that gpsd and ntpd are running, and use ntpq -p to
+Reboot.  Check that gpsd and ntpd are running, and watch ntpq -p to
 verify that you can see time samples coming in.
 
 === Secure the machine ===
@@ -887,8 +930,8 @@ You can strip down a bit further with these commands:
 ------------------------------------------------------------------------
 
 The resulting configuration is pretty minimal, as you can verify by
-running "ps ax" and noticing that most of the background processes are
-kernel threads.
+running "pstree -paul" (or the older-school "ps ax") and noticing that
+most of the background processes are kernel threads.
 
 Note that triggerhappy is required for raspi-config; after you remove
 it, 'apt-get autoremove' will remove raspi-config.  This is easily
@@ -944,14 +987,14 @@ occasionally available.
 
 The pps-gpio module as of April 2016 has a flaw. It catches only
 one edge of the PPS. You have a 50/50 chance you are seeing the
-trailing edge rather than the leading edge (which is the actual top of
+falling edge rather than the assert edge (which is the actual top of
 second).  A patch to fix this has been submitted to the Linux kernel
 maintainers but not merged.
 
 Which edge the kernel will see, and the pulse width, are constant
 depending on the GPS type and firmware (and if you can find a real
 datasheet for the GPS engine it will tell you the pulse width). If the
-kernel sees the trailing edge, the width of the pulse emitted by your
+kernel sees the falling edge, the width of the pulse emitted by your
 GPS will introduce a fixed lag from top of second to the time when you
 actually see the PPS.
 
@@ -959,19 +1002,19 @@ Pulse widths (and the induced lag) range from so fast the serial
 driver can't see them to, worst case, 0.5s.  The worst case is rare;
 typical pulse widths are 50 to 200ms. Because the error is constant,
 you can compensate it out with an offset if you know what it is.
-HATs marked "leading edge" below do not require compensation.
+HATs marked "assert edge" below do not require compensation.
 
 [width="25%",frame="topbot",options="header"]
 |===========================================================
 |Type           | Chipset    | 1PPS width  | gps-ppio detects
-|Adafruit HAT   | MTK3339    |   100ms     | leading edge
-|Uputronics HAT | Ublox 8    |   100ms     | leading edge 
-|SKU 424254     | Ublox 6    |   100ms     | leading edge
+|Adafruit HAT   | MTK3339    |   100ms     | assert edge
+|Uputronics HAT | Ublox 8    |   100ms     | assert edge 
+|SKU 424254     | Ublox 6    |   100ms     | assert edge
 |===========================================================
 
 These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
-the pps-gpio driver triggers on leading or trailing edge.
+the pps-gpio driver triggers on assert or falling edge.
 
 == A note about the Odroid C2 ==
 
@@ -986,8 +1029,9 @@ work with it]
 This recipe has not been tested with the Odroid.  But we can give
 some pointers towards making it work.
 
-* Your configuration and first-login process will be slighly different,
-  as your Odroid will be running a stock Ubuntu rather than Raspbian.
+* Your configuration and first-login process will be slighly
+  different, as your Odroid will be running a mostly stock Ubuntu
+  rather than Raspbian. (The kernel is custom.)
 
 * The company rep says that the UART device is /dev/ttyS2 rather
   than /dev/ttyAMA0, so you'll need to link /dev/ttyS2 to /dev/gps.
