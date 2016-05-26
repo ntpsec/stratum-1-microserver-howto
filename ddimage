@@ -1,22 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Copy a good Raspbian image to an SD writer
 
-target=/dev/${1-sdd}
+target=/dev/${1-dd}
 echo "Checking $target"
 
-if ls $target >/dev/null 2>&1
+if [ -b $target ]
 then
-    if [ -b $target ]
-    then
-       echo "$target exists as a storage device."
-    else
-       echo "$target is not a storage device"
-       exit 1
-    fi
+   echo "$target exists as a mountable device."
 else
-    echo "$target does not exist."
-    exit 1
+   echo "$target does not exist or is not mountable"
+   exit 1
 fi
 
 if df | grep $target >/dev/null
@@ -27,24 +21,10 @@ else
     echo "$target is not mounted"
 fi
 
-set -- *.img
+image=2016-03-18-raspbian-jessie-lite.img
 
-if [ $# != 1 ]
-then
-    echo "Need a unique image file."
-    exit 1
-else
-    image=`ls *img`
-fi
-
-if [ -f $image ]
-then
-    echo "Copying $image..."
-    dcfldd bs=4M if=$image of=$target
-else
-    echo "No .img file, bailing out!"
-    exit 1
-fi
+echo "Copying..."
+dcfldd bs=4M if=$image of=$target
 
 if df | grep $target >/dev/null
 then

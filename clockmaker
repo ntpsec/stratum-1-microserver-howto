@@ -5,7 +5,7 @@
 # To run this, use either the default user account or non-root,
 # non-default account on the SBC. Copy it to the account's $HOME, go
 # root there, and run it.  The --build mode copies over some files
-# that the --install mode will install.
+# that the --nstall mode will install.
 #
 # If there is a local config utility such as raspi-config on the
 # Raspberry Pi, you should already have run it before calling the
@@ -84,7 +84,6 @@ def config():
     print("")
 
     if sbc_type == "RPi":
-        os.system("sudo systemctl mask serial-getty@ttyAMA0.service")
         os.system("systemctl disable hciuart")
         bc = "/boot/config.txt"
         # Has no effect on a Pi 2.  Do it everywhere, in case we swap
