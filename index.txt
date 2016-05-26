@@ -52,8 +52,8 @@ service with a conventional PC and cable-attached GPS, see <<GPSD-SERVICE>>.
 
 You will need:
 
-* One Raspberry Pi or workalike SBC such as the Odroid C2.  I used a
-  Raspberry Pi 3: these instructions cover older variants as well.
+* One Raspberry Pi or workalike SBC such as the Odroid C2.  I've tested
+  a Raspberry Pi 2B and 3.
 
 * One compatible GPS HAT.  Possibilities are:
 +
@@ -200,11 +200,7 @@ will be marked with "$".  Remember that you go root with the command
 
 === Making a bootable SD ===
 
-Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
-Raspbian Lite image zip file] to your host.  Note: due to brain-dead
-configuration of the GPIO pins <<UART-ISSUE>>, you cannot use the
-2016-05-10 image from <<RASPBIAN>>. We hope this will be fixed in a
-future release.
+Download the latesr Rapbian image from <<RASPBIAN>>.
 
 Use sha1sum to verify the correctness of the image.
 
@@ -214,7 +210,7 @@ $ sha1sum 2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
 The hex string this command returns should match the SHA-1 checksum
-above.  If it doesn't, you have a corrupted image and should re-fetch
+on the web page.  If it doesn't, you have a corrupted image and should re-fetch
 it.
 
 Note that this is not the regular NOOBS image, but one specifically
@@ -411,9 +407,9 @@ Under 'Advanced Options' (9), change your hostname to something
 entertaining (A2). If you forget to do this, you can edit /etc/hostname
 later on.
 
-One special thing you should do is disable the serial interface (A8).
-Your HAT needs the GPIO pins it uses, and it's easiest to disable from
-the configurator.
+Do *not* disable the serial interface.  Your HAT needs the GPIO
+pins it uses, but disabling it from the configurator has bad side
+effects.
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -476,6 +472,9 @@ patches and other fixes.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
+(As of 2016-05-26, be aware that it is early days for the Pi 3 and
+the kernel is under heavy development.  Raspbian may be a bit unstable.)
+
 The Raspberry Pi Foundation made a design decision on the Raspberry
 Pi 3 that ties the serial baud rate to the CPU clock rate (by
 default).  This was done because the normal lines that fed the serial
@@ -505,6 +504,14 @@ dtoverlay line.
 ------------------------------------------------------------------------
 # systemctl disable hciuart
 ------------------------------------------------------------------------
+
+Disable monitoring for login on the UART, the GPS device needs it: 
+
+------------------------------------------------------------------------
+{--config}
+------------------------------------------------------------------------
+
+# systemctl mask serial-getty@ttyAMA0.service
 
 {--config} Create a symlink to the GPS device to make it easier to refer
 to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
