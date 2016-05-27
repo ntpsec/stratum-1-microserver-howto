@@ -69,6 +69,10 @@ Special note about the SKU 424254: despite vendor claims, the trace
 thast should have connected GPIO5 to the GPS 1PPS was absent the
 revision of the board I received. To use it for time-service,
 link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
++
+Of these three, I prefer the Uputronics board. The combination of a
+u-blox 8 and solderless assembly is tough to beat, even if casing it
+properly needs Dremel work. 
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
   powered by an on-board supercap, included).  The CR1220 is cheapest
