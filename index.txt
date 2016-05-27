@@ -889,23 +889,26 @@ verify that you can see time samples coming in.
 
 === Secure the machine ===
 
-Final parts of this step can be automated with "./clockmaker --secure"
-done as root.
+Final parts of this step can be automated with "./clockmaker --mask"
+and "clockmaker --secure", both done as root.
 
 The fact that your SBC has a known default name and default user means
 that it is very vulnerable to being attacked and exploited by anyone
 who gets access to your network.  Here's how to fix this:
 
-. On the SBC, create an account for "me" (whatever username you like)
+. {--mask} On the SBC, create an account for "me" (whatever username you like)
   using 'adduser' run as root.
 
-. On the SBC, add yourself to the 'sudo' and 'dialout' groups.
+. {--mask} On the SBC, add yourself to the 'sudo' and 'dialout' groups.
   The first is necessary; the second is optional but will make some
   later test steps easier.  Replace 'me' with the username you desire.
 +
 ------------------------------------------------------------------------
 # usermod -a -G sudo,dialout me
 ------------------------------------------------------------------------
+
+. {--mask} Move the contents of the default-user home directory to
+  the home directory of the "me" account.
 
 . From the host, verify that you can log in via ssh under your own
   name and sudo to a root shell with "sudo bash"; you should see a "#"

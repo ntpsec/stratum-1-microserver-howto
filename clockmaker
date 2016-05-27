@@ -13,7 +13,7 @@
 #
 # The evironment is assumed to be a Debian Linux variant.
 #
-import sys, os, re
+import sys, os, re, pwd
 
 try:
     my_input = raw_input
@@ -214,6 +214,38 @@ def install():
     print("A reboot is fequired for these changes to take effect.")
     os.system("reboot")
 
+def mask():
+    "Create and enable non-default user."
+    if os.geteuid() != 0:
+        print("The --mask function must run as root.")
+        raise SystemExit(0)
+
+    existing = set([x[0] for x in pwd.getpwall()])
+    while True:
+        nonroot = raw_input("Owner userid? ")
+        if not nonroot:
+            print "Cannot be empty."
+        elif ":" in nonroot:
+            print "Cannot contain a colon."
+        else:
+            break
+    if os.system("adduser %s" % nonroot):
+        print "Bailing out."
+        raise SystemExit(1)
+    created = set([x[0] for x in pwd.getpwall()]) - existing
+    if len(created) != 1:
+        print "Expected unique new user!."
+        raise SystemExit(1)
+    created = created.pop()
+    print "Adding %s to sudo and dialout groups..."
+    os.system("usermod -a -G sudo,dialout %s" % created)
+    print "Copying build files..."
+    os.system("mv ~%s/* ~%s;" % (default_login, nonroot)
+    os.system("chown -R %s.%s ~%s/*" % (nonroot, nonroot, nonroot))
+    print "Check that you can log in as %s, then install ssh keys for %s",\
+          (created, created)
+    print "before calling ./clockmaker --secure as root."
+
 def secure():
     "Secure system after a non-default user account has been ssh-enabled."
     if not os.path.isdir(".ssh"):
@@ -257,8 +289,8 @@ def secure():
         print("Default login has been removed.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build",
-                                                "--install", "--secure"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install",
+                                                "--mask", "--secure"):
         print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeservice software")
@@ -277,6 +309,8 @@ if __name__ == "__main__":
         build()
     if sys.argv[1] == "--install":
         install()
+    if sys.argv[1] == "--mask":
+        mask()
     if sys.argv[1] == "--secure":
         secure()
 
