@@ -237,7 +237,7 @@ def mask():
         print "Expected unique new user!."
         raise SystemExit(1)
     created = created.pop()
-    print "Adding %s to sudo and dialout groups..."
+    print "Adding %s to sudo and dialout groups..." % created
     os.system("usermod -a -G sudo,dialout %s" % created)
     print "Copying build files..."
     os.system("mv ~%s/* ~%s;" % (default_login, nonroot))
@@ -282,8 +282,8 @@ def secure():
 
     print("")
     if ("\n"+ default_login + ":") in open("/etc/passwd").read():
-        print("Default login is still present.")
-        os.system("deluser --remove-all-files %s" % default_login)
+        print("Default login %s is still present." % default_login)
+        os.system("rm -fr ~%s/*; deluser %s" % (default_login, default_login))
         reboot_required = True
     else:
         print("Default login has been removed.")

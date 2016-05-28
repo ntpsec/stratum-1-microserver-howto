@@ -845,7 +845,7 @@ Install the link:pinup[pinup] script:
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Copy the following block of text ito the file 'timeserver'; copy it to
+Copy the following block of text ito the file 'timeservice'; copy it to
 /etc/init.d/timeservice and make it executable:
 
 ------------------------------------------------------------------------
