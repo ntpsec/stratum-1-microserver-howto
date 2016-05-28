@@ -240,10 +240,10 @@ def mask():
     print "Adding %s to sudo and dialout groups..."
     os.system("usermod -a -G sudo,dialout %s" % created)
     print "Copying build files..."
-    os.system("mv ~%s/* ~%s;" % (default_login, nonroot)
+    os.system("mv ~%s/* ~%s;" % (default_login, nonroot))
     os.system("chown -R %s.%s ~%s/*" % (nonroot, nonroot, nonroot))
-    print "Check that you can log in as %s, then install ssh keys for %s",\
-          (created, created)
+    print "Check that you can log in as %s, then install ssh keys for %s" \
+          % (created, created)
     print "before calling ./clockmaker --secure as root."
 
 def secure():
