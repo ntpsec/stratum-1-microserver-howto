@@ -86,6 +86,10 @@ properly needs Dremel work.
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
 
+* Either a 5V, 2A power supply with a micro-USBoutlet (same as the
+  standard charger for smartphones) or a USB-to-Micro-USB cable that
+  can take power from the host macine.
+
 * A USB keyboard and DVI-capable display display. You'll do most of
   the software installation and configuration via ssh from your host
   machine, but you need to be off-net for the next step.
@@ -205,10 +209,16 @@ will be marked with "$".  Remember that you go root with the command
 === Making a bootable SD ===
 
 Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
-Raspbian Lite image zip file] to your host.  Note: due to brain-dead
-configuration of the GPIO pins <<UART-ISSUE>>, you cannot use the
-2016-05-10 image from <<RASPBIAN>>. We hope this will be fixed in a
-future release.
+Raspbian Lite image zip file] to your host.
+
+[subs="attributes"]
+------------------------------------------------------------------------
+wget {home}2016-03-18-raspbian-jessie-lite.zip
+------------------------------------------------------------------------
+
+Note: due to brain-dead configuration of the GPIO pins <<UART-ISSUE>>,
+you cannot use the 2016-05-10 image from <<RASPBIAN>>. We hope this
+will be fixed in a future release.
 
 Use sha1sum to verify the correctness of the image.
 
@@ -302,7 +312,9 @@ Copying...
 Done.
 ------------------------------------------------------------------------
 
-Note: this can take a while.
+Note: this can take a while. Many USB SD readers have an activity
+light that blinks while accessed are gone; if yours does, watch for
+it to stop blinking.
 
 === First boot ===
 
@@ -504,7 +516,7 @@ serial device attached to the UART is /dev/ttyAMA0 rather than /dev/ttyS0.
 This change can effectively be reversed by commenting out the
 dtoverlay line.
 
-{--config} To go with this, do:
+{--config} To go with the disabling of Bluetooth, do:
 
 ------------------------------------------------------------------------
 # systemctl disable hciuart
@@ -518,7 +530,7 @@ accomplish this:
 KERNEL=="ttyAMA0", SYMLINK+="gpsd0"
 ------------------------------------------------------------------------
 
-=== Configure the 1PPS GPIO pin ==
+=== Configure the 1PPS GPIO pin ===
 
 You'll need NTPsec to be able to see the high-precision PPS
 (pulse-per-second) signal from the GPS.  But the serial interface from
@@ -563,35 +575,6 @@ clockmaker script will do this for you, but not before
 installing some packages needed for the next step.
 
 == Smoke-test the GPS/HAT combination ==
-
-(Some material in this section is from <<ADAFRUIT-TEST>>.)
-
-Next thing you want to do is verify that the GPS works.  Put your
-SBC+HAT combination on someplace like a windowsill with a good sky
-view outside.  The HATs described in this HOWTO have very good
-weak-signal discrimination and are much less fussy about siting than
-older GPS receivers; all should work quite well at or near a window.
-
-Here's how to tell if your HAT has a fix.  The numbers are blink
-intervals for the fix LED; "off" means the LED does not blink.
-
-.Blink interval in seconds
-[width="50%",frame="topbot",options="header"]
-|=======================================================================
-| HAT type                        | No fix |  Fix
-| Adafruit GPS HAT                | 1      |  10
-| Uputronics GPS Expansion Board  | off    |  1
-| SKU 424254                      | 0.5    |  0.5
-|=======================================================================
-
-On first (cold) boot, the device may take 20-30 minutes to download a
-satellite almanac. After that, time to get a fix should be much faster
-unless you live in a canyon (including the urban kind) or dense forest.
-I, living in a suburb with the front of my house half-screened by tall
-trees, typically get lock about 30 seconds from power up.  It will
-seem longer than it is first time: have patience.
-
-=== GPS serial data ===
 
 To test that you can read data from the device, do this:
 
@@ -662,9 +645,8 @@ If you can see this, you have 1PPS and can do proper timekeeping.
 
 == Live-test the GPS ==
 
-Now exit root, returning to the default-user account, and build GPSD.  If
-you are using clockmaker, "./clockmaker --build" will automate
-the build steps (but not the test procedures).
+Now build GPSD.  If you are using clockmaker, "./clockmaker --build"
+will automate the build steps (but not the test procedures).
 
 It's best to clone the GPSD repository and build from that rather than
 installing the Raspbian package.  This both guarantees you the latest
@@ -687,6 +669,31 @@ $ scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
 ------------------------------------------------------------------------
 
 This builds gpsd in a minimal, fixed-speed timeserver mode.
+
+Now we use GPSD tools to verify that the GPS works.  Put your
+SBC+HAT combination on someplace like a windowsill with a good sky
+view outside.  The HATs described in this HOWTO have very good
+weak-signal discrimination and are much less fussy about siting than
+older GPS receivers; all should work quite well at or near a window.
+
+Here's how to tell if your HAT has a fix.  The numbers are blink
+intervals for the fix LED; "off" means the LED does not blink.
+
+.Blink interval in seconds
+[width="50%",frame="topbot",options="header"]
+|=======================================================================
+| HAT type                        | No fix |  Fix
+| Adafruit GPS HAT                | 1      |  10
+| Uputronics GPS Expansion Board  | off    |  1
+| SKU 424254                      | 0.5    |  0.5
+|=======================================================================
+
+On first (cold) boot, the device may take 20-30 minutes to download a
+satellite almanac. After that, time to get a fix should be much faster
+unless you live in a canyon (including the urban kind) or dense forest.
+I, living in a suburb with the front of my house half-screened by tall
+trees, typically get lock about 30 seconds from power up.  It will
+seem longer than it is first time: have patience.
 
 Then run this: 
 
@@ -813,7 +820,7 @@ as it can sometimes take a few seconds to complete.
 ------------------------------------------------------------------------
 
 You're hoping for a display like the above, with two local devices and
-four pool sources.  A nonzero "reach" column on a source line
+three check sources.  A nonzero "reach" column on a source line
 indicates that your ntp is getting time notifications from that
 source.
 
@@ -831,8 +838,8 @@ Uninstall the stock NTP:
 # apt-get -y autoremove
 ------------------------------------------------------------------------
 
-Change to the directory your gpsd and ntpsec repository clones live and
-install both suites:
+Change to the directory your gpsd and ntpsec repository clones live in
+and install both suites:
 
 ------------------------------------------------------------------------
 # cd gpsd; scons install
@@ -979,11 +986,19 @@ reversed by reinstalling raspi-config.
 
 WiFi is deliberately not removed, in order to give
 you a fallback TCP/IP access when a cable is inconvenient.
+If you want to banish WiFi, this will do:
+
+------------------------------------------------------------------------
+# apt-get remove wpasupplicant
+------------------------------------------------------------------------
 
 === Configuring for a static IP address ===
 
-You can choose to configure the SBC to use a fixed, static IP
-address. That process is described in <<EAT-STATIC>>.
+If you're only going to use the SBC as a itine service for your local
+network, you can cite its zeoroconf (.local) address in other ntp.conf
+files. If you want to expose it as a public server you'll need to
+configure the SBC to use a fixed, static IP address. That process is
+described in <<EAT-STATIC>>.
 
 If you do this, and verify that it works, you
 can remove avahi-daemon and dhcpd5, further
@@ -1095,7 +1110,7 @@ include some BeagleBone variant.
 
 - [[[2258]]] https://www.adafruit.com/product/2258[Adafruit Raspberry Pi B+ / Pi 2 / Pi 3 Case - Smoke Base - w/ Clear Top]
 
-- [[[PI-PINOUT]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
+- [[[PI-PINOUT]]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
 - [[[UART-ISSUE]]] https://www.raspberrypi.org/forums/viewtopic.php?uid=191178&f=28&t=148218&start=0[UART Issue]
 
