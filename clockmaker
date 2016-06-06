@@ -92,7 +92,7 @@ def config():
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
 dtoverlay=pi3-miniuart-bt
 """
-        if "dtoverlay=pi3-miniuart-bt-overlay" in open(bc).read():
+        if "dtoverlay=pi3-miniuart-bt" in open(bc).read():
             print("Bluetooth use of UART already disabled.")
         else:
             print("Reclaiming serial UART.")

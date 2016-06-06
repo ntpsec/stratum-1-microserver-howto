@@ -97,7 +97,7 @@ if __name__ == "__main__":
             sys.stdout.write("configured for the %s.\n" % ptype)
         else:
             print("GPIO not configured")
-            raise SysyemExit(1)
+            raise SystemExit(1)
 
         if pin:
             print("Configuring GPIO pin....")
