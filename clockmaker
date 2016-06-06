@@ -248,13 +248,21 @@ def mask():
 
 def secure():
     "Secure system after a non-default user account has been ssh-enabled."
-    if not os.path.isdir(".ssh"):
-        print("No ssh keys have been installed, bailing out.")
-        raise SystemExit(1)
-
     if os.geteuid() != 0:
         print("The --secure function must run as root.")
         raise SystemExit(0)
+
+    if os.environ.get('SUDO_USER'):
+      sudo_user = os.environ.get('SUDO_USER')
+      ssh_path = os.path.join("/home", sudo_user, ".ssh")
+      print ("ssh_path is %s" % ssh_path)
+    else:
+      print ("Unable to determine where to look for .ssh directory...")
+      raise SystemExit(1)
+
+    if not os.path.isdir(ssh_path):
+        print("No ssh keys have been installed, bailing out.")
+        raise SystemExit(1)
 
     rp = open("/etc/ssh/sshd_config", "r")
     wp = open("/etc/ssh/sshd_config-new", "w")
