@@ -6,7 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v0.9, May 2015
+v0.9, May 2016
 
 == Introduction ==
 
@@ -52,7 +52,7 @@ service with a conventional PC and cable-attached GPS, see <<GPSD-SERVICE>>.
 
 You will need:
 
-* One Raspberry Pi or workalike SBC such as the Odroid C2.  I used a
+* One Raspberry Pi or workalike SBC.  I used a
   Raspberry Pi 3: these instructions cover older variants as well.
 
 * One compatible GPS HAT.  Possibilities are:
@@ -304,19 +304,21 @@ You should to make it executable so you can run it as a script:
 # chmod a+x 
 ------------------------------------------------------------------------
 
-Your ddimage command execution should look like this:
+Your ddimage command execution should look roughly like this:
 
 ------------------------------------------------------------------------
 # ddimage sdd
 Checking /dev/sdd
 /dev/sdd exists as a mountable device.
 /dev/sdd is not mounted
-Copying...
+Copying  2016-03-18-raspbian-jessie-lite.img...
 256 blocks (1024Mb) written.
 324+1 records in
 324+1 records out
 Done.
 ------------------------------------------------------------------------
+
+with an animated progress line in the middle. 
 
 Note: this can take a while. Many USB SD readers have an activity
 light that blinks while accesses are going on; if yours does, watch for
@@ -329,7 +331,7 @@ Ethernet should *not* be plugged in!  Attach the keyboard and
 display. Power up.
 
 Log in as the default user, with the default password.  (On the
-Raspberry Pi this is 'pi' and 'raspberry')
+Raspberry Pi this is 'pi' and 'raspberry'.
 
 Use 'passwd' to change the password of the default user. Don't use
 anything obvious or cute.  Remember the password.
@@ -371,8 +373,8 @@ Raspberryi Pi, that looks like this:
 $ ssh pi@raspberrypi.local
 ------------------------------------------------------------------------
 
-If ssh tells you it can't see any host named 'raspberrypi.local',
-either the Pi hasn't yet booted or your network can't see it. Don't
+If ssh tells you it can't see any host with the expected name,
+either the SBC hasn't yet booted or your network can't see it. Don't
 panic. Check for a green light on the Pi's Ethernet port to be sure
 it's plugged in properly. Make sure your SD card is electrode-side-up
 (unplugging the power before removing it, if you have to) and
@@ -429,8 +431,9 @@ want to set the keyboard type.  Raspbian defaults to a "Generic
 expecting this, the differences (for example, " and @ being swapped)
 can trip you up.
 
-Advanced Options (9), Memory Split A3, enter 8. This will free up some
-memory that the GPU won't need, because you're running headless.
+Advanced Options (9), Memory Split A3, enter 8 and give the GPU 0
+memory. This will free up some memory that the GPU won't need, because
+you're running headless.
 
 Under 'Advanced Options' (9), change your hostname to something
 entertaining (A2). If you forget to do this, you can edit /etc/hostname
@@ -1138,18 +1141,33 @@ The http://www.hardkernel.com/main/products/prdt_info.php[Odroid C2]
 is an ARM-based hackerboard strongly resembling the Raspberry Pi, but
 with better hardware and at a slighly higher price point. The main
 connector on the Odroid is pin-compatible with the 40-pin Pi
-connector.  A company representative has stated that
-the Adafruit HAT should work with it <<ODROID>>.
+connector.
 
-This recipe has not been tested with the Odroid.  But we can give
-some pointers towards making it work.
+We have installed an Adafruit HAT on a C2 and seen NMEA data from it.
+Unfortunately, the kernel support necessary for watching 1PPS is
+absent in the 3.14.29-29 build current in early June 2016.  When this
+is fixed, we will broaden our recipe to include the C2.  I have
+reported this on the issue tracker at Hardkernel.
 
-* Your configuration and first-login process will be slighly
-  different, as your Odroid will be running a mostly stock Ubuntu
-  rather than Raspbian. (The kernel is custom.)
+In case you are reading this between the time their kernel is updated
+and we update the recipe, some pointers:
 
-* The company rep says that the UART device is /dev/ttyS2 rather
-  than /dev/ttyAMA0, so you'll need to link /dev/ttyS2 to /dev/gps.
+* You won't be able to ssh in with a simple "odroid@odroid.local".
+  Get to a terminal emulator on an physically attached monitor and
+  do
++
+------------------------------------------------------------------------
+$ ps aux | grep avahi-daemon
+------------------------------------------------------------------------
++
+to see what name it is actually exporting; look for the ".local" suffix.
+
+* The hard UART attached to GPIO pins 8 and 10 is at /dev/ttyS1 and
+  does not interfere with the serial console.  I have seen it report
+  NMEA data from the HAT.
+
+* Look for pps-gpio under /lib/modules.  That's the missing piece. 
+  Without it you won't be able to watch 1PPS.
 
 * The RPi 3 hack to disable serial interfaces won't be required.
 

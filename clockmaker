@@ -55,9 +55,8 @@ def config():
     "Perform root-mode preconfiguration of the SBC"
     if sbc_type == "RPi":
         print("This is a Raspberry Pi")
-    else:
-        print("Unknown SBC type.")
-        raise SystemExit(1)
+    elif sbc_type == "Odroid C2":
+        print("This is an Odroid C2")
 
     if os.geteuid() != 0:
         print("The --config function must run as root.")
@@ -133,27 +132,28 @@ dtoverlay=pps-gpio,gpiopin=%s
             with open(bc, "a") as ap:
                 ap.write(gpio % pin)
             reboot_required = True
-        if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
-            print("")
-            print("Creating /dev/gpsd0 symlink rule")
-            with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
-                wfp.write('KERNEL=="ttyAMA0", SYMLINK+="gpsd0"\n')
-                reboot_required = True
 
+    if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
         print("")
+        print("Creating /dev/gpsd0 symlink rule")
+        with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
+            wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % gpsdev)
+            reboot_required = True
 
-        print("Getting build and test prerequisites")
-        prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
-                        "python-dev bc bison libevent-dev libreadline-dev "\
-                        "libcap-dev libssl-dev"
-        os.system(prerequisites)
+    print("")
 
-        print("")
-        if reboot_required:
-            print("A reboot is required for configuration changes to take effect")
-            os.system("reboot")
-        else:
-            print("No configuration changes - no reboot is required.")
+    print("Getting build and test prerequisites")
+    prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
+                    "python-dev bc bison libevent-dev libreadline-dev "\
+                    "libcap-dev libssl-dev"
+    os.system(prerequisites)
+
+    print("")
+    if reboot_required:
+        print("A reboot is required for configuration changes to take effect")
+        os.system("reboot")
+    else:
+        print("No configuration changes - no reboot is required.")
 
 def build():
     "Perform fetch and build of the software."
@@ -310,6 +310,14 @@ if __name__ == "__main__":
         sbc_type = "RPi"
         default_login = "pi"
         gpsdev = "/dev/ttyAMA0"
+    elif "ODROID-C2" in open("/proc/cpuinfo"):
+        sbc_type = "Odroid C2"
+        default_login = "odroid"
+        gpsdev = "/dev/ttyS1"
+    else:
+        print("Unknown SBC type.")
+        raise SystemExit(1)
+
 
     if sys.argv[1] == "--config":
         config()
@@ -322,3 +330,4 @@ if __name__ == "__main__":
     if sys.argv[1] == "--secure":
         secure()
 
+# end
