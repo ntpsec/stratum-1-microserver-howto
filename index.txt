@@ -283,7 +283,7 @@ Follow the directions at <<INSTALLATION>>, using dfcldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
-# dcfldd bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
+# dcfldd statusinterval=16 sizeprobe=if bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
 For safety's sake, force pending I/O to the SD card before removing it.
@@ -297,6 +297,12 @@ run with root permissions, to check that it doesn't do anything
 nefarious.  Give it the basename of your SD reader (usually "sdd"). It
 will do some safety checks, then generate unzip and ddcfldd commands
 like the above.
+
+You should to make it executable so you can run it as a script:
+
+------------------------------------------------------------------------
+# chmod a+x 
+------------------------------------------------------------------------
 
 Your ddimage command execution should look like this:
 
@@ -313,7 +319,7 @@ Done.
 ------------------------------------------------------------------------
 
 Note: this can take a while. Many USB SD readers have an activity
-light that blinks while accessed are gone; if yours does, watch for
+light that blinks while accesses are going on; if yours does, watch for
 it to stop blinking.
 
 === First boot ===
@@ -347,7 +353,7 @@ a passworded SBC with one of the names they're expecting.
 
 You can skip this step only if your network lives behind a firewall
 with both IPv4 and IPv6 forwarding rules.  If anyone on the public
-Internet can reach your SBC via ssh before you either change rgw
+Internet can reach your SBC via ssh before you either change the
 default-account password or remove the default account altogether,
 your Pi could be enslaved by an attack bot within minutes.
 
@@ -423,6 +429,9 @@ want to set the keyboard type.  Raspbian defaults to a "Generic
 expecting this, the differences (for example, " and @ being swapped)
 can trip you up.
 
+Advanced Options (9), Memory Split A3, enter 8. This will free up some
+memory that the GPU won't need, because you're running headless.
+
 Under 'Advanced Options' (9), change your hostname to something
 entertaining (A2). If you forget to do this, you can edit /etc/hostname
 later on.
@@ -455,7 +464,7 @@ wget {home}clockmaker
 
 4. Go root. Then run "clockmaker --config". This will do most of the
    tricky OS and hardware configuration; also system software
-   downloads and prerequisites for the timeserver software
+   updates and prerequisites for the timeserver software
 
 5. Leave root. Then run "clockmaker --build".  This will clone and build the
    special timeserver software.  It also copies in the current
@@ -475,7 +484,11 @@ use clockmaker to avoid most of the typing.
 
 At this point the steps you can automate with clockmaker begin.  If
 you have not downloaded clockmaker, refer to "Using Clockmaker" above. 
-Go root on the SBC and run "./clockmaker --config".
+Go root on the SBC and run
+
+------------------------------------------------------------------------
+# ./clockmaker --config
+------------------------------------------------------------------------
 
 {--config} Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
@@ -635,7 +648,7 @@ Then run this test:
 # ppstest /dev/pps0
 ------------------------------------------------------------------------
 
-You should see repeated lines somewhat resembling this:
+You should see repeated lines somewhat resembling this, until you interrupt:
 
 ------------------------------------------------------------------------
 source 0 - assert 1461161753.267392352, sequence: 246 - clear  0.000000000, sequence: 0
@@ -797,19 +810,19 @@ Turn off the default ntpd service running on your SBC
 Run gpsd, telling it to look at the GPS device
 
 ------------------------------------------------------------------------
-# gpsd/gpsd /dev/gpsd0
+# ./gpsd/gpsd /dev/gpsd0
 ------------------------------------------------------------------------
 
 Run your newly built ntpd, telling it to step time if required:
 
 ------------------------------------------------------------------------
-# ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
+# ./ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
 Run ntpsec/build/main/ntpq/ntpq -p and look at what it returns. Be patient,
 as it can sometimes take a few seconds to complete.
 ------------------------------------------------------------------------
-# ntpsec/build/main/ntpq/ntpq -p
+$ ntpsec/build/main/ntpq/ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
 -SHM(0)          .GPS.            0 l   15   64    1    0.000  -515.07   0.002
@@ -937,9 +950,6 @@ who gets access to your network.  Here's how to fix this:
   do this, edit its /etc/ssh/sshd_config file.  Change the
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
-
-You will probably want to re-fetch clockmaker and do a "clockmaker
---build" in your home directory.
 
 == Performance tuning ==
 
@@ -1129,8 +1139,7 @@ is an ARM-based hackerboard strongly resembling the Raspberry Pi, but
 with better hardware and at a slighly higher price point. The main
 connector on the Odroid is pin-compatible with the 40-pin Pi
 connector.  A company representative has stated that
-forum.odroid.com/viewtopic.php?f=111&t=7660[the Adafruit HAT should
-work with it]
+the Adafruit HAT should work with it <<ODROID>>.
 
 This recipe has not been tested with the Odroid.  But we can give
 some pointers towards making it work.
@@ -1181,6 +1190,9 @@ include some BeagleBone variant.
 - [[[TAYLOR]]] http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html[RPi quick start]
 
 - [[[EAT-STATIC]]] http://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address[Tutorial - How to give your Raspberry Pi a Static IP Address]
+
+- [[[ODROID]]] http://forum.odroid.com/viewtopic.php?f=111&t=7660[GPS
+  unit for odroid c1]
 
 == Acknowledgements ==
 

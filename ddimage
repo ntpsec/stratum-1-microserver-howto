@@ -40,7 +40,7 @@ fi
 if [ -f $image ]
 then
     echo "Copying $image..."
-    dcfldd bs=4M if=$image of=$target
+    dcfldd statusinterval=16 sizeprobe=if bs=4M if=$image of=$target
 else
     echo "No .img file, bailing out!"
     exit 1
