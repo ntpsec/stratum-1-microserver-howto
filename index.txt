@@ -1071,6 +1071,57 @@ These details will become relevant whenever we qualify a new HAT
 for coverage in this HOWTO.  The important thing to check is whether
 the pps-gpio driver triggers on assert or falling edge.
 
+== Adequate power is important ==
+
+Hackerboards like the Pi, Odroid, and Beaglebone are picky about
+getting clean power to the full specified amount because they're
+designed for lowest cost.  Power regulation is expensive compared to
+logic gates, and this is one of the corners they cut.  Under-voltage
+or under-wattage can cause failures to boot, lockups, or mystery
+crashes.
+
+You're generally safe if you use a vendor's wall wart matched to the
+device. But there are a lot of crappy power supplies that don’t come
+close to putting out the volts/amps/watts that they are rated for.
+The power supllies, too, are made with extreme cost cutting measures -
+and worse,false marking/advertising.
+
+It's best to buy a power supply from a board reseller, that the
+reseller “qualifies” or recommends for the board. Even then you
+may run into problems, because the board builders might underestimate
+current draw with peripherals attached. The RasPi foundation was
+selling and recommending 2A power supplies for a while before they
+figured out that the actual draw with all ports active was close to 2.5A
+
+Problems may arise if you try powering from a USB hub that isn't quite
+up to snuff, or have lossy USB cables.  I've had good results with a
+powered hub from Anker, the class act in USB equipment, and I'm told
+Tronsmart is also a pretty reliable brand. Beware of going cheap here.
+
+Unless your USB cable is really short (1 foot, or less) you also need
+20AWG USB cables (the nominal standard gauge for USB), not the 28AWG
+or smaller "thin" USB cables often shipped to cut prices. 28AWG is
+0.064 ohms per foot.  Double that for out and back to 0.128 ohms/ft of
+USB cable.
+
+Anecdotal evidence says you can run a Pi 3 on 4.8V but less is a
+problem.  Running headless (without a mouse, keyboard or display) and
+without a HAT, a Pi 3 will draw about 700mA, but peripherals rapidly
+drive up power consumption to where even 2A isn't enough; the Pi
+Foundation recommends 2.5A.
+
+On a Raspberry Pi B+, 2 & 3, the red Power LED will turn off to
+indicate if voltage drops below 4.63V.  If it's not staying on solid,
+the power supply or power cable is not adequate.  Also, I'm told that
+before the power LED flickers, or goes out, there will be a rainbow
+colored box on the top left of the HDMI output screen.
+
+There are a lot of really bad USB cables on the market, and it is wise
+to avoid the price basement here too. I've had good results with
+bulk-pack 3-foot cables from Monoprice. When in doubt, apply a USB V/A
+meter; Newegg has them for less than $10. Be sure your meter can do 9V
+for the new Quick Charge standard.
+
 == A note about the Odroid C2 ==
 
 The http://www.hardkernel.com/main/products/prdt_info.php[Odroid C2]
