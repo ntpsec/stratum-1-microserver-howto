@@ -273,13 +273,13 @@ depending on how many hard drives you have and how your reader firmware
 is set up. If you're using a built-in SD reader port, e.g. on a laptop, the
 devicename might be something like '/dev/mmcblk0'
 
-To proceed manually, first unpack the zip file it to get an img file:
+First, unpack the zip file it to get an img file:
 
 ------------------------------------------------------------------------
 $ unzip 2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
-Follow the directions at <<INSTALLATION>>, using dfcldd.
+To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
@@ -295,19 +295,19 @@ For safety's sake, force pending I/O to the SD card before removing it.
 To use ddimage, first read it. You should always read any script that will
 run with root permissions, to check that it doesn't do anything
 nefarious.  Give it the basename of your SD reader (usually "sdd"). It
-will do some safety checks, then generate unzip and ddcfldd commands
+will do some safety checks, then generate a ddcfldd command
 like the above.
 
-You should to make it executable so you can run it as a script:
+You should make it executable so you can run it as a script:
 
 ------------------------------------------------------------------------
-# chmod a+x 
+# chmod a+x ddimage
 ------------------------------------------------------------------------
 
 Your ddimage command execution should look roughly like this:
 
 ------------------------------------------------------------------------
-# ddimage sdd
+# ./ddimage sdd
 Checking /dev/sdd
 /dev/sdd exists as a mountable device.
 /dev/sdd is not mounted
