@@ -359,7 +359,7 @@ Internet can reach your SBC via ssh before you either change the
 default-account password or remove the default account altogether,
 your Pi could be enslaved by an attack bot within minutes.
 
-=== Initial configuration ===
+=== First ssh access ===
 
 Next, make sure your SBC has a live Ethernet cable plugged in and
 connected to the same network as your host (because it will also need
