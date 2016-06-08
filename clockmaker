@@ -200,7 +200,7 @@ def install():
     print("Installing NTPsec")
     if 'ntp' not in set([x[0] for x in pwd.getpwall()]):
         os.system("adduser --system --no-create-home --disabled-login --gecos '' ntp")
-        us.system("addgroup --system ntp; addgroup ntp ntp")
+        os.system("addgroup --system ntp; addgroup ntp ntp")
     os.system("(cd ntpsec && ./waf install) && cp ntp.conf /etc")
 
     print("Installing pinup")
