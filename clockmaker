@@ -189,9 +189,10 @@ def install():
         print("The --install function must run as root.")
         raise SystemExit(0)
 
-    print("Removing stock NTP")
-    os.system("apt-get -y remove --purge ntp")
-    os.system("apt-get -y autoremove")
+    if os.path.exists("/usr/sbin/ntp-keygen"):
+        print("Removing stock NTP")
+        os.system("apt-get -y remove --purge ntp")
+        os.system("apt-get -y autoremove")
 
     print("Installing GPSD")
     os.system("(cd gpsd && scons install)")
@@ -213,6 +214,8 @@ def install():
 
     print("Enabling time service")
     os.system("systemctl enable timeservice")
+
+    # FIXME: set up cron jobs?
 
     print("A reboot is required for these changes to take effect.")
     os.system("reboot")
