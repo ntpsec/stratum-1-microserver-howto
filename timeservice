@@ -40,7 +40,7 @@ unlock_ntpdate() {
 
 NTPD_OPTS=-g
 
-RUNASUSER=nobody
+RUNASUSER=ntp
 UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
 if test "$(uname -s)" = "Linux"; then
         NTPD_OPTS="$NTPD_OPTS -u $UGID"

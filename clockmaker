@@ -174,7 +174,7 @@ def build():
     else:
         os.system("(chdir ntpsec; git pull)")
     os.chdir("ntpsec")
-    os.system("./waf configure --refclock=28")
+    os.system("./waf configure --refclock=20,22,28,46")
     os.system("./waf build")
     os.chdir("..")
 
@@ -197,6 +197,9 @@ def install():
     os.system("(cd gpsd && scons install)")
 
     print("Installing NTPsec")
+    if 'ntp' not in set([x[0] for x in pwd.getpwall()]):
+        os.system("adduser --system --no-create-home --disabled-login --gecos '' ntp")
+        us.system("addgroup --system ntp; addgroup ntp ntp")
     os.system("(cd ntpsec && ./waf install) && cp ntp.conf /etc")
 
     print("Installing pinup")
@@ -211,7 +214,7 @@ def install():
     print("Enabling time service")
     os.system("systemctl enable timeservice")
 
-    print("A reboot is fequired for these changes to take effect.")
+    print("A reboot is required for these changes to take effect.")
     os.system("reboot")
 
 def mask():
