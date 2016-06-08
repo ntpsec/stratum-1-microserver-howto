@@ -5,7 +5,7 @@
 # To run this, use either the default user account or non-root,
 # non-default account on the SBC. Copy it to the account's $HOME, go
 # root there, and run it.  The --build mode copies over some files
-# that the --nstall mode will install.
+# that the --install mode will install.
 #
 # If there is a local config utility such as raspi-config on the
 # Raspberry Pi, you should already have run it before calling the
@@ -50,6 +50,29 @@ version_dict = {
 sbc_type = None
 default_login = None
 gpsdev = None
+
+def pinprompt():
+    print("Configuring GPIO pin....")
+    #   GPIO04      |      P1-7     | Adafruit
+    #   GPIO18      |      P1-12    | Uputronics
+    #   GPIO05      |      PI-29    | SKU 424254
+    pin_dict = {
+        "Adafruit HAT" : 4,
+        "Uputronics HAT" : 18,
+        "SKU 42425" : 5,
+        }
+    while True:
+        pin = None
+        for k in pin_dict:
+            print("%s = %s" % (k[0], k))
+        sel = my_input("Select a GPS daughterboard type: ").upper()
+        for k in pin_dict:
+            if k.startswith(sel):
+                pin = pin_dict[k]
+        if pin is not None:
+            print("Configuring for PPS via GPIO pin %s" % pin)
+            break
+    return pin
 
 def config():
     "Perform root-mode preconfiguration of the SBC"
@@ -105,26 +128,7 @@ dtoverlay=pi3-miniuart-bt
         if m:
             print("GPIO pin already configured to %s." % m.group(1))
         else:
-            print("Configuring GPIO pin....")
-            #   GPIO04      |      P1-7     | Adafruit
-            #   GPIO18      |      P1-12    | Uputronics
-            #   GPIO05      |      PI-29    | SKU 424254
-            pin_dict = {
-                "Adafruit HAT" : 4,
-                "Uputronics HAT" : 18,
-                "SKU 42425" : 5,
-                }
-            while True:
-                pin = None
-                for k in pin_dict:
-                    print("%s = %s" % (k[0], k))
-                sel = my_input("Select a GPS daughterboard type: ").upper()
-                for k in pin_dict:
-                    if k.startswith(sel):
-                        pin = pin_dict[k]
-                if pin is not None:
-                    print("Configuring for PPS via GPIO pin %s" % pin)
-                    break
+            pin = pinprompt()
             gpio = """\
 # Get 1PPS from HAT pin 
 dtoverlay=pps-gpio,gpiopin=%s
@@ -132,6 +136,10 @@ dtoverlay=pps-gpio,gpiopin=%s
             with open(bc, "a") as ap:
                 ap.write(gpio % pin)
             reboot_required = True
+    elif sbc_type == "Odroid C2":
+        os.system("apt-get install device-tree-compiler")
+        print("Can't configure the Odroid C2 yet.")
+        raise SystemExit(1)
 
     if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
         print("")
