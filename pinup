@@ -43,6 +43,29 @@ pin_pairs = (
     ("SKU 42425", 5),
     )
 
+def pinprompt():
+    print("Configuring GPIO pin....")
+    #   GPIO04      |      P1-7     | Adafruit
+    #   GPIO18      |      P1-12    | Uputronics
+    #   GPIO05      |      PI-29    | SKU 424254
+    pin_dict = {
+        "Adafruit HAT" : 4,
+        "Uputronics HAT" : 18,
+        "SKU 42425" : 5,
+        }
+    while True:
+        newpin = None
+        for k in pin_dict:
+            print("%s = %s" % (k[0], k))
+        sel = my_input("Select a GPS daughterboard type: ").upper()
+        for k in pin_dict:
+            if k.startswith(sel):
+                newpin = pin_dict[k]
+        if newpin is not None:
+            print("Configuring for PPS via GPIO pin %s" % newpin)
+            break
+    return newpin
+
 if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "p")
@@ -68,6 +91,11 @@ if __name__ == "__main__":
         default_login = "pi"
         gpsdev = "/dev/ttyAMA0"
         sys.stdout.write("Raspberry ")
+    elif "ODROID-C2" in open("/cat/proc/cpuinfo").read():
+        sbc_type = "Odroid C2"
+        default_login = "odroid"
+        gpsdev = "/dev/ttyS1"
+        sys.stdout.write("ODroid C2 ")
     else:
         print("Unknown SBC type.")
         raise SystemExit(1)
@@ -77,12 +105,13 @@ if __name__ == "__main__":
     for line in open("/proc/cpuinfo"):
         if line.startswith("Revision"):
             revno = line.split()[2]
-    if revno is None or revno not in version_dict:
-        sys.stdout.write("can't identify SBC version.\n")
-        raise SystemExit(0)
-    else:
-        sys.stdout.write("%s, " % (version_dict[revno]))
-
+    if sbc_type == RPi:
+        if revno is None or revno not in version_dict:
+            sys.stdout.write("can't identify SBC version.\n")
+            raise SystemExit(0)
+        else:
+            revno = version_dict[revno]
+    sys.stdout.write("%s, " % (revno))
 
     reboot_required = False
 
@@ -100,22 +129,7 @@ if __name__ == "__main__":
             raise SystemExit(1)
 
         if pin:
-            print("Configuring GPIO pin....")
-            #   GPIO04      |      P1-7     | Adafruit
-            #   GPIO18      |      P1-12    | Uputronics
-            #   GPIO05      |      PI-29    | SKU 424254
-            while True:
-                newpin = None
-                pin_dict = dict(pin_pairs)
-                for k in pin_dict:
-                    print("%s = %s" % (k[0], k))
-                sel = my_input("Select a GPS daughterboard type: ").upper()
-                for k in pin_dict:
-                    if k.startswith(sel):
-                        newpin = pin_dict[k]
-                if newpin is not None:
-                    print("Configuring for PPS via GPIO pin %s" % newpin)
-                    break
+            newpin = pin_prompt()
 
             new_config = re.sub(gpio_re, dtoverlay + str(newpin), config_txt)
             if new_config == config_txt:
@@ -124,12 +138,15 @@ if __name__ == "__main__":
             with open(bc, "w") as wp:
                 wp.write(new_config)
             reboot_required = True
+    elif sbc_type == "Odroid C2":
+        print("Not working on Odroid C2 yet")
+        raise SystemExit(1)
 
-        if reboot_required:
-            print("")
-            print("A reboot is required for the GPIO change to take effect.")
-        elif pin:
-            print("No configuration changes - no reboot is required.")
+    if reboot_required:
+        print("")
+        print("A reboot is required for the GPIO change to take effect.")
+    elif pin:
+        print("No configuration changes - no reboot is required.")
 
 #end
 
