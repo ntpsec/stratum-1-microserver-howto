@@ -62,17 +62,17 @@ def pinprompt():
         "SKU 42425" : 5,
         }
     while True:
-        pin = None
+        pinup = None
         for k in pin_dict:
             print("%s = %s" % (k[0], k))
         sel = my_input("Select a GPS daughterboard type: ").upper()
         for k in pin_dict:
             if k.startswith(sel):
-                pin = pin_dict[k]
-        if pin is not None:
-            print("Configuring for PPS via GPIO pin %s" % pin)
+                pinup = pin_dict[k]
+        if pinup is not None:
+            print("Configuring for PPS via GPIO pin %s" % pinup)
             break
-    return pin
+    return pinup
 
 def config():
     "Perform root-mode preconfiguration of the SBC"
@@ -282,12 +282,12 @@ def secure():
     wp = open("/etc/ssh/sshd_config-new", "w")
     modified = False
     for line in rp:
-        if line.startswith("PermitRootLogin") and "no" not in line:
+        if line.startswith("PermitRootLogin") and "without-password" not in line:
             modified = True
-            line = "PermitRootLogin no\n"
+            line = "PermitRootLogin without-password\n"
         elif line.startswith("#PermitRootLogin"):
             modified = True
-            line = "PermitRootLogin no\n"
+            line = "PermitRootLogin withou-password\n"
         elif line.startswith("PasswordAuthentication") and "no" not in line:
             modified = True
             line = "PasswordAuthentication no\n"
