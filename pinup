@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 #
-# Query a microserver for its hardware configuration
+# Query a microserver for its hardware configuration, including the
+# pin designated to receive 1PPS by the pps-gpio driver.  With the
+# -p option, set that pin.
 #
-# If there is a local config utility such as raspi-config on the
-# Raspberry Pi, you should already have run it before this.
-#
-# The evironment is assumed to be Debian Linux variant.
+# The evironment is assumed to be a Debian Linux variant.
 #
 import sys, os, re, getopt
 
@@ -14,7 +13,7 @@ try:
 except NameError:
     my_input = input
 
-# Map hardware revision numbers to Raspeberry Pi versions
+# Map hardware revision numbers to Raspberry Pi versions
 version_dict = {
     "0002" : "Model B Revision 1.0",
     "0003" : "Model B Revision 1.0",
@@ -85,6 +84,9 @@ if __name__ == "__main__":
         print("The config function must run as root.")
         raise SystemExit(0)
 
+    hostname = open("/etc/hostname").read().strip()
+    sys.stdout.write(hostname + ": ")
+
     # Identify the SBC
     if os.path.exists("/dev/ttyAMA0"):
         sbc_type = "RPi"
@@ -105,7 +107,7 @@ if __name__ == "__main__":
     for line in open("/proc/cpuinfo"):
         if line.startswith("Revision"):
             revno = line.split()[2]
-    if sbc_type == RPi:
+    if sbc_type == "RPi":
         if revno is None or revno not in version_dict:
             sys.stdout.write("can't identify SBC version.\n")
             raise SystemExit(0)
