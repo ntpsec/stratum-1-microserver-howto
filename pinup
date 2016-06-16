@@ -93,7 +93,7 @@ if __name__ == "__main__":
         default_login = "pi"
         gpsdev = "/dev/ttyAMA0"
         sys.stdout.write("Raspberry ")
-    elif "ODROID-C2" in open("/cat/proc/cpuinfo").read():
+    elif "ODROID-C2" in open("/proc/cpuinfo").read():
         sbc_type = "Odroid C2"
         default_login = "odroid"
         gpsdev = "/dev/ttyS1"
