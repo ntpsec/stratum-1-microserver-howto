@@ -8,6 +8,8 @@
 #
 import sys, os, re, getopt
 
+# This code is in common with clockmaker.  Make sure they stay synced
+
 try:
     my_input = raw_input
 except NameError:
@@ -89,6 +91,16 @@ class OdroidC2:
         # Not yet supported
         raise ValueError
 
+def whatami():
+    "Identify the SBC"
+    for sbctype in (RaspberryPi, OdroidC2):
+        if sbctype.identify_me():
+            return sbctype()
+            break
+    else:
+        print("Unknown SBC type.")
+        raise SystemExit(1)
+
 def pinprompt(pin_pairs):
     print("Configuring GPIO pin....")
     while True:
@@ -103,6 +115,8 @@ def pinprompt(pin_pairs):
             print("Configuring for PPS via GPIO pin %s" % newpin)
             break
     return newpin
+
+# End common code
 
 if __name__ == "__main__":
     try:
@@ -127,14 +141,8 @@ if __name__ == "__main__":
     sys.stdout.write(hostname + ": ")
 
     # Identify the SBC
-    for sbctype in (RaspberryPi, OdroidC2):
-        if sbctype.identify_me():
-            sbc = sbctype()
-            sys.stdout.write(sbc.name + " ")
-            break
-    else:
-        print("Unknown SBC type.")
-        raise SystemExit(1)
+    sbc = whatami()
+    sys.stdout.write(sbc.name + " ")
 
     # Determine the hardware revision
     revno = None
