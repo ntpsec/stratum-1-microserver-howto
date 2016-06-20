@@ -36,30 +36,25 @@ version_dict = {
     "a22082" : "Pi 3 Model B",
 }
 
-pin_pairs = (
-    ("Adafruit HAT", 4),
-    ("Uputronics HAT", 18),
-    ("SKU 42425", 5),
-    )
-
-def pinprompt():
-    print("Configuring GPIO pin....")
+gpio = {
     #   GPIO04      |      P1-7     | Adafruit
     #   GPIO18      |      P1-12    | Uputronics
     #   GPIO05      |      PI-29    | SKU 424254
-    pin_dict = {
-        "Adafruit HAT" : 4,
-        "Uputronics HAT" : 18,
-        "SKU 42425" : 5,
-        }
+    "RPi": (("Adafruit", 4), ("Uputronics", 18), ("SKU 42425", 5)),
+    # See http://forum.odroid.com/viewtopic.php?f=136&t=21733&p=147199#p147199
+    "Odroid C2": (("Adafruit", 249), ("Uputronics", 238), ("SKU 42425", 228)),
+    }
+
+def pinprompt(pin_pairs):
+    print("Configuring GPIO pin....")
     while True:
         newpin = None
-        for k in pin_dict:
+        for k in pin_pairs:
             print("%s = %s" % (k[0], k))
         sel = my_input("Select a GPS daughterboard type: ").upper()
-        for k in pin_dict:
+        for k in pin_pairs:
             if k.startswith(sel):
-                newpin = pin_dict[k]
+                newpin = pin_pairs[k]
         if newpin is not None:
             print("Configuring for PPS via GPIO pin %s" % newpin)
             break
@@ -124,14 +119,14 @@ if __name__ == "__main__":
         config_txt = open(bc).read()
         m = gpio_re.search(config_txt)
         if m:
-            ptype = dict([(str(y), x) for (x, y) in pin_pairs])[m.group(1)]
+            ptype = dict([(str(y), x) for (x, y) in gpio["RPi"]])[m.group(1)]
             sys.stdout.write("configured for the %s.\n" % ptype)
         else:
             print("GPIO not configured")
             raise SystemExit(1)
 
         if pin:
-            newpin = pin_prompt()
+            newpin = pin_prompt(dict(gpio["RPi"]))
 
             new_config = re.sub(gpio_re, dtoverlay + str(newpin), config_txt)
             if new_config == config_txt:
