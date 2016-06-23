@@ -74,20 +74,20 @@ class RaspberryPi:
 class OdroidC2:
     "Odroid C2 capabilities"
     # See: http://forum.odroid.com/viewtopic.php?f=136&t=21733&p=147199#p147199
-    mf = /etc/modprobe.d/pps-gpio.conf
+    mf = "/etc/modprobe.d/pps-gpio.conf"
     options = "options pps-gpio gpio_pin="
     gpio_re = re.compile(options + "([0-9]*)")
     def __init__(self):
         self.name = "Odroid C2"
-        self.ppsdev = "/dev/ttyS1"
+        self.gpsdev = "/dev/ttyS1"
         self.default_login = "odroid"
         self.gpiomap = (("Adafruit", 249),("Uputronics", 238),("SKU 42425", 228))
-        self.revision_dict = None
+        self.revision_dict = {}
     @staticmethod
     def identify_me():
         return "ODROID-C2" in open("/proc/cpuinfo").read()
     def get_pps_gpio(self):
-        if not os.path.exists(mf):
+        if not os.path.exists(OdroidC2.mf):
             return None
         else:
             with open(OdroidC2.mf) as rp:
@@ -99,8 +99,8 @@ class OdroidC2:
                 return None
     def set_pps_gpio(self, newpin):
         with open("/etc/modules-load.d/pps-gpio.conf", "w") as wp:
-            wp.write("pps-gpio")
-        with open(mf, "w") as wp:
+            wp.write("pps-gpio\n")
+        with open(OdroidC2.mf, "w") as wp:
             wp.write(OdroidC2.options + str(newpin) + "\n")
         os.system("modprobe")
 

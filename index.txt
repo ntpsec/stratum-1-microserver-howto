@@ -54,6 +54,11 @@ You will need:
 
 * One Raspberry Pi or workalike SBC.  I used a
   Raspberry Pi 3: these instructions cover older variants as well.
+  The http://www.hardkernel.com/main/products/prdt_info.php[Odroid C2]
+  is an ARM-based hackerboard strongly resembling the Raspberry Pi, but
+  with better hardware and at a slighly higher price point. The main
+  connector on the Odroid is pin-compatible with the 40-pin Pi
+  connector.
 
 * One compatible GPS HAT.  Possibilities are:
 +
@@ -207,6 +212,9 @@ will be marked with "$".  Remember that you go root with the command
 "sudo bash" or (after you haves set a +root password) "su -".
 
 === Making a bootable SD ===
+
+You get to skip this step on the ODroid; it comes with a bootable
+Micro SD.
 
 Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
 Raspbian Lite image zip file] to your host.
@@ -373,6 +381,16 @@ Raspberryi Pi, that looks like this:
 $ ssh pi@raspberrypi.local
 ------------------------------------------------------------------------
 
+On the Odroid C2, you won't be able to ssh in with a simple
+"odroid@odroid.local".  Get to a terminal emulator on an physically
+attached monitor and do
++
+------------------------------------------------------------------------
+$ ps aux | grep avahi-daemon
+------------------------------------------------------------------------
++
+to see what name it is actually exporting; look for the ".local" suffix.
+
 If ssh tells you it can't see any host with the expected name,
 either the SBC hasn't yet booted or your network can't see it. Don't
 panic. Check for a green light on the Pi's Ethernet port to be sure
@@ -404,7 +422,7 @@ The hardest part is now done.
 
 === Initial configuration ===
 
-Call 'sudo raspi-config' on the Pi.  
+Call 'sudo raspi-config' on the Pi.  This step is skipped on the ODroid.
 
 ------------------------------------------------------------------------
 # raspi-config
@@ -504,7 +522,8 @@ $ sudo bash
 
 These changes are not reversible, but you'd want them for any other
 use of the SBC anyway. You always want to be updated with security
-patches and other fixes.
+patches and other fixes.  Also, older ODroid kernels are missing a
+driver this build needs.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
@@ -539,11 +558,17 @@ dtoverlay line.
 ------------------------------------------------------------------------
 
 {--config} Create a symlink to the GPS device to make it easier to refer
-to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
-accomplish this:
+to.  Put one of the following in a new file /etc/udev/rules.d/10-pps.rules to
+accomplish this. On the Pi:
 
 ------------------------------------------------------------------------
 KERNEL=="ttyAMA0", SYMLINK+="gpsd0"
+------------------------------------------------------------------------
+
+On the Odroid:
+
+------------------------------------------------------------------------
+KERNEL=="ttyS1", SYMLINK+="gpsd0"
 ------------------------------------------------------------------------
 
 === Configure the 1PPS GPIO pin ===
@@ -561,12 +586,12 @@ Which pin is used for 1PPS is a variable of the HAT design.  Here is a
 table:
 
 [width="25%",frame="topbot",options="header"]
-|============================================
-| Logical pin   | Physical pin | HAT
-|   GPIO04      |      P-7     | Adafruit
-|   GPIO18      |      P-12    | Uputronics
-|   GPIO05      |      P-29    | SKU 424254
-|============================================
+|======================================================================
+| HAT        | Physical pin | RPi Logical pin   | ODroid C2 export pin
+| Adafruit   |      P-7     |   GPIO04          |    249
+| Uputronics |      P-12    |   GPIO18          |    238
+| SKU 424254 |      P-29    |   GPIO05          |    228
+|======================================================================
 
 There is a Linux kernel driver called pps-gpio which,
 given one of these pins, uses the signal from it to support an
@@ -578,13 +603,26 @@ The procedure for declaring the GPIO pin varies by Raspbian version.
 We only give the formula for the current Raspbian here; you can
 find details about older versions at <<TAYLOR>>;
 
-{--config} Edit /boot/config.txt to contain these options, replacing '4' with
-the logical pin number for your HAT if it's not an Adafruit:
+{--config} On the Pi, edit /boot/config.txt to contain these options,
+replacing '4' with the logical pin number for your HAT if it's not an
+Adafruit:
 
 ------------------------------------------------------------------------
 # Get 1PPS from HAT pin 
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
+
+{---config} On the Odroid, you need to do these things:
+
+------------------------------------------------------------------------
+# echo pps-gpio >/etc/modules-load.d/pps-gpio.conf
+# echo options pps-gpio gpio_pin=249 >/etc/modprobe.d/pps-gpio.conf
+# modprobe pps-gpio
+------------------------------------------------------------------------
+
+However, you need to modify that '249' if you're using a non-Adafruit
+HAT.  See the previous table for the Odroid pin numbers.  Or let
+clockmaker do all this for you.
 
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
@@ -1134,44 +1172,6 @@ to avoid the price basement here too. I've had good results with
 bulk-pack 3-foot cables from Monoprice. When in doubt, apply a USB V/A
 meter; Newegg has them for less than $10. Be sure your meter can do 9V
 for the new Quick Charge standard.
-
-== A note about the Odroid C2 ==
-
-The http://www.hardkernel.com/main/products/prdt_info.php[Odroid C2]
-is an ARM-based hackerboard strongly resembling the Raspberry Pi, but
-with better hardware and at a slighly higher price point. The main
-connector on the Odroid is pin-compatible with the 40-pin Pi
-connector.
-
-We have installed an Adafruit HAT on a C2 and seen NMEA data from it.
-Unfortunately, the kernel support necessary for watching 1PPS is
-absent in the 3.14.29-29 build current in early June 2016.  When this
-is fixed, we will broaden our recipe to include the C2.  I have
-reported this on the issue tracker at Hardkernel.
-
-In case you are reading this between the time their kernel is updated
-and we update the recipe, some pointers:
-
-* You won't be able to ssh in with a simple "odroid@odroid.local".
-  Get to a terminal emulator on an physically attached monitor and
-  do
-+
-------------------------------------------------------------------------
-$ ps aux | grep avahi-daemon
-------------------------------------------------------------------------
-+
-to see what name it is actually exporting; look for the ".local" suffix.
-
-* The hard UART attached to GPIO pins 8 and 10 is at /dev/ttyS1 and
-  does not interfere with the serial console.  I have seen it report
-  NMEA data from the HAT.
-
-* Look for pps-gpio under /lib/modules.  That's the missing piece. 
-  Without it you won't be able to watch 1PPS.
-
-* The RPi 3 hack to disable serial interfaces won't be required.
-
-We would welcome field reports to complete this recipe.
 
 == Future Direction ==
 

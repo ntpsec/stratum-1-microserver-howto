@@ -85,20 +85,20 @@ class RaspberryPi:
 class OdroidC2:
     "Odroid C2 capabilities"
     # See: http://forum.odroid.com/viewtopic.php?f=136&t=21733&p=147199#p147199
-    mf = /etc/modprobe.d/pps-gpio.conf
+    mf = "/etc/modprobe.d/pps-gpio.conf"
     options = "options pps-gpio gpio_pin="
     gpio_re = re.compile(options + "([0-9]*)")
     def __init__(self):
         self.name = "Odroid C2"
-        self.ppsdev = "/dev/ttyS1"
+        self.gpsdev = "/dev/ttyS1"
         self.default_login = "odroid"
         self.gpiomap = (("Adafruit", 249),("Uputronics", 238),("SKU 42425", 228))
-        self.revision_dict = None
+        self.revision_dict = {}
     @staticmethod
     def identify_me():
         return "ODROID-C2" in open("/proc/cpuinfo").read()
     def get_pps_gpio(self):
-        if not os.path.exists(mf):
+        if not os.path.exists(OdroidC2.mf):
             return None
         else:
             with open(OdroidC2.mf) as rp:
@@ -110,8 +110,8 @@ class OdroidC2:
                 return None
     def set_pps_gpio(self, newpin):
         with open("/etc/modules-load.d/pps-gpio.conf", "w") as wp:
-            wp.write("pps-gpio")
-        with open(mf, "w") as wp:
+            wp.write("pps-gpio\n")
+        with open(OdroidC2.mf, "w") as wp:
             wp.write(OdroidC2.options + str(newpin) + "\n")
         os.system("modprobe")
 
@@ -152,16 +152,16 @@ def config():
         print("The --config function must run as root.")
         raise SystemExit(0)
 
-    # Determine the Pi version
+    # Determine the SBC version
     revno = None
     for line in open("/proc/cpuinfo"):
         if line.startswith("Revision"):
             revno = line.split()[2]
-    if revno is None or revno not in version_dict:
+    if revno is not None and revno in sbc.revision_dict:
+        print("I see hardware revision %s, %s" % (revno, sbc.revision_dict[revno]))
+    elif revno and sbc.revision_dict:
         print("Can't identify SBC version")
         raise SystemExit(0)
-    else:
-        print("I see hardware revision %s, %s" % (revno, version_dict[revno]))
 
     print("")
 
@@ -193,11 +193,8 @@ dtoverlay=pi3-miniuart-bt
     try:
         ptype = sbc.get_pps_gpio()
         if ptype:
-            sys.stdout.write("configured for the %s.\n" % ptype)
+            sys.stdout.write("Configured for the %s.\n" % ptype)
         else:
-            print("GPIO not configured")
-            raise SystemExit(1)
-        if pin:
             sbc.set_pps_gpio(pinprompt(dict(sbc.gpiomap)))
             reboot_required = True
     except ValueError:
@@ -208,7 +205,7 @@ dtoverlay=pi3-miniuart-bt
         print("")
         print("Creating /dev/gpsd0 symlink rule")
         with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
-            wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % gpsdev)
+            wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % sbc.gpsdev)
             reboot_required = True
 
     print("")
