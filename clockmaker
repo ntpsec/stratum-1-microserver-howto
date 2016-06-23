@@ -13,6 +13,10 @@
 #
 # The evironment is assumed to be a Debian Linux variant.
 #
+# Note: There is some support for the ODroid C2 in here, but we found it
+# too fragile and unstable to be useful.  the code is left in as a model for
+# other SBCs but we recommend against trying to use it.
+#
 import sys, os, re, pwd
 
 # If this changes, the corresponding Makefile declaration and asciidoc macro
