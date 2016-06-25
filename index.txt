@@ -86,7 +86,7 @@ properly needs Dremel work.
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
 
-* Either a 5V, 2A power supply with a micro-USBoutlet (same as the
+* Either a 5V, 2A power supply with a micro-USB outlet (same as the
   standard charger for smartphones) or a USB-to-Micro-USB cable that
   can take power from the host macine.
 
@@ -1013,7 +1013,7 @@ If you want to banish WiFi, this will do:
 === Configuring for a static IP address ===
 
 If you're only going to use the SBC as a itine service for your local
-network, you can cite its zeoroconf (.local) address in other ntp.conf
+network, you can cite its zeroconf (.local) address in other ntp.conf
 files. If you want to expose it as a public server you'll need to
 configure the SBC to use a fixed, static IP address. That process is
 described in <<EAT-STATIC>>.
