@@ -6,7 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v0.9, May 2016
+v0.10, July 2016
 
 == Introduction ==
 
@@ -779,7 +779,7 @@ shared-memory refclock support, excluding all other drivers.
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
 $ cd ntpsec
-$ ./waf configure --refclock=28
+$ ./waf configure --refclock=shm
 $ ./waf build
 ------------------------------------------------------------------------
 
@@ -794,12 +794,12 @@ include::ntp.conf[]
 Here's what the parts mean:
 
 GPS Serial data reference (NTP0)::
-   The line beginning "server 127.127.28.0" tells it we're expecting fixes
+   The line beginning "refclock shm unit 0" tells it we're expecting fixes
    via the shared-memory mailbox, unit 0.  These will be labeled GPS
    because they are the GPS's in-band time reports.
 
 GPS Serial data reference (NTP1)::
-   The line beginning "server 127.127.28.1" tells it we're expecting fixes
+   The line beginning "refclock shm unit 1" tells it we're expecting fixes
    via the shared-memory mailbox, unit 1.  These will be labeled PPS
    because they come from the GPS's 1PPS.
 
