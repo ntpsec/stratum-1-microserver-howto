@@ -86,7 +86,6 @@ class RaspberryPi:
                 wp.write(new_config)
         else:
             with open(RaspberryPi.bc, "a") as wp:
-                wp.write(new_config)
                 print("Appending to %s." % RaspberryPi.bc)
                 wp.write(RaspberryPi.dtoverlay + str(newpin) + "\n")
 
@@ -175,8 +174,8 @@ def config():
 
     reboot_required = False
 
-    print("About to upgrade your OS")
-    os.system("apt-get -y update; apt-get -y dist-upgrade")
+    #print("About to upgrade your OS")
+    #os.system("apt-get -y update; apt-get -y dist-upgrade")
 
     print("")
     print("Getting build and test prerequisites")
