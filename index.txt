@@ -6,7 +6,13 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v0.10, July 2016
+v0.11, October 2016
+
+Warning: due to severe breakage in Raspbian, this recipe no longer
+works.  The maintainers apparently lack either ability or will to
+maintain stable, documented interfaces to the serial UART and 1PPS
+dacilities it needs. Attempt only if you think you have the technical
+skill to figure out what they have busted and fix it.
 
 == Introduction ==
 
