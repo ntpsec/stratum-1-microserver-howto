@@ -208,9 +208,6 @@ will be marked with "$".  Remember that you go root with the command
 
 === Making a bootable SD ===
 
-You get to skip this step on the ODroid; it comes with a bootable
-Micro SD.
-
 Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
 Raspbian Lite image zip file] to your host.
 
@@ -407,7 +404,7 @@ The hardest part is now done.
 
 === Initial configuration ===
 
-Call 'sudo raspi-config' on the Pi.  This step is skipped on the ODroid.
+Call 'sudo raspi-config' on the Pi.
 
 ------------------------------------------------------------------------
 # raspi-config
@@ -507,8 +504,7 @@ $ sudo bash
 
 These changes are not reversible, but you'd want them for any other
 use of the SBC anyway. You always want to be updated with security
-patches and other fixes.  Also, older ODroid kernels are missing a
-driver this build needs.
+patches and other fixes.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
@@ -1181,6 +1177,9 @@ unstable to hand to newbies.  We may try again when it has matured.
 
 - [[[ODROID]]] http://forum.odroid.com/viewtopic.php?f=111&t=7660[GPS
   unit for odroid c1]
+
+// Not referenced in text yet.
+- [[[GPIO]]] http://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/[Configuring The GPIO Serial Port On Raspbian Jessie Including Pi 3]
 
 == Acknowledgements ==
 
