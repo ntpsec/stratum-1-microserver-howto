@@ -66,7 +66,7 @@ You will need:
 |=======================================================================
 +
 Special note about the SKU 424254: despite vendor claims, the trace
-thast should have connected GPIO5 to the GPS 1PPS was absent the
+that should have connected GPIO5 to the GPS 1PPS was absent the
 revision of the board I received. To use it for time-service,
 link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 +
