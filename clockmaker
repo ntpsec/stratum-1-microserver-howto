@@ -80,11 +80,15 @@ class RaspberryPi:
         with open(RaspberryPi.bc) as rp:
             config_txt = rp.read()
         new_config = re.sub(RaspberryPi.gpio_re, RaspberryPi.dtoverlay + str(newpin), config_txt)
-        if new_config == config_txt:
-            print("internal error - no substitution")
-            raise SystemExit(1)
-        with open(RaspberryPi.bc, "w") as wp:
-            wp.write(new_config)
+        if new_config != config_txt:
+            with open(RaspberryPi.bc, "w") as wp:
+                print("Modifying %s in place." % RaspberryPi.config)
+                wp.write(new_config)
+        else:
+            with open(RaspberryPi.bc, "a") as wp:
+                wp.write(new_config)
+                print("Appending to %s." % RaspberryPi.bc)
+                wp.write(RaspberryPi.dtoverlay + str(newpin) + "\n")
 
 class OdroidC2:
     "Odroid C2 capabilities"
