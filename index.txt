@@ -8,15 +8,15 @@
 by Eric S. Raymond
 v0.11, October 2016
 
-Warning: due to severe breakage in Raspbian, this recipe no longer
+*Warning: due to severe breakage in Raspbian, this recipe no longer
 works.  The maintainers apparently lack either ability or will to
 maintain stable, documented interfaces to the serial UART and 1PPS
 facilities it needs. Attempt only if you think you have the technical
-skill to figure out what they have busted and fix it.
+skill to figure out what they have busted and fix it.*
 
-And no, you can't get around the problems by starting from a known-good
+*And no, you can't get around the problems by starting from a known-good
 2016-03-18 image. They took down the repositories you need for
-NTPsec's build dependencies.
+NTPsec's build dependencies.*
 
 == Introduction ==
 
