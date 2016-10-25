@@ -16,7 +16,7 @@ skill to figure out what they have busted and fix it.
 
 And no, you can't get around the problems by starting from a known-good
 2016-03-18 image. They took down the repositories you need for
-NTPsec's build depedencies.
+NTPsec's build dependencies.
 
 == Introduction ==
 
