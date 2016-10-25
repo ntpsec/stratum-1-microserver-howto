@@ -179,7 +179,14 @@ def config():
     os.system("apt-get -y update; apt-get -y dist-upgrade")
 
     print("")
+    print("Getting build and test prerequisites")
+    prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
+                    "python-dev bc bison libevent-dev libreadline-dev "\
+                    "libcap-dev libssl-dev"
+    os.system(prerequisites)
 
+    print("")
+    print("Configuring for %s" % sbc.name)
     if sbc.name == "Raspberry Pi":
         os.system("systemctl disable hciuart")
         bc = "/boot/config.txt"
@@ -215,14 +222,6 @@ dtoverlay=pi3-miniuart-bt
         with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
             wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % sbc.gpsdev)
             reboot_required = True
-
-    print("")
-
-    print("Getting build and test prerequisites")
-    prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
-                    "python-dev bc bison libevent-dev libreadline-dev "\
-                    "libcap-dev libssl-dev"
-    os.system(prerequisites)
 
     print("")
     if reboot_required:
