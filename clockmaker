@@ -187,6 +187,12 @@ def config():
 
     print("")
     print("Configuring for %s" % sbc.name)
+
+    print("")
+    if not os.path.exists(sbc.bc + "-orig"):
+        print("First-time configuration - backing up %s to %s "% (sbc.bc,sbc.bc))
+        os.system("cp %s %s-orig" % (sbc.bc, sbc.bc))
+
     if sbc.name == "Raspberry Pi":
         os.system("systemctl disable hciuart")
         bc = "/boot/config.txt"
