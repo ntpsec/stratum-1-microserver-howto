@@ -14,6 +14,10 @@ maintain stable, documented interfaces to the serial UART and 1PPS
 dacilities it needs. Attempt only if you think you have the technical
 skill to figure out what they have busted and fix it.
 
+And no, you can't get around the problems by starting from a known-good
+2016-03-18 image. They took down the repositories you need for
+NTPsec's build depedencies.
+
 == Introduction ==
 
 This HOWTO gives complete instructions for building a headless Stratum
