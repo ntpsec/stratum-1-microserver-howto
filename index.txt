@@ -1217,8 +1217,8 @@ unstable to hand to newbies.  We may try again when it has matured.
 == Acknowledgements ==
 
 Various devteam members and friends of the GPSD and NTPsec projects
-assisted with this HOWTO, including: Gary E. Miller, Hal Murray, and
-Phil Salkie.
+assisted with this HOWTO, including: Gary E. Miller, Hal Murray,
+Phil Salkie, and Richard Laager.
 
 == Other resources ==
 
