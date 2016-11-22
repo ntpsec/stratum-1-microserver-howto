@@ -421,6 +421,9 @@ want to set the keyboard type.  Raspbian defaults to a "Generic
 expecting this, the differences (for example, " and @ being swapped)
 can trip you up.
 
+On some versions of Raspbian the keyboard configuration doesn't seem
+to work properly.  Don't worry about this, the step is optional.
+
 Advanced Options (9), Memory Split A3, enter 8 and give the GPU 0
 memory. This will free up some memory that the GPU won't need, because
 you're running headless.
@@ -495,6 +498,17 @@ $ sudo bash
 These changes are not reversible, but you'd want them for any other
 use of the SBC anyway. You always want to be updated with security
 patches and other fixes.
+
+=== Enable the UART ===
+
+{--config} On the Pi, edit /boot/config.txt to contain this option.
+
+------------------------------------------------------------------------
+enable_uart=1
+------------------------------------------------------------------------
+
+You need to do this because rapi-config will have turned off the UART
+when you told it you didn't want a login shell on the serial console.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
