@@ -135,7 +135,7 @@ def whatami():
 def pinprompt(pin_pairs):
     print("Configuring GPIO pin....")
     while True:
-        newpin = None
+s        newpin = None
         for k in pin_pairs:
             print("%s = %s" % (k[0], k))
         sel = my_input("Select a GPS daughterboard type: ").upper()
@@ -174,8 +174,8 @@ def config():
 
     reboot_required = False
 
-    #print("About to upgrade your OS")
-    #os.system("apt-get -y update; apt-get -y dist-upgrade")
+    print("About to upgrade your OS")
+    os.system("apt-get -y update; apt-get -y dist-upgrade")
 
     print("")
     print("Getting build and test prerequisites")
@@ -199,13 +199,17 @@ def config():
         # an SD from a 3 to a 2 and have to wonder why it fails.
         rp3_overlay = """
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
-dtoverlay=pi3-miniuart-bt
+dtoverlay=pi3-disable-bt
 """
-        if "dtoverlay=pi3-miniuart-bt" in open(bc).read():
+        config = open(bc).read()
+        need_uart = "enable_uart=1" not in config
+        if "dtoverlay=pi3-disable-bt" in config:
             print("Bluetooth use of UART already disabled.")
         else:
             print("Reclaiming serial UART.")
             with open(bc, "a") as ap:
+                if need_uart:
+                    ap.write("enable_uart=1\n")
                 ap.write(rp3_overlay)
             reboot_required = True
 
@@ -227,7 +231,7 @@ dtoverlay=pi3-miniuart-bt
         with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
             wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % sbc.gpsdev)
             reboot_required = True
-
+        os.system("udevadm trigger")
     print("")
     if reboot_required:
         print("A reboot is required for configuration changes to take effect")

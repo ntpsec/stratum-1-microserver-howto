@@ -6,17 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v0.11, October 2016
-
-*Warning: due to severe breakage in Raspbian, this recipe no longer
-works.  The maintainers apparently lack either ability or will to
-maintain stable, documented interfaces to the serial UART and 1PPS
-facilities it needs. Attempt only if you think you have the technical
-skill to figure out what they have busted and fix it.*
-
-*And no, you can't get around the problems by starting from a known-good
-2016-03-18 image. They took down the repositories you need for
-NTPsec's build dependencies.*
+v0.12, November 2016
 
 == Introduction ==
 
@@ -218,28 +208,18 @@ will be marked with "$".  Remember that you go root with the command
 
 === Making a bootable SD ===
 
-Download the link:2016-03-18-raspbian-jessie-lite.zip[2016-03-18
-Raspbian Lite image zip file] to your host.
+Download the latest Raspbian Jessie Lite from <<RASPBIAN>> to your host.
 
-[subs="attributes"]
-------------------------------------------------------------------------
-wget {home}2016-03-18-raspbian-jessie-lite.zip
-------------------------------------------------------------------------
-
-Note: due to brain-dead configuration of the GPIO pins <<UART-ISSUE>>,
-you cannot use the 2016-05-10 image from <<RASPBIAN>>. We hope this
-will be fixed in a future release.
-
-Use sha1sum to verify the correctness of the image.
+Use sha1sum to verify the correctness of the image. For example:
 
 ------------------------------------------------------------------------
-$ sha1sum 2016-03-18-raspbian-jessie-lite.zip
-9d4c33fe027a0411bf78181f4c2a0a5ba1f97e31  2016-03-18-raspbian-jessie-lite.zip
+$ shasum 2016-09-23-raspbian-jessie-lite.zip
+3a34e7b05e1e6e9042294b29065144748625bea8  2016-09-23-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
-The hex string this command returns should match the SHA-1 checksum
-above.  If it doesn't, you have a corrupted image and should re-fetch
-it.
+The hex string this command returns should match the SHA-1 checksum on
+the Raspbian download page.  If it doesn't, you have a corrupted image
+and should re-fetch it.
 
 Note that this is not the regular NOOBS image, but one specifically
 designed to boot the Pi as a headless server, communicated with only
@@ -600,6 +580,20 @@ dtoverlay=pps-gpio,gpiopin=4
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
 installing some packages needed for the next step.
+
+Once you have fully configured, the last few lines of your
+/boot/config.txt file should look like this:
+
+------------------------------------------------------------------------
+gpu_mem=0
+enable_uart=1
+dtoverlay=pi3-disable-bt
+dtoverlay=pps-gpio,gpiopin=4
+------------------------------------------------------------------------
+
+The number after "gpiopin=" may be different.  The order of the lines is
+not important. The gpu_mem=0 line is just an optimization. If any of
+the others are missing, your setup will probably not work.
 
 == Smoke-test the GPS/HAT combination ==
 
