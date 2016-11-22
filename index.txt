@@ -1209,7 +1209,7 @@ unstable to hand to newbies.  We may try again when it has matured.
 - [[[ODROID]]] http://forum.odroid.com/viewtopic.php?f=111&t=7660[GPS
   unit for odroid c1]
 
-- [[[TICKLESS]] https://www.kernel.org/doc/Documentation/timers/NO_HZ.txt
+- [[[TICKLESS]]] https://www.kernel.org/doc/Documentation/timers/NO_HZ.txt
 
 // Not referenced in text yet.
 - [[[GPIO]]] http://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/[Configuring The GPIO Serial Port On Raspbian Jessie Including Pi 3]
