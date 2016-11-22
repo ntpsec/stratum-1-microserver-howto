@@ -36,8 +36,8 @@ class RaspberryPi:
     dtoverlay = "dtoverlay=pps-gpio,gpiopin="
     gpio_re = re.compile(dtoverlay + "([0-9]*)")
     def __init__(self):
-        self.name = "Raspberry PI"
-        self.gpsdev = "/dev/ttyAMA0"
+        self.name = "Raspberry Pi"
+        self.gpsdev = "ttyAMA0"
         self.default_login = "pi"
         #   GPIO04      |      P1-7     | Adafruit
         #   GPIO18      |      P1-12    | Uputronics
@@ -97,7 +97,7 @@ class OdroidC2:
     gpio_re = re.compile(options + "([0-9]*)")
     def __init__(self):
         self.name = "Odroid C2"
-        self.gpsdev = "/dev/ttyS1"
+        self.gpsdev = "ttyS1"
         self.default_login = "odroid"
         self.gpiomap = (("Adafruit", 249),("Uputronics", 238),("SKU 42425", 228))
         self.revision_dict = {}
@@ -199,7 +199,7 @@ def config():
             config = rp.read()
             need_uart = "enable_uart=1" not in config
             need_nohz = "nohz=off" not in config
-            need_disablebt = "dtoverlay=pi3-disable-bt" not in config:
+            need_disablebt = "dtoverlay=pi3-disable-bt" not in config
         with open(bc, "a") as ap:
             ap.write("\n#Timeserver customizations begin here\n")
             if not need_disablebt:
