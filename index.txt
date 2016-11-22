@@ -577,18 +577,28 @@ Adafruit:
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
 
+An optimization that is convenient to apply at this point is telling
+the kernel to run tickless (see <<TICKLESS>> for technical detaills).
+This can serioualy reduce the jitter and offset in a GPS PPS time
+server.
+
+------------------------------------------------------------------------
+nohz=off
+------------------------------------------------------------------------
+
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
 installing some packages needed for the next step.
 
 Once you have fully configured, the last few lines of your
-/boot/config.txt file should look like this:
+/boot/config.txt file should look rather like this:
 
 ------------------------------------------------------------------------
 gpu_mem=0
 enable_uart=1
 dtoverlay=pi3-disable-bt
 dtoverlay=pps-gpio,gpiopin=4
+nohz=off
 ------------------------------------------------------------------------
 
 The number after "gpiopin=" may be different.  The order of the lines is
@@ -1191,6 +1201,8 @@ unstable to hand to newbies.  We may try again when it has matured.
 
 - [[[ODROID]]] http://forum.odroid.com/viewtopic.php?f=111&t=7660[GPS
   unit for odroid c1]
+
+- [[[TICKLESS]] https://www.kernel.org/doc/Documentation/timers/NO_HZ.txt
 
 // Not referenced in text yet.
 - [[[GPIO]]] http://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/[Configuring The GPIO Serial Port On Raspbian Jessie Including Pi 3]

@@ -201,17 +201,24 @@ def config():
 # Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
 dtoverlay=pi3-disable-bt
 """
-        config = open(bc).read()
-        need_uart = "enable_uart=1" not in config
-        if "dtoverlay=pi3-disable-bt" in config:
-            print("Bluetooth use of UART already disabled.")
-        else:
-            print("Reclaiming serial UART.")
-            with open(bc, "a") as ap:
-                if need_uart:
-                    ap.write("enable_uart=1\n")
+        with open(bc, "r") as rp:
+            config = rp.read()
+            need_uart = "enable_uart=1" not in config
+            need_nohz = "nohz=off" not in config
+        with open(bc, "a") as ap:
+            ap.write("\n#Timeserver customizations begin here\n")
+            if "dtoverlay=pi3-disable-bt" in config:
+                print("Bluetooth use of UART already disabled.")
+            else:
+                print("Reclaiming serial UART.")
                 ap.write(rp3_overlay)
-            reboot_required = True
+                reboot_required = True
+            if need_uart:
+                ap.write("enable_uart=1\n")
+                reboot_required = True
+            if need_nohz:
+                ap.write("nohz=off\n")
+                reboot_required = True
 
     # Configure the PPS GPIO pin
     try:
