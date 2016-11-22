@@ -195,27 +195,27 @@ def config():
     if sbc.name == "Raspberry Pi":
         os.system("systemctl disable hciuart")
         bc = "/boot/config.txt"
-        # Has no effect on a Pi 2.  Do it everywhere, in case we swap
-        # an SD from a 3 to a 2 and have to wonder why it fails.
-        rp3_overlay = """
-# Disable Bluetooth so serial-tty speed is no longer tied to CPU speed
-dtoverlay=pi3-disable-bt
-"""
         with open(bc, "r") as rp:
             config = rp.read()
             need_uart = "enable_uart=1" not in config
             need_nohz = "nohz=off" not in config
+            need_disablebt = "dtoverlay=pi3-disable-bt" not in config:
         with open(bc, "a") as ap:
             ap.write("\n#Timeserver customizations begin here\n")
-            if "dtoverlay=pi3-disable-bt" in config:
+            if not need_disablebt:
                 print("Bluetooth use of UART already disabled.")
             else:
                 print("Reclaiming serial UART.")
-                ap.write(rp3_overlay)
+                # Has no effect on a Pi 2.  Do it everywhere, in case we swap
+                # an SD from a 3 to a 2 and have to wonder why it fails.
+                ap.write("dtoverlay=pi3-disable-bt\n")
                 reboot_required = True
             if need_uart:
+                print("Enabling UART")
                 ap.write("enable_uart=1\n")
                 reboot_required = True
+            else:
+                print("UART is already enabled")
             if need_nohz:
                 ap.write("nohz=off\n")
                 reboot_required = True
