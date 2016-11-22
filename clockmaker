@@ -135,7 +135,7 @@ def whatami():
 def pinprompt(pin_pairs):
     print("Configuring GPIO pin....")
     while True:
-s        newpin = None
+        newpin = None
         for k in pin_pairs:
             print("%s = %s" % (k[0], k))
         sel = my_input("Select a GPS daughterboard type: ").upper()
@@ -275,7 +275,7 @@ def install():
 
     if os.path.exists("/usr/sbin/ntp-keygen"):
         print("Removing stock NTP")
-        os.system("apt-get -y remove --purge ntp")
+        os.system("apt-get -y purge ntp")
         os.system("apt-get -y autoremove")
 
     print("Installing GPSD")
@@ -330,7 +330,7 @@ def mask():
     print "Adding %s to sudo and dialout groups..." % created
     os.system("usermod -a -G sudo,dialout %s" % created)
     print "Copying build files..."
-    os.system("mv ~%s/* ~%s;" % (default_login, nonroot))
+    os.system("mv ~%s/* ~%s;" % (sbc.default_login, nonroot))
     os.system("chown -R %s.%s ~%s/*" % (nonroot, nonroot, nonroot))
     print "Check that you can log in as %s, then install ssh keys for %s" \
           % (created, created)
@@ -379,9 +379,9 @@ def secure():
         print("Root login and password tunneling are already disabled.")
 
     print("")
-    if ("\n"+ default_login + ":") in open("/etc/passwd").read():
-        print("Default login %s is still present." % default_login)
-        os.system("rm -fr ~%s/*; deluser %s" % (default_login, default_login))
+    if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
+        print("Default login %s is still present." % sbc.default_login)
+        os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
         reboot_required = True
     else:
         print("Default login has been removed.")

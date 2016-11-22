@@ -827,8 +827,18 @@ Run your newly built ntpd, telling it to step time if required:
 # ./ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
-Run ntpsec/build/main/ntpq/ntpq -p and look at what it returns. Be patient,
-as it can sometimes take a few seconds to complete.
+Change directory to ./ntpd/ntpq, run ntpq -p and look at what it
+returns. Be patient, as it can sometimes take a few seconds to
+complete.
+
+If you get a message like this:
+------------------------------------------------------------------------
+ntpq: can't find Python NTP library -- check PYTHONPATH.
+------------------------------------------------------------------------
+
+you didn't change to the right directory.  Go to ./ntpsec/ntpq and try
+again.
+
 ------------------------------------------------------------------------
 $ ntpsec/build/main/ntpq/ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -855,7 +865,7 @@ This step can be automated with "./clockmaker --install" done as root.
 Uninstall the stock NTP:
 
 ------------------------------------------------------------------------
-# apt-get -y remove --purge ntp
+# apt-get -y purge ntp
 # apt-get -y autoremove
 ------------------------------------------------------------------------
 
@@ -873,7 +883,7 @@ Install the link:pinup[pinup] script:
 # cp pinup /usr/local/bin
 ------------------------------------------------------------------------
 
-Copy the following block of text ito the file 'timeservice'; copy it to
+Copy the following block of text into the file 'timeservice'; copy it to
 /etc/init.d/timeservice and make it executable:
 
 ------------------------------------------------------------------------
