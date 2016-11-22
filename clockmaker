@@ -393,14 +393,24 @@ def secure():
     else:
         print("Default login has been removed.")
 
+def strip():
+    "Remove unnecessary stuff."
+    if os.geteuid() != 0:
+        print("The --mask function must run as root.")
+        raise SystemExit(0)
+    os.system("apt-get -y purge bluez triggerhappy")
+    os.system("apt-get -y autoremove")
+    os.system("apt-get -y update")
+
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install",
-                                                "--mask", "--secure"):
+                                                "--mask", "--secure", "--strip"):
         print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeservice software")
         print("  --install = install timeservice software")
         print("  --secure = secure the timeserver")
+        print("  --strip = strip out unneeded services")
         raise SystemExit(1)
 
     sbc = whatami()
@@ -415,5 +425,7 @@ if __name__ == "__main__":
         mask()
     if sys.argv[1] == "--secure":
         secure()
+    if sys.argv[1] == "--strip":
+        strip()
 
 # end

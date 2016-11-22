@@ -851,17 +851,8 @@ Run your newly built ntpd, telling it to step time if required:
 # ./ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
-Change directory to ./ntpd/ntpq, run ntpq -p and look at what it
-returns. Be patient, as it can sometimes take a few seconds to
-complete.
-
-If you get a message like this:
-------------------------------------------------------------------------
-ntpq: can't find Python NTP library -- check PYTHONPATH.
-------------------------------------------------------------------------
-
-you didn't change to the right directory.  Go to ./ntpsec/ntpq and try
-again.
+Run ./ntpsec/ntpq/ntpq - p and look at what it returns. Be patient, as
+it can sometimes take a few seconds to complete.
 
 ------------------------------------------------------------------------
 $ ntpsec/build/main/ntpq/ntpq -p
@@ -1022,11 +1013,13 @@ things to go wrong.
 You can strip down a bit further with these commands:
 
 ------------------------------------------------------------------------
-# apt-get -y remove --purge bluez
-# apt-get -y remove --purge triggerhappy
+# apt-get -y purge bluez
+# apt-get -y purge triggerhappy
 # apt-get -y autoremove
 # apt-get -y update
 ------------------------------------------------------------------------
+
+This step can be done conveniently with "clockmaker --strip" run as root.
 
 The resulting configuration is pretty minimal, as you can verify by
 running "pstree -paul" (or the older-school "ps ax") and noticing that
