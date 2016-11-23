@@ -1037,7 +1037,6 @@ You can strip down a bit further with these commands:
 ------------------------------------------------------------------------
 # apt-get -y purge bluez triggerhappy
 # apt-get -y autoremove
-# apt-get -y update
 ------------------------------------------------------------------------
 
 This step can be done conveniently with "clockmaker --strip" run as root.

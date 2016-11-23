@@ -410,7 +410,6 @@ def strip():
         raise SystemExit(0)
     os.system("apt-get -y purge bluez triggerhappy")
     os.system("apt-get -y autoremove")
-    os.system("apt-get -y update")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install",
