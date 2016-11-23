@@ -148,7 +148,7 @@ Anything sold as a "Raspberry Pi" case ought to do for the Adafruit
 HAT, because a single HAT doen't project above the USB & Ethernet
 connectors on the SBC. The Raspberry Pi Foundation Case qualifies, but
 for functional reasons we recommend a transparent case.  The Adafruit
-2258 case <<2258>>, for example, should do nicely.  The Uputronic and
+2258 case <<2258>>, for example, should do nicely.  The Uputronics and
 SKU 424254 HATs, alas, have projecting SMA antenna jacks that won't
 fit in a stock case. A bit of work with a Dremel tool will fix that.
 
