@@ -593,7 +593,7 @@ dtoverlay=pps-gpio,gpiopin=4
 
 An optimization that is convenient to apply at this point is telling
 the kernel to run tickless (see <<TICKLESS>> for technical detaills).
-This can serioualy reduce the jitter and offset in a GPS PPS time
+This can seriously reduce the jitter and offset in a GPS PPS time
 server.
 
 ------------------------------------------------------------------------
