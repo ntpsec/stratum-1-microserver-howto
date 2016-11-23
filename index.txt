@@ -232,7 +232,7 @@ of steps in removing unnecessary desktop software.
 Install dcfldd on your host machine:
 
 ------------------------------------------------------------------------
-# apt-get install dcfldd
+# apt install dcfldd
 ------------------------------------------------------------------------
 
 Insert an SD card in the reader and, if it's a USB reader, plug the
@@ -377,7 +377,7 @@ implementation like Linux's 'avahi-daemon' installed.  Try to fix
 that.  This may work:
 
 ------------------------------------------------------------------------
-# apt-get install libnss-mdns
+# apt install libnss-mdns
 ------------------------------------------------------------------------
 
 If that doesn't work, attach a physical keyboard and display to
@@ -493,8 +493,8 @@ with these commands:
 
 ------------------------------------------------------------------------
 $ sudo bash
-# apt-get update
-# apt-get dist-upgrade
+# apt update
+# apt dist-upgrade
 ------------------------------------------------------------------------
 
 These changes are not reversible, but you'd want them for any other
@@ -629,7 +629,7 @@ Configuring the system to run at full performance uses more power, but
 results in more consistent timing.
 
 ------------------------------------------------------------------------
-# apt-get -y install cpufrequtils
+# apt -y install cpufrequtils
 # systemctl disable ondemand
 # echo 'GOVERNOR="performance"' > /etc/default/cpufrequtils
 # systemctl restart cpufrequtils
@@ -693,7 +693,7 @@ If you are doing these steps by hand rather than with clockmaker,
 prepare with this step {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install pps-tools
+# apt install pps-tools
 ------------------------------------------------------------------------
 
 Then run this test:
@@ -724,7 +724,7 @@ The prerequisites not present in a stock Raspbian can be covered with
 this import {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install git scons ncurses-dev python-dev bc
+# apt install git scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
 
 Then do this {--build}:
@@ -815,8 +815,8 @@ lighter and more securely and can do more accurate time stepping.
 Install the build prerequisites {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install bison libevent-dev libcap-dev libssl-dev
-# apt-get install libreadline-dev
+# apt install bison libevent-dev libcap-dev libssl-dev
+# apt install libreadline-dev
 ------------------------------------------------------------------------
 
 Build NTPsec {--build}.  The --refclock option says to include only
@@ -902,8 +902,8 @@ This step can be automated with "./clockmaker --install" done as root.
 Uninstall the stock NTP:
 
 ------------------------------------------------------------------------
-# apt-get -y purge ntp
-# apt-get -y autoremove
+# apt -y purge ntp
+# apt -y autoremove
 ------------------------------------------------------------------------
 
 Change to the directory your gpsd and ntpsec repository clones live in
@@ -1035,8 +1035,8 @@ things to go wrong.
 You can strip down a bit further with these commands:
 
 ------------------------------------------------------------------------
-# apt-get -y purge bluez triggerhappy
-# apt-get -y autoremove
+# apt -y purge bluez triggerhappy
+# apt -y autoremove
 ------------------------------------------------------------------------
 
 This step can be done conveniently with "clockmaker --strip" run as root.
@@ -1046,7 +1046,7 @@ running "pstree -paul" (or the older-school "ps ax") and noticing that
 most of the background processes are kernel threads.
 
 Note that triggerhappy is required for raspi-config; after you remove
-it, 'apt-get autoremove' will remove raspi-config.  This is easily
+it, 'apt autoremove' will remove raspi-config.  This is easily
 reversed by reinstalling raspi-config.
 
 WiFi is deliberately not removed, in order to give
@@ -1054,7 +1054,7 @@ you a fallback TCP/IP access when a cable is inconvenient.
 If you want to banish WiFi, this will do:
 
 ------------------------------------------------------------------------
-# apt-get -y remove wpasupplicant
+# apt -y remove wpasupplicant
 ------------------------------------------------------------------------
 
 === Configuring for a static IP address ===
@@ -1070,7 +1070,7 @@ can remove avahi-daemon and dhcpd5, further
 cutting the number of service processes running.
 
 ------------------------------------------------------------------------
-# apt-get -y purge avahi-daemon dhcpd5
+# apt -y purge avahi-daemon dhcpd5
 ------------------------------------------------------------------------
 
 Once you do this, the SBC will no longer be accessible at a ".local"
