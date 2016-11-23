@@ -903,7 +903,7 @@ Uninstall the stock NTP:
 
 ------------------------------------------------------------------------
 # apt -y purge ntp
-# apt -y autoremove
+# apt-get -y autoremove
 ------------------------------------------------------------------------
 
 Change to the directory your gpsd and ntpsec repository clones live in
