@@ -625,6 +625,22 @@ server.
 nohz=off
 ------------------------------------------------------------------------
 
+Configuring the system to run at full performance uses more power, but
+results in more consistent timing.
+
+------------------------------------------------------------------------
+# apt-get -y install cpufrequtils
+# systemctl disable ondemand
+# echo 'GOVERNOR="performance"' > /etc/default/cpufrequtils
+# systemctl restart cpufrequtils
+------------------------------------------------------------------------
+
+You can verify with the following command, which should print
+"performance" once for each CPU:
+------------------------------------------------------------------------
+$ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+------------------------------------------------------------------------
+
 == Smoke-test the GPS/HAT combination ==
 
 To test that you can read data from the device, do this:
