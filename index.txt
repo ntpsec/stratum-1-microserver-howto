@@ -549,7 +549,7 @@ to.  Put one of the following in a new file /etc/udev/rules.d/10-pps.rules to
 accomplish this. On the Pi:
 
 ------------------------------------------------------------------------
-KERNEL=="ttyAMA0", SYMLINK+="gpsd0"
+KERNEL=="ttyAMA0", SYMLINK+="gps0"
 ------------------------------------------------------------------------
 
 === Configure the 1PPS GPIO pin ===
@@ -646,8 +646,8 @@ $ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 To test that you can read data from the device, do this:
 
 ------------------------------------------------------------------------
-$ stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/gpsd0
+$ stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
+$ cat /dev/gps0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
@@ -765,7 +765,7 @@ seem longer than it is first time: have patience.
 Then run this: 
 
 ------------------------------------------------------------------------
-# ./gpsd/gpsmon /dev/gpsd0
+# ./gpsd/gpsmon /dev/gps0
 ------------------------------------------------------------------------
 
 Running gpsmon should give you a nice panel display with a scrolling
@@ -783,7 +783,7 @@ should see time sample lines until you interrupt, looking something
 like this:
 
 ------------------------------------------------------------------------
-# ./gpsd/gpsd /dev/gpsd0
+# ./gpsd/gpsd /dev/gps0
 # ./gpsd/ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
@@ -864,7 +864,7 @@ Turn off the default ntpd service running on your SBC
 Run gpsd, telling it to look at the GPS device
 
 ------------------------------------------------------------------------
-# ./gpsd/gpsd /dev/gpsd0
+# ./gpsd/gpsd /dev/gps0
 ------------------------------------------------------------------------
 
 Run your newly built ntpd, telling it to step time if required:

@@ -55,10 +55,10 @@ case $1 in
 	start)
 		# Make sure the UART device is in a good state
 	        # Adafruit HAT starts at some weird baud rate unknown to man.
-		stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+		stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
 		# Launch gpsd
 		log_daemon_msg "Starting GPSD server" "timeservice"
-  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -P $PIDFILE1 $GPSD_OPTS /dev/gpsd0
+  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -P $PIDFILE1 $GPSD_OPTS /dev/gps0
 		status=$?
 		log_end_msg $status
 		lock_ntpdate       		
