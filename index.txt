@@ -1054,7 +1054,7 @@ you a fallback TCP/IP access when a cable is inconvenient.
 If you want to banish WiFi, this will do:
 
 ------------------------------------------------------------------------
-# apt-get remove wpasupplicant
+# apt-get -y remove wpasupplicant
 ------------------------------------------------------------------------
 
 === Configuring for a static IP address ===
