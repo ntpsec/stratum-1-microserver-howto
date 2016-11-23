@@ -61,7 +61,7 @@ case $1 in
 		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -P $PIDFILE1 $GPSD_OPTS /dev/gps0
 		status=$?
 		log_end_msg $status
-		lock_ntpdate       		
+		lock_ntpdate
 		# Launch ntpd
 		log_daemon_msg "Starting NTP server" "timeservice"
 		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE2 --startas $DAEMON2 -- -p $PIDFILE2 $NTPD_OPTS
