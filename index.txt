@@ -108,10 +108,11 @@ board and a 40-pin header. The SKU 424254 comes presoldered.  The
 header on the Uputronics board snugs into an on-board fitting and does
 not require soldering.
 
-Note that if you're going to use a CR2032 with the Uputronics, a
+Note that if you're going to use a CR2032 with the Uputronics HAT, a
 jumper on the board needs to be desoldered.  It lives in a white box
 outline near the + pole of the battery cradle. As shipped, it is
-covered by a small dome of solder.
+covered by a small dome of solder. The latest version of the Uputronics HAT
+uses a supercapacitor instead of a battery, so no soldering is required.
 
 The header on the assembled HAT will fit down over the double row of pins
 on one edge of the SBC, such that when fully assembled the SBC and HAT will
