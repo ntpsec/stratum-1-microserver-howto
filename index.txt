@@ -593,15 +593,6 @@ Adafruit:
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
 
-An optimization that is convenient to apply at this point is telling
-the kernel to run tickless (see <<TICKLESS>> for technical detaills).
-This can seriously reduce the jitter and offset in a GPS PPS time
-server.
-
-------------------------------------------------------------------------
-nohz=off
-------------------------------------------------------------------------
-
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
 installing some packages needed for the next step.
@@ -614,12 +605,25 @@ gpu_mem=0
 enable_uart=1
 dtoverlay=pi3-disable-bt
 dtoverlay=pps-gpio,gpiopin=4
-nohz=off
 ------------------------------------------------------------------------
 
 The number after "gpiopin=" may be different.  The order of the lines is
 not important. The gpu_mem=0 line is just an optimization. If any of
 the others are missing, your setup will probably not work.
+
+== Optimize system performance ==
+
+An optimization that is convenient to apply at this point is telling
+the kernel to run tickless (see <<TICKLESS>> for technical detaills).
+This can seriously reduce the jitter and offset in a GPS PPS time
+server.
+
+{--config} On the Pi, add this to the end of the kernel command-line in
+/boot/cmdline.txt:
+
+------------------------------------------------------------------------
+nohz=off
+------------------------------------------------------------------------
 
 == Smoke-test the GPS/HAT combination ==
 

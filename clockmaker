@@ -198,7 +198,6 @@ def config():
         with open(bc, "r") as rp:
             config = rp.read()
             need_uart = "enable_uart=1" not in config
-            need_nohz = "nohz=off" not in config
             need_disablebt = "dtoverlay=pi3-disable-bt" not in config
         with open(bc, "a") as ap:
             ap.write("\n#Timeserver customizations begin here\n")
@@ -216,8 +215,13 @@ def config():
                 reboot_required = True
             else:
                 print("UART is already enabled")
-            if need_nohz:
-                ap.write("nohz=off\n")
+        kc = "/boot/cmdline.txt"
+        with open(kc, "r") as rp:
+            config = rp.read().split("\n")[0]
+            need_nohz = "nohz=off" not in config
+        if need_nohz:
+            with open(kc, "w") as ap:
+                ap.write(config + " nohz=off\n")
                 reboot_required = True
 
     # Configure the PPS GPIO pin
