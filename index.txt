@@ -71,8 +71,7 @@ revision of the board I received. To use it for time-service,
 link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 +
 Of these three, I prefer the Uputronics board. The combination of a
-u-blox 8 and solderless assembly is tough to beat, even if casing it
-properly needs Dremel work. 
+u-blox 8 and solderless assembly is tough to beat.
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
   powered by an on-board supercap, included).  The CR1220 is cheapest
@@ -108,10 +107,11 @@ board and a 40-pin header. The SKU 424254 comes presoldered.  The
 header on the Uputronics board snugs into an on-board fitting and does
 not require soldering.
 
-Note that if you're going to use a CR2032 with the Uputronics, a
+Note that if you're going to use a CR2032 with the Uputronics HAT, a
 jumper on the board needs to be desoldered.  It lives in a white box
 outline near the + pole of the battery cradle. As shipped, it is
-covered by a small dome of solder.
+covered by a small dome of solder. The latest version of the Uputronics HAT
+uses a supercapacitor instead of a battery, so no soldering is required.
 
 The header on the assembled HAT will fit down over the double row of pins
 on one edge of the SBC, such that when fully assembled the SBC and HAT will
@@ -147,9 +147,11 @@ Anything sold as a "Raspberry Pi" case ought to do for the Adafruit
 HAT, because a single HAT doen't project above the USB & Ethernet
 connectors on the SBC. The Raspberry Pi Foundation Case qualifies, but
 for functional reasons we recommend a transparent case.  The Adafruit
-2258 case <<2258>>, for example, should do nicely.  The Uputronic and
+2258 case <<2258>>, for example, should do nicely.  The Uputronics and
 SKU 424254 HATs, alas, have projecting SMA antenna jacks that won't
 fit in a stock case. A bit of work with a Dremel tool will fix that.
+Alternatively, if you use the Uputronics HAT, both Uputronics and ModMyPi
+sell a case <<MODMYPI CASE>> specifically designed for it.
 
 == Understanding the GPIO connector ==
 
@@ -204,7 +206,7 @@ This recipe consists of a few commands run on your host machine, and
 more on your SBC.  A '#' before a command line means you need to be
 root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
-"sudo bash" or (after you haves set a +root password) "su -".
+"sudo -s" or (after you haves set a +root password) "su -".
 
 === Making a bootable SD ===
 
@@ -230,7 +232,7 @@ of steps in removing unnecessary desktop software.
 Install dcfldd on your host machine:
 
 ------------------------------------------------------------------------
-# apt-get install dcfldd
+# apt install dcfldd
 ------------------------------------------------------------------------
 
 Insert an SD card in the reader and, if it's a USB reader, plug the
@@ -375,7 +377,7 @@ implementation like Linux's 'avahi-daemon' installed.  Try to fix
 that.  This may work:
 
 ------------------------------------------------------------------------
-# apt-get install libnss-mdns
+# apt install libnss-mdns
 ------------------------------------------------------------------------
 
 If that doesn't work, attach a physical keyboard and display to
@@ -490,9 +492,9 @@ Go root on the SBC and run
 with these commands:
 
 ------------------------------------------------------------------------
-$ sudo bash
-# apt-get update
-# apt-get dist-upgrade
+$ sudo -s
+# apt update
+# apt dist-upgrade
 ------------------------------------------------------------------------
 
 These changes are not reversible, but you'd want them for any other
@@ -591,15 +593,6 @@ Adafruit:
 dtoverlay=pps-gpio,gpiopin=4
 ------------------------------------------------------------------------
 
-An optimization that is convenient to apply at this point is telling
-the kernel to run tickless (see <<TICKLESS>> for technical detaills).
-This can serioualy reduce the jitter and offset in a GPS PPS time
-server.
-
-------------------------------------------------------------------------
-nohz=off
-------------------------------------------------------------------------
-
 You must reboot your SBC for this change to take effect.  The
 clockmaker script will do this for you, but not before 
 installing some packages needed for the next step.
@@ -612,12 +605,41 @@ gpu_mem=0
 enable_uart=1
 dtoverlay=pi3-disable-bt
 dtoverlay=pps-gpio,gpiopin=4
-nohz=off
 ------------------------------------------------------------------------
 
 The number after "gpiopin=" may be different.  The order of the lines is
 not important. The gpu_mem=0 line is just an optimization. If any of
 the others are missing, your setup will probably not work.
+
+== Optimize system performance ==
+
+An optimization that is convenient to apply at this point is telling
+the kernel to run tickless (see <<TICKLESS>> for technical detaills).
+This can seriously reduce the jitter and offset in a GPS PPS time
+server.
+
+{--config} On the Pi, add this to the end of the kernel command-line in
+/boot/cmdline.txt:
+
+------------------------------------------------------------------------
+nohz=off
+------------------------------------------------------------------------
+
+Configuring the system to run at full performance uses more power, but
+results in more consistent timing.
+
+------------------------------------------------------------------------
+# apt -y install cpufrequtils
+# systemctl disable ondemand
+# echo 'GOVERNOR="performance"' > /etc/default/cpufrequtils
+# systemctl restart cpufrequtils
+------------------------------------------------------------------------
+
+You can verify with the following command, which should print
+"performance" once for each CPU:
+------------------------------------------------------------------------
+$ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+------------------------------------------------------------------------
 
 == Smoke-test the GPS/HAT combination ==
 
@@ -671,7 +693,7 @@ If you are doing these steps by hand rather than with clockmaker,
 prepare with this step {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install pps-tools
+# apt install pps-tools
 ------------------------------------------------------------------------
 
 Then run this test:
@@ -702,7 +724,7 @@ The prerequisites not present in a stock Raspbian can be covered with
 this import {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install git scons ncurses-dev python-dev bc
+# apt install git scons ncurses-dev python-dev bc
 ------------------------------------------------------------------------
 
 Then do this {--build}:
@@ -793,8 +815,8 @@ lighter and more securely and can do more accurate time stepping.
 Install the build prerequisites {--config}:
 
 ------------------------------------------------------------------------
-# apt-get install bison libevent-dev libcap-dev libssl-dev
-# apt-get install libreadline-dev
+# apt install bison libevent-dev libcap-dev libssl-dev
+# apt install libreadline-dev
 ------------------------------------------------------------------------
 
 Build NTPsec {--build}.  The --refclock option says to include only
@@ -880,8 +902,8 @@ This step can be automated with "./clockmaker --install" done as root.
 Uninstall the stock NTP:
 
 ------------------------------------------------------------------------
-# apt-get -y purge ntp
-# apt-get -y autoremove
+# apt -y purge ntp
+# apt -y autoremove
 ------------------------------------------------------------------------
 
 Change to the directory your gpsd and ntpsec repository clones live in
@@ -1013,10 +1035,8 @@ things to go wrong.
 You can strip down a bit further with these commands:
 
 ------------------------------------------------------------------------
-# apt-get -y purge bluez
-# apt-get -y purge triggerhappy
-# apt-get -y autoremove
-# apt-get -y update
+# apt -y purge bluez triggerhappy
+# apt -y autoremove
 ------------------------------------------------------------------------
 
 This step can be done conveniently with "clockmaker --strip" run as root.
@@ -1026,7 +1046,7 @@ running "pstree -paul" (or the older-school "ps ax") and noticing that
 most of the background processes are kernel threads.
 
 Note that triggerhappy is required for raspi-config; after you remove
-it, 'apt-get autoremove' will remove raspi-config.  This is easily
+it, 'apt autoremove' will remove raspi-config.  This is easily
 reversed by reinstalling raspi-config.
 
 WiFi is deliberately not removed, in order to give
@@ -1034,7 +1054,7 @@ you a fallback TCP/IP access when a cable is inconvenient.
 If you want to banish WiFi, this will do:
 
 ------------------------------------------------------------------------
-# apt-get remove wpasupplicant
+# apt -y remove wpasupplicant
 ------------------------------------------------------------------------
 
 === Configuring for a static IP address ===
@@ -1050,7 +1070,7 @@ can remove avahi-daemon and dhcpd5, further
 cutting the number of service processes running.
 
 ------------------------------------------------------------------------
-# apt-get -y remove --purge avahi-daemon dhcpd5
+# apt -y purge avahi-daemon dhcpd5
 ------------------------------------------------------------------------
 
 Once you do this, the SBC will no longer be accessible at a ".local"
@@ -1184,6 +1204,8 @@ unstable to hand to newbies.  We may try again when it has matured.
 - [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
 
 - [[[2258]]] https://www.adafruit.com/product/2258[Adafruit Raspberry Pi B+ / Pi 2 / Pi 3 Case - Smoke Base - w/ Clear Top]
+
+- [[[MODMYPI CASE]]] https://store.uputronics.com/index.php?route=product/product&product_id=90[ModMyPi Pi GPS Case (Matte Black)] also available direct from ModMyPi in https://www.modmypi.com/raspberry-pi/cases/modmypi-single-colour/gps-case-black[Matte Black] or https://www.modmypi.com/raspberry-pi/cases/modmypi-single-colour/gps-case[Clear]
 
 - [[[PI-PINOUT]]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 

@@ -181,7 +181,7 @@ def config():
     print("Getting build and test prerequisites")
     prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
                     "python-dev bc bison libevent-dev libreadline-dev "\
-                    "libcap-dev libssl-dev"
+                    "libcap-dev libssl-dev cpufrequtils"
     os.system(prerequisites)
 
     print("")
@@ -198,7 +198,6 @@ def config():
         with open(bc, "r") as rp:
             config = rp.read()
             need_uart = "enable_uart=1" not in config
-            need_nohz = "nohz=off" not in config
             need_disablebt = "dtoverlay=pi3-disable-bt" not in config
         with open(bc, "a") as ap:
             ap.write("\n#Timeserver customizations begin here\n")
@@ -216,8 +215,13 @@ def config():
                 reboot_required = True
             else:
                 print("UART is already enabled")
-            if need_nohz:
-                ap.write("nohz=off\n")
+        kc = "/boot/cmdline.txt"
+        with open(kc, "r") as rp:
+            config = rp.read().split("\n")[0]
+            need_nohz = "nohz=off" not in config
+        if need_nohz:
+            with open(kc, "w") as ap:
+                ap.write(config + " nohz=off\n")
                 reboot_required = True
 
     # Configure the PPS GPIO pin
@@ -231,6 +235,12 @@ def config():
     except ValueError:
         print("Not working on %s yet" % sbc.name)
         raise SystemExit(1)
+
+    print "Setting CPU governor"
+    os.system("systemctl disable ondemand")
+    with open("/etc/default/cpufrequtils", "w") as cfu:
+        cfu.write("GOVERNOR=\"performance\"\n")
+    os.system("systemctl restart cpufrequtils")
 
     if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
         print("")
@@ -400,7 +410,6 @@ def strip():
         raise SystemExit(0)
     os.system("apt-get -y purge bluez triggerhappy")
     os.system("apt-get -y autoremove")
-    os.system("apt-get -y update")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install",
