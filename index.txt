@@ -71,8 +71,7 @@ revision of the board I received. To use it for time-service,
 link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 +
 Of these three, I prefer the Uputronics board. The combination of a
-u-blox 8 and solderless assembly is tough to beat, even if casing it
-properly needs Dremel work. 
+u-blox 8 and solderless assembly is tough to beat.
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
   powered by an on-board supercap, included).  The CR1220 is cheapest
@@ -151,6 +150,8 @@ for functional reasons we recommend a transparent case.  The Adafruit
 2258 case <<2258>>, for example, should do nicely.  The Uputronics and
 SKU 424254 HATs, alas, have projecting SMA antenna jacks that won't
 fit in a stock case. A bit of work with a Dremel tool will fix that.
+Alternatively, if you use the Uputronics HAT, both Uputronics and ModMyPi
+sell a case <<MODMYPI CASE>> specifically designed for it.
 
 == Understanding the GPIO connector ==
 
@@ -1185,6 +1186,8 @@ unstable to hand to newbies.  We may try again when it has matured.
 - [[[STANDOFFS]]] https://www.adafruit.com/product/2336[Brass M2.5 Standoffs for Pi]
 
 - [[[2258]]] https://www.adafruit.com/product/2258[Adafruit Raspberry Pi B+ / Pi 2 / Pi 3 Case - Smoke Base - w/ Clear Top]
+
+- [[[MODMYPI CASE]]] https://store.uputronics.com/index.php?route=product/product&product_id=90[ModMyPi Pi GPS Case (Matte Black)] also available direct from ModMyPi in https://www.modmypi.com/raspberry-pi/cases/modmypi-single-colour/gps-case-black[Matte Black] or https://www.modmypi.com/raspberry-pi/cases/modmypi-single-colour/gps-case[Clear]
 
 - [[[PI-PINOUT]]] https://www.element14.com/community/docs/DOC-73950/l/raspberry-pi-3-model-b-gpio-40-pin-block-pinout[Raspberry Pi 3 Model B GPIO 40 Pin Block Pinout]
 
