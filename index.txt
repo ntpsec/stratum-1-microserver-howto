@@ -206,7 +206,7 @@ This recipe consists of a few commands run on your host machine, and
 more on your SBC.  A '#' before a command line means you need to be
 root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
-"sudo bash" or (after you haves set a +root password) "su -".
+"sudo -s" or (after you haves set a +root password) "su -".
 
 === Making a bootable SD ===
 
@@ -492,7 +492,7 @@ Go root on the SBC and run
 with these commands:
 
 ------------------------------------------------------------------------
-$ sudo bash
+$ sudo -s
 # apt update
 # apt dist-upgrade
 ------------------------------------------------------------------------
