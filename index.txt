@@ -1072,7 +1072,7 @@ can remove avahi-daemon and dhcpd5, further
 cutting the number of service processes running.
 
 ------------------------------------------------------------------------
-# apt-get -y remove --purge avahi-daemon dhcpd5
+# apt-get -y purge avahi-daemon dhcpd5
 ------------------------------------------------------------------------
 
 Once you do this, the SBC will no longer be accessible at a ".local"
