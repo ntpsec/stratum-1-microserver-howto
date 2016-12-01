@@ -380,7 +380,7 @@ def secure():
             line = "PermitRootLogin without-password\n"
         elif line.startswith("#PermitRootLogin"):
             modified = True
-            line = "PermitRootLogin withou-password\n"
+            line = "PermitRootLogin without-password\n"
         elif line.startswith("PasswordAuthentication") and "no" not in line:
             modified = True
             line = "PasswordAuthentication no\n"
