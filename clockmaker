@@ -21,7 +21,7 @@ import sys, os, re, pwd
 
 # If this changes, the corresponding Makefile declaration and asciidoc macro
 # must as well.
-webfaq = "http://www.catb.org/esr/faqs/stratum-1-microserver-howto/"
+webfaq = "http://www.ntpsec.org/white-papers/stratum-1-microserver-howto/"
 
 # This code is in common with pinup.  Make sure they stay synced
 

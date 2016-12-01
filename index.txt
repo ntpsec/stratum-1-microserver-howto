@@ -1,12 +1,12 @@
 == Stratum-1-Microserver HOWTO ==
 :description: Building and configuring a tiny Stratum 1 timeserver
 :keywords: Raspberry Pi, BeagleBone, NTP, NTPsec, time service
-:home: http://www.catb.org/esr/faqs/stratum-1-microserver-howto/
+:home: http://www.ntpsec.org/white-papers/stratum-1-microserver-howto/
 :adahat: https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v0.12, November 2016
+v1.0, December 2016
 
 == Introduction ==
 
@@ -1235,6 +1235,11 @@ unstable to hand to newbies.  We may try again when it has matured.
 
 // Not referenced in text yet.
 - [[[GPIO]]] http://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/[Configuring The GPIO Serial Port On Raspbian Jessie Including Pi 3]
+
+== Revision history:
+
+1.0: 2016-12-01::
+     First official release.
 
 == Acknowledgements ==
 
