@@ -1,0 +1,8 @@
+* Collect fudges for u-blox 6, u-blox 8, MTK3339.
+
+* Write a description of how to derive a fudge from observation (does
+  GPSD HOWTO have this?)
+
+* Can we make an ntp.conf that is really autonomous for operation off
+  the public net?  If so, that's what we need in our ntp.conf, with
+  adding check servers as an optional extra.
