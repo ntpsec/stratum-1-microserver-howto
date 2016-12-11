@@ -466,7 +466,7 @@ wget {home}clockmaker
 
 5. Leave root. Then run "clockmaker --build".  This will clone and build the
    special timeserver software.  It also copies in the current
-   versions of the 'pinup' script, and several configuration options
+   versions of the 'pinup' script, and several configuration files
    used in the installation phase.
 
 Some further uses of clockmaker are discussed in later steps.
