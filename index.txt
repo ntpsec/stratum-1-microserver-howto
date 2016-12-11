@@ -1242,7 +1242,7 @@ unstable to hand to newbies.  We may try again when it has matured.
      First official release.
 
 1.1: 2016-12-11::
-     Use pool keywod in configuration. /dev/gpsd0 -> /dev/gps0.
+     Use pool keyword in configuration. /dev/gpsd0 -> /dev/gps0.
 
 == Acknowledgements ==
 
