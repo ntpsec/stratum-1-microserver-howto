@@ -43,7 +43,7 @@ NTPD_OPTS=-g
 RUNASUSER=ntp
 UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
 if test "$(uname -s)" = "Linux"; then
-        NTPD_OPTS="$NTPD_OPTS -u $UGID"
+	NTPD_OPTS="$NTPD_OPTS -u $UGID"
 fi
 
 # It's best to have gpsd start first.  That way when ntpd restarts it has
@@ -55,32 +55,32 @@ case $1 in
 	start)
 		# Make sure the UART device is in a good state
 	        # Adafruit HAT starts at some weird baud rate unknown to man.
-		stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+		stty -F /dev/gps0 raw 9600 cs8 clocal -cstopb
 		# Launch gpsd
 		log_daemon_msg "Starting GPSD server" "timeservice"
-  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -P $PIDFILE1 $GPSD_OPTS /dev/gpsd0
+		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE1 --startas $DAEMON1 -- -P $PIDFILE1 $GPSD_OPTS /dev/gps0
 		status=$?
 		log_end_msg $status
-		lock_ntpdate       		
+		lock_ntpdate
 		# Launch ntpd
 		log_daemon_msg "Starting NTP server" "timeservice"
-  		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE2 --startas $DAEMON2 -- -p $PIDFILE2 $NTPD_OPTS 
+		start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE2 --startas $DAEMON2 -- -p $PIDFILE2 $NTPD_OPTS
 		status=$?
 		log_end_msg $status
 		unlock_ntpdate
-  		;;
+		;;
 	stop)
 		log_daemon_msg "Stopping gpsd" "timeservice"
-  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE1
+		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE1
 		log_end_msg $?
 		log_daemon_msg "Stopping ntpd" "timeservice"
-  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE2
+		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE2
 		log_end_msg $?
 		rm -f $PIDFILE1 $PIDFILE2
-  		;;
+		;;
 	restart|force-reload)
 		$0 stop && sleep 2 && $0 start
-  		;;
+		;;
 	try-restart)
 		if $0 status >/dev/null; then
 			$0 restart

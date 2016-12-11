@@ -26,5 +26,5 @@ version:
 tag:
 	git tag $(VERSION) && git push && git push --tags
 
-clean: 
+clean:
 	rm -f index.html
