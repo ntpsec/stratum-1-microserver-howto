@@ -6,7 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v1.0, December 2016
+v1.1, December 2016
 
 == Introduction ==
 
@@ -1240,6 +1240,9 @@ unstable to hand to newbies.  We may try again when it has matured.
 
 1.0: 2016-12-01::
      First official release.
+
+1.1: 2016-12-11::
+     Use pool keywod in configuration. /dev/gpsd0 -> /dev/gps0.
 
 == Acknowledgements ==
 
