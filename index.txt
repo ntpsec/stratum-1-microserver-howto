@@ -873,7 +873,7 @@ Run your newly built ntpd, telling it to step time if required:
 # ./ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
-Run ./ntpsec/ntpq/ntpq - p and look at what it returns. Be patient, as
+Run ./ntpsec/ntpq/ntpq -p and look at what it returns. Be patient, as
 it can sometimes take a few seconds to complete.
 
 ------------------------------------------------------------------------
