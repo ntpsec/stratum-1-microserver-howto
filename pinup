@@ -26,7 +26,7 @@ class RaspberryPi:
     gpio_re = re.compile(dtoverlay + "([0-9]*)")
     def __init__(self):
         self.name = "Raspberry PI"
-        self.gpsdev = "/dev/ttyAMA0"
+        self.gpsdev = "mmcblk0"
         self.default_login = "pi"
         #   GPIO04      |      P1-7     | Adafruit
         #   GPIO18      |      P1-12    | Uputronics
@@ -53,6 +53,7 @@ class RaspberryPi:
             "900092" : "PiZero",
             "a02082" : "Pi 3 Model B",
             "a22082" : "Pi 3 Model B",
+            "900032" : "Model B+",
         }
     @staticmethod
     def identify_me():
