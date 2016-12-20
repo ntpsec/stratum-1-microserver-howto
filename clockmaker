@@ -37,7 +37,7 @@ class RaspberryPi:
     gpio_re = re.compile(dtoverlay + "([0-9]*)")
     def __init__(self):
         self.name = "Raspberry Pi"
-        self.gpsdev = "mmcblk0"
+        self.gpsdev = "/dev/ttyAMA0"
         self.default_login = "pi"
         #   GPIO04      |      P1-7     | Adafruit
         #   GPIO18      |      P1-12    | Uputronics
@@ -68,7 +68,7 @@ class RaspberryPi:
         }
     @staticmethod
     def identify_me():
-        return os.path.exists("/dev/ttyAMA0")
+        return os.path.exists("/dev/mmcblk0")
     def get_pps_gpio(self):
         with open(RaspberryPi.bc) as rp:
             config_txt = rp.read()
@@ -98,7 +98,7 @@ class OdroidC2:
     gpio_re = re.compile(options + "([0-9]*)")
     def __init__(self):
         self.name = "Odroid C2"
-        self.gpsdev = "ttyS1"
+        self.gpsdev = "/dev/ttyS1"
         self.default_login = "odroid"
         self.gpiomap = (("Adafruit", 249),("Uputronics", 238),("SKU 42425", 228))
         self.revision_dict = {}
