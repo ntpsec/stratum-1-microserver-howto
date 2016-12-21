@@ -243,11 +243,14 @@ def config():
         cfu.write("GOVERNOR=\"performance\"\n")
     os.system("systemctl restart cpufrequtils")
 
+    # Do not change the device name /dev/gpsd0 to /dev/gps0 or anything else!
+    # This name is magic to GPSD, telling it it can pick up a static PPS
+    # device at /dev/pps0.
     if not os.path.exists("/etc/udev/rules.d/10-gps.rules"):
         print("")
-        print("Creating /dev/gps0 symlink rule")
+        print("Creating /dev/gpsd0 symlink rule")
         with open("/etc/udev/rules.d/10-gps.rules", "w") as wfp:
-            wfp.write('KERNEL=="%s", SYMLINK+="gps0"\n' % sbc.gpsdev)
+            wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % sbc.gpsdev)
             reboot_required = True
         os.system("udevadm trigger")
     print("")
