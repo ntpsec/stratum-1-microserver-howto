@@ -509,7 +509,7 @@ patches and other fixes.
 enable_uart=1
 ------------------------------------------------------------------------
 
-You need to do this because rapi-config will have turned off the UART
+You need to do this because raspi-config will have turned off the UART
 when you told it you didn't want a login shell on the serial console.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
