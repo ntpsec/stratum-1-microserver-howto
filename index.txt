@@ -6,7 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v1.2, December 2016
+v1.3, January 2017
 
 == Introduction ==
 
@@ -1246,6 +1246,9 @@ unstable to hand to newbies.  We may try again when it has matured.
 
 1.2: 2016-12-21::
      /dev/gps0 back to /dev/gpsd0; previous change hurt GPSD compatibility
+
+1.3: 2017-01-02::
+     Track an incompatible change in GPSD configuration.
 
 == Acknowledgements ==
 
