@@ -732,7 +732,7 @@ Then do this {--build}:
 ------------------------------------------------------------------------
 $ git clone git://git.savannah.nongnu.org/gpsd.git
 $ cd gpsd
-$ scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
+$ scons timeservice=yes magic_hat=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
 ------------------------------------------------------------------------
 
 This builds gpsd in a minimal, fixed-speed timeserver mode.
