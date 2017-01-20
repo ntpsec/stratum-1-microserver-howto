@@ -181,8 +181,8 @@ def config():
     print("")
     print("Getting build and test prerequisites")
     prerequisites = "apt-get -y install pps-tools git scons ncurses-dev "\
-                    "python-dev bc bison libevent-dev libreadline-dev "\
-                    "libcap-dev libssl-dev cpufrequtils"
+                    "python-dev bc bison libreadline-dev "\
+                    "libcap-dev libssl-dev cpufrequtils libsodium-dev"
     os.system(prerequisites)
 
     print("")
