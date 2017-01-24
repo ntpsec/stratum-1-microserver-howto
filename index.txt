@@ -30,7 +30,7 @@ footnote:[There is one line of USB GPSes, the Navisys
 GR601-W/GR701-W/GR801-W, that provides 1PPS.].
 
 Most of this build is actually independent of any one daughterboard's
-hardware idiosyncracies. The build may also generalize to other
+hardware idiosyncrasies. The build may also generalize to other
 HAT-compatible Unix SBCs such as the BeagleBone, though details of
 those remain to be filled in. To emphasize which parts of the build
 won't vary versus those that will, we will refer to the main board as
@@ -87,7 +87,7 @@ u-blox 8 and solderless assembly is tough to beat.
 
 * Either a 5V, 2A power supply with a micro-USB outlet (same as the
   standard charger for smartphones) or a USB-to-Micro-USB cable that
-  can take power from the host macine.
+  can take power from the host machine.
 
 * A USB keyboard and DVI-capable display display. You'll do most of
   the software installation and configuration via ssh from your host
@@ -144,7 +144,7 @@ assembly is dropped or has something sat on it.
 
 . Optional: fit the SBC into a case bottom before plugging in the HAT.
 Anything sold as a "Raspberry Pi" case ought to do for the Adafruit
-HAT, because a single HAT doen't project above the USB & Ethernet
+HAT, because a single HAT doesn't project above the USB & Ethernet
 connectors on the SBC. The Raspberry Pi Foundation Case qualifies, but
 for functional reasons we recommend a transparent case.  The Adafruit
 2258 case <<2258>>, for example, should do nicely.  The Uputronics and
@@ -359,7 +359,7 @@ to see the general Internet, direct-connecting to your PC is
 insufficient). Power it up and wait about 60 seconds (or, if you can
 see the Ethernet-port LEDs, wait for them to start flashing) then use
 the default machine name and login to ssh from your host.  For a
-Raspberryi Pi, that looks like this:
+Raspberry Pi, that looks like this:
 
 ------------------------------------------------------------------------
 $ ssh pi@raspberrypi.local
@@ -404,8 +404,8 @@ Call 'sudo raspi-config' on the Pi.
 
 Request 'Expand Filesystem' by keying Return with the select bar on
 that entry.  This will make all the space on the SD above the end of
-your copied OS image available on next reboot.  (Some Rasian images
-may do this autmatically.)
+your copied OS image available on next reboot.  (Some Raspbian images
+may do this automatically.)
 
 Request 'Wait for Network at Boot'.  This makes recovery a little
 more convenient if you power up the SBC forgetting to plug in
@@ -568,7 +568,7 @@ table:
 
 [width="25%",frame="topbot",options="header"]
 |======================================================================
-| HAT        | Physical pin | RPi Logical pin   | ODroid C2 export pin
+| HAT        | Physical pin | RPi Logical pin   | Odroid C2 export pin
 | Adafruit   |      P-7     |   GPIO04          |    249
 | Uputronics |      P-12    |   GPIO18          |    238
 | SKU 424254 |      P-29    |   GPIO05          |    228
@@ -614,7 +614,7 @@ the others are missing, your setup will probably not work.
 == Optimize system performance ==
 
 An optimization that is convenient to apply at this point is telling
-the kernel to run tickless (see <<TICKLESS>> for technical detaills).
+the kernel to run tickless (see <<TICKLESS>> for technical details).
 This can seriously reduce the jitter and offset in a GPS PPS time
 server.
 
@@ -1059,7 +1059,7 @@ If you want to banish WiFi, this will do:
 
 === Configuring for a static IP address ===
 
-If you're only going to use the SBC as a itine service for your local
+If you're only going to use the SBC as a time service for your local
 network, you can cite its zeroconf (.local) address in other ntp.conf
 files. If you want to expose it as a public server you'll need to
 configure the SBC to use a fixed, static IP address. That process is
@@ -1096,7 +1096,7 @@ from a menu of daughterboard types.
 
 === Why GPSD? ===
 
-If you are already familar with ntpd and wonder why this recipe uses
+If you are already familiar with ntpd and wonder why this recipe uses
 gpsd through SHM rather than ntpd's native refclock 20 GPS driver, the
 answer is this: when refclock 20 is configured to use 1PPS, it mixes
 in-band time data with 1PPS in a way that causes it to behave badly,
@@ -1126,7 +1126,7 @@ HATs marked "assert edge" below do not require compensation.
 
 [width="25%",frame="topbot",options="header"]
 |===========================================================
-|Type           | Chipset    | 1PPS width  | gps-ppio detects
+|Type           | Chipset    | 1PPS width  | pps-gpio detects
 |Adafruit HAT   | MTK3339    |   100ms     | assert edge
 |Uputronics HAT | Ublox 8    |   100ms     | assert edge
 |SKU 424254     | Ublox 6    |   100ms     | assert edge
@@ -1138,7 +1138,7 @@ the pps-gpio driver triggers on assert or falling edge.
 
 == Adequate power is important ==
 
-Hackerboards like the Pi and Beaglebone are picky about
+Hackerboards like the Pi and BeagleBone are picky about
 getting clean power to the full specified amount because they're
 designed for lowest cost.  Power regulation is expensive compared to
 logic gates, and this is one of the corners they cut.  Under-voltage
@@ -1148,8 +1148,8 @@ crashes.
 You're generally safe if you use a vendor's wall wart matched to the
 device. But there are a lot of crappy power supplies that don’t come
 close to putting out the volts/amps/watts that they are rated for.
-The power supllies, too, are made with extreme cost cutting measures -
-and worse,false marking/advertising.
+The power supplies, too, are made with extreme cost cutting measures -
+and worse, false marking/advertising.
 
 It's best to buy a power supply from a board reseller, that the
 reseller “qualifies” or recommends for the board. Even then you
