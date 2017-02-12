@@ -85,7 +85,7 @@ u-blox 8 and solderless assembly is tough to beat.
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
 
-* Either a 5V, 2A power supply with a micro-USB outlet (same as the
+* Either a 5V, 2.5A power supply with a micro-USB outlet (same as the
   standard charger for smartphones) or a USB-to-Micro-USB cable that
   can take power from the host machine.
 
@@ -640,6 +640,11 @@ You can verify with the following command, which should print
 ------------------------------------------------------------------------
 $ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ------------------------------------------------------------------------
+
+If you want to run the system constantly at the lowest frequency
+instead (maybe to avoid thermal problems) you can use the governor
+"conservative".  Everything will run slower than with governor
+"performance", but consistently so and the system will stay cooler.
 
 == Smoke-test the GPS/HAT combination ==
 
