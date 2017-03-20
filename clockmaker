@@ -279,7 +279,7 @@ def build():
     else:
         os.system("(chdir ntpsec; git pull)")
     os.chdir("ntpsec")
-    os.system("./waf configure --refclock=local,nmea,pps,shm,gpsd")
+    os.system("./waf configure --refclock=nmea,pps,shm,gpsd")
     os.system("./waf build")
     os.chdir("..")
 
