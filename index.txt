@@ -825,7 +825,9 @@ Install the build prerequisites {--config}:
 ------------------------------------------------------------------------
 
 Build NTPsec {--build}.  The --refclock option says to include only
-shared-memory refclock support, excluding all other drivers.
+shared-memory refclock support, excluding all other drivers
+footnote:[As a convenience for NTPsec's developers, the clockmaker
+script installs a slightly larger set of clock drivers]. 
 
 ------------------------------------------------------------------------
 $ git clone https://gitlab.com/NTPsec/ntpsec.git
