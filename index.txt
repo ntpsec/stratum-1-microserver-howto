@@ -206,7 +206,7 @@ This recipe consists of a few commands run on your host machine, and
 more on your SBC.  A '#' before a command line means you need to be
 root to run it. Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
-"sudo -s" or (after you haves set a +root password) "su -".
+"sudo -s" or (after you have set a +root password) "su -".
 
 === Making a bootable SD ===
 
@@ -245,7 +245,7 @@ file-browser view of the device, you should unmount it through that
 GUI.
 
 You can use the older 'dd' if you do the next step manually, but
-dfcldd is better about giving you progress messages during the
+dcfldd is better about giving you progress messages during the
 operation.
 
 Better yet, we provide a script, link:ddimage[ddimage], to
@@ -265,13 +265,13 @@ depending on how many hard drives you have and how your reader firmware
 is set up. If you're using a built-in SD reader port, e.g. on a laptop, the
 devicename might be something like '/dev/mmcblk0'
 
-First, unpack the zip file it to get an img file:
+First, unpack the zip file to get an img file:
 
 ------------------------------------------------------------------------
 $ unzip 2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
-To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
+To proceed manually, follow the directions at <<INSTALLATION>>, using dcfldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
@@ -287,7 +287,7 @@ For safety's sake, force pending I/O to the SD card before removing it.
 To use ddimage, first read it. You should always read any script that will
 run with root permissions, to check that it doesn't do anything
 nefarious.  Give it the basename of your SD reader (usually "sdd"). It
-will do some safety checks, then generate a ddcfldd command
+will do some safety checks, then generate a dcfldd command
 like the above.
 
 You should make it executable so you can run it as a script:
@@ -614,7 +614,7 @@ the others are missing, your setup will probably not work.
 == Optimize system performance ==
 
 An optimization that is convenient to apply at this point is telling
-the kernel to run tickless (see <<TICKLESS>> for technical details).
+the kernel to not run tickless (see <<TICKLESS>> for technical details).
 This can seriously reduce the jitter and offset in a GPS PPS time
 server.
 
@@ -1156,7 +1156,7 @@ You're generally safe if you use a vendor's wall wart matched to the
 device. But there are a lot of crappy power supplies that don’t come
 close to putting out the volts/amps/watts that they are rated for.
 The power supplies, too, are made with extreme cost cutting measures -
-and worse, false marking/advertising.
+and worse, false marketing/advertising.
 
 It's best to buy a power supply from a board reseller, that the
 reseller “qualifies” or recommends for the board. Even then you
