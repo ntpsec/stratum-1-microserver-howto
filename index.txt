@@ -383,23 +383,24 @@ that.  This may work:
 If that doesn't work, check the display connected to the SBC and
 figure out the assigned address with the "ip a" command.  If the output
 of "ip a" doesn't list "eth0", something else is wrong, which is outside
-the scope of this Howto; please investigate the many resources on the
+the scope of this HOWTO; please investigate the many resources on the
 Internet that are available.  If "ip a" lists "eth0", ensure that the
 word "UP" is listed in the bracketed text immediately to the right of
 "eth0", and that the "inet" line lists a dotted-quad IP address.  If
 either or both are missing, this is also outside the scope of this
-Howto. 
+HOWTO. Try rebooting the Pi; it can't hurt. 
 
 Persistent failure after you've tried these things mean you need
-to rebuild the SD card image.  Try with a different card, as sometimes
+to rebuild the SD card image.  Try with a different SD card, as sometimes
 older ones go flaky.
 
 You may see some warnings from ssh about an unknown host; tell it yes,
-you want to connect.  Then you should be asked for a login password.  The
-default Pi password is "raspberry".  Entering that should give you
-a shell prompt.
+you want to connect.  Then you should be asked for a login password.
+Use the spiffy, secure password you decided upon earlier.  You should 
+now see a shell prompt on your Pi.
 
-The hardest part is now done.
+The hardest part is done; you may remove the keyboard and display now
+- you won't need them any more!
 
 === Initial configuration ===
 
