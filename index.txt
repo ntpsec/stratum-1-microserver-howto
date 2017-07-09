@@ -30,9 +30,9 @@ footnote:[There is one line of USB GPSes, the Navisys
 GR601-W/GR701-W/GR801-W, that provides 1PPS.].
 
 Most of this build is actually independent of any one daughterboard's
-hardware idiosyncrasies. The build may also generalize to other
+hardware idiosyncrasies.  The build may also generalize to other
 HAT-compatible Unix SBCs such as the BeagleBone, though details of
-those remain to be filled in. To emphasize which parts of the build
+those remain to be filled in.  To emphasize which parts of the build
 won't vary versus those that will, we will refer to the main board as
 "SBC" for the invariant parts and as "Pi", "Pi 2", or "Pi 3"
 for the board-specific parts.
@@ -41,7 +41,7 @@ Where this HOWTO says "I" it refers to the author's direct experience;
 "we" includes both the author and various technical experts who
 assisted in the preparation of this document.
 
-This tutorial assumes some basic Unix competence. You will not need to
+This tutorial assumes some basic Unix competence.  You will not need to
 be a programmer or an expert system administrator; you will need to
 know your way around the command line a little and how to edit files.
 
@@ -67,10 +67,10 @@ You will need:
 +
 Special note about the SKU 424254: despite vendor claims, the trace
 that should have connected GPIO5 to the GPS 1PPS was absent the
-revision of the board I received. To use it for time-service,
+revision of the board I received.  To use it for time-service,
 link:bluewire.jpg[patch-wire the pad marked 'GPS' to physical pin 29 (GPIO05)].
 +
-Of these three, I prefer the Uputronics board. The combination of a
+Of these three, I prefer the Uputronics board.  The combination of a
 u-blox 8 and solderless assembly is tough to beat.
 
 * One 3.3-volt lithium button cell (except the SKU 424254, which is
@@ -80,7 +80,7 @@ u-blox 8 and solderless assembly is tough to beat.
 
 * A micro-SD reader/writer for making bootable OS images.
 
-* A micro-SD card. 4GB is minimal. 8GB is plenty.
+* A micro-SD card. 4GB is minimal.  8GB is plenty.
 
 * A Linux host machine and a live Ethernet cable on which your Pi can
   see your local network and the Internet.
@@ -89,7 +89,7 @@ u-blox 8 and solderless assembly is tough to beat.
   standard charger for smartphones) or a USB-to-Micro-USB cable that
   can take power from the host machine.
 
-* A USB keyboard and DVI-capable display display. You'll do most of
+* A USB keyboard and DVI-capable display display.  You'll do most of
   the software installation and configuration via ssh from your host
   machine, but you need to be off-net for the next step.
 
@@ -97,20 +97,20 @@ u-blox 8 and solderless assembly is tough to beat.
   felines.
 
 * (Optional) 2 hex standoffs, 11mm with M2.5 threading, compatible
-  screws.  Adafruit sells these <<STANDOFFS>>. They are the very
+  screws.  Adafruit sells these <<STANDOFFS>>.  They are the very
   similar to standard spacers used in PC cases; if you keep the small
   parts from old PCs around you'll have a dozen of them and probably
   the screws to match.
 
 The Adafruit and Uputronics HATs are shipped as two parts each, a circuit
-board and a 40-pin header. The SKU 424254 comes presoldered.  The
+board and a 40-pin header.  The SKU 424254 comes presoldered.  The
 header on the Uputronics board snugs into an on-board fitting and does
 not require soldering.
 
 Note that if you're going to use a CR2032 with the Uputronics HAT, a
 jumper on the board needs to be desoldered.  It lives in a white box
-outline near the + pole of the battery cradle. As shipped, it is
-covered by a small dome of solder. The latest version of the Uputronics HAT
+outline near the + pole of the battery cradle.  As shipped, it is
+covered by a small dome of solder.  The latest version of the Uputronics HAT
 uses a supercapacitor instead of a battery, so no soldering is required.
 
 The header on the assembled HAT will fit down over the double row of pins
@@ -380,14 +380,21 @@ that.  This may work:
 # apt install libnss-mdns
 ------------------------------------------------------------------------
 
-If that doesn't work, attach a physical keyboard and display to
-the SBC and figure out the assigned address with the "ip a" command.
+If that doesn't work, check the display connected to the SBC and
+figure out the assigned address with the "ip a" command. If the output
+of "ip a" doesn't list "eth0", something else is wrong, which is outside
+the scope of this Howto; please investigate the many resources on the
+Internet that are available. If "ip a" lists "eth0", ensure that the
+word "UP" is listed in the bracketed text immediately to the right of
+"eth0", and that the "inet" line lists a dotted-quad IP address. If
+either or both are missing, this is also outside the scope of this
+Howto. 
 
-Only persistent failure after you've tried these things mean you need
+Persistent failure after you've tried these things mean you need
 to rebuild the SD card image. Try with a different card, as sometimes
 older ones go flaky.
 
-You may see some noise from ssh about an unknown host; tell it yes,
+You may see some warnings from ssh about an unknown host; tell it yes,
 you want to connect.  Then you should be asked for a login password. The
 default Pi password is "raspberry".  Entering that should give you
 a shell prompt.
