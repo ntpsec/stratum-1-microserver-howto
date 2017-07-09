@@ -271,7 +271,7 @@ def build():
     else:
         os.system("(chdir gpsd; git pull)")
     os.chdir("gpsd")
-    os.system("scons timeservice=yes magic_hat=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1")
+    os.system("scons timeservice=yes magic_hat=yes nmea0183=yes ublox=yes mtk3301=yes fixed_port_speed=9600 fixed_stop_bits=1")
     os.chdir("..")
 
     if not os.path.isdir("ntpsec"):
