@@ -82,7 +82,7 @@ u-blox 8 and solderless assembly is tough to beat.
 
 * A micro-SD card.  4GB is minimal.  8GB is plenty.
 
-* A Linux host machine and a live Ethernet cable on which your Pi can
+* A Linux host machine and an Ethernet cable on which your Pi can
   see your local network and the Internet.
 
 * Either a 5V, 2.5A power supply with a micro-USB outlet (same as the
