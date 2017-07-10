@@ -1,4 +1,4 @@
-== Stratum-1-Microserver HOWTO ==
+= Stratum-1-Microserver HOWTO =
 :description: Building and configuring a tiny Stratum 1 timeserver
 :keywords: Raspberry Pi, BeagleBone, NTP, NTPsec, time service
 :home: http://www.ntpsec.org/white-papers/stratum-1-microserver-howto/
@@ -206,7 +206,7 @@ This recipe consists of a few commands run on your host machine, and
 more on your SBC.  A '#' before a command line means you need to be
 root to run it.  Some commands won't require root; those command lines
 will be marked with "$".  Remember that you go root with the command
-"sudo -s" or (after you have set a +root password) "su -".
+"sudo -s" or (after you haves set a root password) "su -".
 
 === Making a bootable SD ===
 
@@ -245,7 +245,7 @@ file-browser view of the device, you should unmount it through that
 GUI.
 
 You can use the older 'dd' if you do the next step manually, but
-dcfldd is better about giving you progress messages during the
+dfcldd is better about giving you progress messages during the
 operation.
 
 Better yet, we provide a script, link:ddimage[ddimage], to
@@ -271,7 +271,7 @@ First, unpack the zip file to get an img file:
 $ unzip 2016-03-18-raspbian-jessie-lite.zip
 ------------------------------------------------------------------------
 
-To proceed manually, follow the directions at <<INSTALLATION>>, using dcfldd.
+To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
@@ -622,7 +622,7 @@ the others are missing, your setup will probably not work.
 == Optimize system performance ==
 
 An optimization that is convenient to apply at this point is telling
-the kernel to not run tickless (see <<TICKLESS>> for technical details).
+the kernel not to run tickless (see <<TICKLESS>> for technical details).
 This can seriously reduce the jitter and offset in a GPS PPS time
 server.
 
