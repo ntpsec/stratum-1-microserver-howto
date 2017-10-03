@@ -1044,10 +1044,12 @@ who gets access to your network.  Here's how to fix this:
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
 
-. {--secure} On the SBC, disable the default-user login (on the RPi
-  "deluser pi" as root).  Note: This step may fail on the Stretch
-  version of Raspbian - there's some systemd problem in the way there.
-  This failure is harmless.
+//We used to disable the pi login, but can't do that any more because
+//for some unknown reason the console login process is now owned by it.
+//. {--secure} On the SBC, disable the default-user login (on the RPi
+//  "deluser pi" as root).  Note: This step may fail on the Stretch
+//  version of Raspbian - there's some systemd problem in the way there.
+//  This failure is harmless.
 
 == Performance tuning ==
 

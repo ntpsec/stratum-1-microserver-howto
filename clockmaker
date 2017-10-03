@@ -220,9 +220,10 @@ def config():
         with open(kc, "r") as rp:
             config = rp.read().split("\n")[0]
             need_nohz = "nohz=off" not in config
-        if need_nohz:
+        newconf = config.replace("console=serial0,115200 ", "")
+        if need_nohz or newconf != config:
             with open(kc, "w") as ap:
-                ap.write(config + " nohz=off\n")
+                ap.write(newconf + " nohz=off\n")
                 reboot_required = True
 
     # Configure the PPS GPIO pin
@@ -400,13 +401,15 @@ def secure():
     else:
         print("Root login and password tunneling are already disabled.")
 
-    print("")
-    if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
-        print("Default login %s is still present." % sbc.default_login)
-        os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
-        reboot_required = True
-    else:
-        print("Default login has been removed.")
+    # We used to disable the pi login, but can't do that any more because
+    # for some unknown reason the console login process is owned by it.
+    #print("")
+    #if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
+    #    print("Default login %s is still present." % sbc.default_login)
+    #    os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
+    #    reboot_required = True
+    #else:
+    #    print("Default login has been removed.")
 
 def strip():
     "Remove unnecessary stuff."
