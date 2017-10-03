@@ -445,13 +445,13 @@ need, because you're running headless.
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
 
-=== Fully update Your OS ===
+=== Clockmaker ===
 
 Most of the remaining instructions do not have to be done by hand.  You can
 download link:clockmaker[clockmaker], a Python script which
 does much of this recipe for you.  Here's how to use it:
 
-1. Copy clockmaker to to the pi user's home directory with
+1. As the pi user, copy clockmaker to your home directory with
    this command:
 +
 [subs="attributes"]
@@ -464,12 +464,12 @@ wget {home}clockmaker
 
 3. Make clockmaker executable with "chmod a+x clockmaker".
 
-4. Go root.  Then run "clockmaker --config".  This will do most of the
+4. Run "sudo clockmaker --config".  This will do most of the
    tricky OS and hardware configuration; also system software
    updates and prerequisites for the timeserver software
 
-5. Leave root.  Then run "clockmaker --build".  This will clone and build the
-   special timeserver software.  It also copies in the current
+5. Now as the pi user, run "clockmaker --build".  This will clone
+   and build the special timeserver software.  It also copies in the current
    versions of the 'pinup' script, and several configuration files
    used in the installation phase.
 
@@ -486,11 +486,8 @@ use clockmaker to avoid most of the typing.
 
 At this point the steps you can automate with clockmaker begin.  If
 you have not downloaded clockmaker, refer to "Using Clockmaker" above.
-Go root on the SBC and run
 
-------------------------------------------------------------------------
-# ./clockmaker --config
-------------------------------------------------------------------------
+=== Fully update Your OS ===
 
 {--config} Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
@@ -504,17 +501,6 @@ $ sudo -s
 These changes are not reversible, but you'd want them for any other
 use of the SBC anyway.  You always want to be updated with security
 patches and other fixes.
-
-=== Enable the UART ===
-
-{--config} On the Pi, edit /boot/config.txt to contain this option.
-
-------------------------------------------------------------------------
-enable_uart=1
-------------------------------------------------------------------------
-
-You need to do this because raspi-config will have turned off the UART
-when you told it you didn't want a login shell on the serial console.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
