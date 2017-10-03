@@ -410,41 +410,37 @@ Call 'sudo raspi-config' on the Pi.
 # raspi-config
 ------------------------------------------------------------------------
 
-Request 'Expand Filesystem' by keying Return with the select bar on
-that entry.  This will make all the space on the SD above the end of
-your copied OS image available on next reboot.  (Some Raspbian images
-may do this automatically.)
+Under Hostname (2), change your hostname to something entertaining.
+If you forget to do this, you can edit /etc/hostname later on.
 
-Request 'Wait for Network at Boot'.  This makes recovery a little
-more convenient if you power up the SBC forgetting to plug in
-the Ethernet cable.
+Under Boot Options (3) select 'Wait for Network at Boot' (B2).
+This makes recovery a littlemore convenient if you power up the SBC
+forgetting to plug in the Ethernet cable.
 
-Go through your normal configuration - timezone, locale, etc.  These
-are under "Internationalization Options".  In the US, you probably
+Under Localization Options (4) select 'Change Locale' (I1) and
+choose the appropriate one for your location.  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
-code followed by ".UTF-8".  Also, set up WiFi country.
+code followed by ".UTF-8".
 
-It is not likely you will ever use a direct keyboard with this machine
-(as opposed to getting to it with ssh).  But just in case, you might
-want to set the keyboard type.  Raspbian defaults to a "Generic
-105-key (Intl) PC" rather than US keyboard layout.  If you are not
-expecting this, the differences (for example, " and @ being swapped)
-can trip you up.
+Still under Localization, select 'Change Timezone' (I2) and set to
+your local Timezone.
 
-On some versions of Raspbian the keyboard configuration doesn't seem
-to work properly.  Don't worry about this, the step is optional.
+Again under Localization, select 'Change Wi-fi Country' and ensure
+that it also matches your location.
 
-Advanced Options (9), Memory Split A3, enter 8 and give the GPU 0
-memory.  This will free up some memory that the GPU won't need, because
-you're running headless.
+Back up one level, under Interfacing Options (5), it is important to select
+'Serial' (P6), and select 'No' for 'Would you like a login shell to be
+accessible over serial?' and select 'Yes' for 'Would you like the serial port
+hardware to be enabled?'. Your HAT needs the GPIO pins it uses, and it's
+easiest to disable from the configurator.
 
-Under 'Advanced Options' (9), change your hostname to something
-entertaining (A2).  If you forget to do this, you can edit /etc/hostname
-later on.
+Under Advanced Options (7) select 'Expand Filesystem' (A1). This will
+make all the space on the SD above the end of your copied OS image
+available on next reboot. (Some Raspbian images may do this automatically.)
 
-One special thing you should do is disable the serial interface (A8).
-Your HAT needs the GPIO pins it uses, and it's easiest to disable from
-the configurator.
+Still under Advanced Options (7), Memory Split (A3), enter 8 to give
+the GPU less memory. This will free up some memory that the GPU won't
+need, because you're running headless.
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
