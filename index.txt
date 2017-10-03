@@ -638,11 +638,11 @@ instead (maybe to avoid thermal problems) you can use the governor
 
 == Smoke-test the GPS/HAT combination ==
 
-To test that you can read data from the device, do this:
+To test that you can read data from the device, do this as root:
 
 ------------------------------------------------------------------------
-$ stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
-$ cat /dev/gpsd0
+# stty -F /dev/gpsd0 raw 9600 cs8 clocal -cstopb
+# cat /dev/gpsd0
 ------------------------------------------------------------------------
 
 You should see NMEA0183 sentences issuing in bursts once per second -
@@ -669,6 +669,17 @@ very careful that all the arguments are correct.  If you still don't
 see output, check that the HAT is correctly seated on the GPIO and
 powered up (a red light near the north edge should blink at least once
 per 10 seconds).
+
+Sometimes changing the baud rate may 'kickstart' communication with the
+device if it is balking. You can try this, for example:
+
+------------------------------------------------------------------------
+# stty -F /dev/gpsd0 raw 38400 cs8 clocal -cstopb
+# cat /dev/gpsd0
+------------------------------------------------------------------------
+
+Other rates may work as well - the adafruit HAT will happily communicate
+at 115200.
 
 If you still don't see legible output after checking these, you may
 have a problem this HOWTO can't solve - possibly dead or defective
@@ -810,8 +821,7 @@ lighter and more securely and can do more accurate time stepping.
 Install the build prerequisites {--config}:
 
 ------------------------------------------------------------------------
-# apt install bison libevent-dev libcap-dev libssl-dev
-# apt install libreadline-dev
+# apt install bison libevent-dev libcap-dev libssl-dev libreadline-dev
 ------------------------------------------------------------------------
 
 Build NTPsec {--build}.  The --refclock option says to include only
@@ -896,7 +906,9 @@ gpsd is running and ntpshmmon reports fix lines.
 
 This step can be automated with "./clockmaker --install" done as root.
 
-Uninstall the stock NTP:
+Uninstall the stock NTP - bear in mind that 'purge' will also remove any
+existing /etc/ntp.conf, so if you already have customizations there - back
+them up.
 
 ------------------------------------------------------------------------
 # apt -y purge ntp
@@ -980,11 +992,12 @@ who gets access to your network.  Here's how to fix this:
 ------------------------------------------------------------------------
 
 . {--mask} Move the contents of the default-user home directory to
-  the home directory of the "me" account.
+  the home directory of the "me" account. Be sure to 'chown' the files
+  from the pi user to the new user.
 
 . From the host, verify that you can log in via ssh under your own
   name and sudo to a root shell with "sudo bash"; you should see a "#"
-  prompt.
+  prompt. Type 'exit', 'logout', or simply hit control-d to leave root.
 
 . From the host, export an ssh key from the "me" account to the
   SBC.  If you don't understand this instruction, search for "ssh
@@ -1024,8 +1037,8 @@ GPSD Time Service HOWTO's section on tuning].
 The Raspbian default is to install a lot of background processes that
 exist to support a graphical desktop.  Installing from the Lite image
 eliminates most of these.  This reduces load variability on the
-processor, which will will decrease your time jitter.  It will also
-cut your power draw and heat dissipation, increasing the Pi's expected
+processor, which will decrease your time jitter.  It will also cut
+your power draw and heat dissipation, increasing the Pi's expected
 lifetime.  Most importantly, it will reduce the number of ways for
 things to go wrong.
 
@@ -1062,9 +1075,8 @@ files.  If you want to expose it as a public server you'll need to
 configure the SBC to use a fixed, static IP address.  That process is
 described in <<EAT-STATIC>>.
 
-If you do this, and verify that it works, you
-can remove avahi-daemon and dhcpd5, further
-cutting the number of service processes running.
+If you do this, and verify that it works, you can remove avahi-daemon
+and dhcpd5, further cutting the number of service processes running.
 
 ------------------------------------------------------------------------
 # apt -y purge avahi-daemon dhcpd5
@@ -1136,7 +1148,7 @@ the pps-gpio driver triggers on assert or falling edge.
 == Adequate power is important ==
 
 Hackerboards like the Pi and BeagleBone are picky about
-getting clean power to the full specified amount because they're
+getting clean power at the full specified level because they're
 designed for lowest cost.  Power regulation is expensive compared to
 logic gates, and this is one of the corners they cut.  Under-voltage
 or under-wattage can cause failures to boot, lockups, or mystery
