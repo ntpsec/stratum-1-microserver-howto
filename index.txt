@@ -405,6 +405,9 @@ The hardest part is done; you may remove the keyboard and display now
 
 === Initial configuration ===
 
+Note: This part of the configuration tends to be unstable between
+Raspbian releases.  Even if you've done it before, review carefully.
+
 Call 'sudo raspi-config' on the Pi.
 
 ------------------------------------------------------------------------
@@ -458,7 +461,6 @@ Back up one level, under Interfacing Options (5), it is important to select
 'Serial' (P6), and select 'No' for 'Would you like a login shell to be
 accessible over serial?'  Your HAT needs the GPIO pins it uses, and it's
 easiest to disable from the configurator.
-//Note: We may need enable-uart back
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -520,6 +522,17 @@ These changes are not reversible, but you'd want them for any other
 use of the SBC anyway.  You always want to be updated with security
 patches and other fixes.
 
+=== Enable the UART ===
+
+{--config} On the Pi, edit /boot/config.txt to contain this option.
+
+------------------------------------------------------------------------
+enable_uart=1
+------------------------------------------------------------------------
+
+You need to do this because raspi-config will have turned off the UART
+when you told it you didn’t want a login shell on the serial console.
+
 === Pi 3 only: disable Bluetooth and remap console device ===
 
 The Raspberry Pi Foundation made a design decision on the Raspberry
@@ -579,7 +592,7 @@ table:
 | HAT        | Physical pin | RPi Logical pin   | Odroid C2 export pin
 | Adafruit   |      P-7     |   GPIO04          |    249
 | Uputronics |      P-12    |   GPIO18          |    238
-| SKU 424254 |      P-29    |   GPIO05          |    228
+more | SKU 424254 |      P-29    |   GPIO05          |    228
 |======================================================================
 
 There is a Linux kernel driver called pps-gpio which,
@@ -898,8 +911,9 @@ Run your newly built ntpd, telling it to step time if required:
 # ./ntpsec/build/main/ntpd/ntpd -g -c ntp.conf
 ------------------------------------------------------------------------
 
-Run ./ntpsec/ntpq/ntpq -p and look at what it returns.  Be patient, as
-it can sometimes take a few seconds to complete.
+Run ./ntpsec/build/main/ntpclients/ntpq -p and look at what it
+returns.  Be patient, as it can sometimes take a few seconds to
+complete.
 
 ------------------------------------------------------------------------
 $ ntpsec/build/main/ntpq/ntpq -p
@@ -1026,13 +1040,15 @@ who gets access to your network.  Here's how to fix this:
   machine to the "me" account on the SBC without giving a password.
   Then go root.
 
-. {--secure} On the SBC, disable the default-user login (on the RPi
-  "deluser pi" as root).
-
 . {--secure} On the SBC, disable root login and password tunneling.  To
   do this, edit its /etc/ssh/sshd_config file.  Change the
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
+
+. {--secure} On the SBC, disable the default-user login (on the RPi
+  "deluser pi" as root).  Note: This step may fail on the Stretch
+  version of Raspbian - there's some systemd problem in the way there.
+  This failure is harmless.
 
 == Performance tuning ==
 
