@@ -6,7 +6,7 @@
 :upuhat: https://store.uputronics.com/index.php?route=product/product&path=60_64&product_id=81
 :dxhat: http://www.dx.com/p/add-on-gps-module-gps-hat-module-for-raspberry-pi-2-model-b-b-424254
 by Eric S. Raymond
-v1.3, January 2017
+v1.4, October 2017
 
 == Introduction ==
 
@@ -210,20 +210,20 @@ will be marked with "$".  Remember that you go root with the command
 
 === Making a bootable SD ===
 
-Download the latest Raspbian Jessie Lite from <<RASPBIAN>> to your host.
+Download the latest Raspbian Stretch Lite from <<RASPBIAN>> to your host.
 
-Use sha1sum to verify the correctness of the image.  For example:
+Use sha256sum to verify the correctness of the image.  For example:
 
 ------------------------------------------------------------------------
-$ shasum 2016-09-23-raspbian-jessie-lite.zip
-3a34e7b05e1e6e9042294b29065144748625bea8  2016-09-23-raspbian-jessie-lite.zip
+$ sha256sum 2017-09-07-raspbian-stretch-lite.zip
+bd2c04b94154c9804cc1f3069d15e984c927b750056dd86b9d86a0ad4be97f12  2017-09-07-raspbian-stretch-lite.zip
 ------------------------------------------------------------------------
 
-The hex string this command returns should match the SHA-1 checksum on
+The hex string this command returns should match the checksum on
 the Raspbian download page.  If it doesn't, you have a corrupted image
 and should re-fetch it.
 
-Note that this is not the regular NOOBS image, but one specifically
+Note that this is not the regular NOOBS image, but a 'light' one specifically
 designed to boot the Pi as a headless server, communicated with only
 by Ethernet.  By going this route we get to avoid some hardware
 prerequisites that would never be used after install, and skip a bunch
@@ -268,14 +268,14 @@ devicename might be something like '/dev/mmcblk0'
 First, unpack the zip file to get an img file:
 
 ------------------------------------------------------------------------
-$ unzip 2016-03-18-raspbian-jessie-lite.zip
+$ unzip 2016-03-18-raspbian-stretch-lite.zip
 ------------------------------------------------------------------------
 
 To proceed manually, follow the directions at <<INSTALLATION>>, using dfcldd.
 Your command will look something like this:
 
 ------------------------------------------------------------------------
-# dcfldd statusinterval=16 sizeprobe=if bs=4M if=2016-03-18-raspbian-jessie-lite.img of=/dev/sdd
+# dcfldd statusinterval=16 sizeprobe=if bs=4M if=2016-03-18-raspbian-stretch-lite.img of=/dev/sdd
 ------------------------------------------------------------------------
 
 For safety's sake, force pending I/O to the SD card before removing it.
@@ -301,20 +301,21 @@ Your ddimage command execution should look roughly like this:
 ------------------------------------------------------------------------
 # ./ddimage sdd
 Checking /dev/sdd
-/dev/sdd exists as a mountable device.
+/dev/sdd exists as a storage device.
 /dev/sdd is not mounted
-Copying  2016-03-18-raspbian-jessie-lite.img...
-256 blocks (1024Mb) written.
-324+1 records in
-324+1 records out
-Done.
+Copying 2016-09-23-raspbian-jessie-lite.img...
+[96% of 1325Mb] 320 blocks (1280Mb) written. 00:00:00 remaining.
+331+1 records in
+331+1 records out
+Done
 ------------------------------------------------------------------------
 
 with an animated progress line in the middle.
 
-Note: this can take a while.  Many USB SD readers have an activity
-light that blinks while accesses are going on; if yours does, watch for
-it to stop blinking.
+Note: this can take a while, with lag between the "records out" line
+and the "Done".  Many USB SD readers have an activity light that
+blinks while accesses are going on; if yours does, watch for it to
+stop blinking.
 
 === First boot ===
 
@@ -410,37 +411,54 @@ Call 'sudo raspi-config' on the Pi.
 # raspi-config
 ------------------------------------------------------------------------
 
-Under Hostname (2), change your hostname to something entertaining.
-If you forget to do this, you can edit /etc/hostname later on.
+Select (1) "Expand Filesystem" and press return for OK. This will make
+all the space on the SD above the end of your copied OS image
+available on next reboot. (Some Raspbian images may do this
+automatically; if so, it probably hqppened on firstr boot and you got
+a message about it.)
 
-Under Boot Options (3) select 'Wait for Network at Boot' (B2).
-This makes recovery a littlemore convenient if you power up the SBC
-forgetting to plug in the Ethernet cable.
+You should already have done (2) "Change User Password".
 
-Under Localization Options (4) select 'Change Locale' (I1) and
-choose the appropriate one for your location.  In the US, you probably
+Under Boot Options (3) select B2 "Text console, automatically logged
+in as 'pi' user". Or, if you're concerned about an evil maid attack, 
+B1 "Text console, requiring user to login".
+
+Select (4) 'Wait for Network at Boot' (B2).  This makes recovery a
+little more convenient if you power up the SBC forgetting to plug in
+the Ethernet cable.
+
+Under Localization Options (5) select 'Change Locale' (I1) and
+enable the appropriate one for your location.  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
-code followed by ".UTF-8".
+code followed by ".UTF-8". Then set it as the default.
 
 Still under Localization, select 'Change Timezone' (I2) and set to
 your local Timezone.
 
-Again under Localization, select 'Change Wi-fi Country' and ensure
+Again under Localization, select (I4) 'Change Wi-fi Country' and ensure
 that it also matches your location.
+
+It is not necessary to set (6) "Enable Camera" or (7) "Add to
+Rastrack" (the latter does no harm).  You should not set (8)
+"Overclock", as this can have unpredictable interactions with timing
+loops.
+
+Under (9\->A2) "Advanced Options"\->"Hostname", change your hostname
+to something entertaining.  If you forget to do this, you can edit
+/etc/hostname later on.  Note, this should just be a local name
+without a domain part.
+
+Under (9\->A3) "Advanced Options"\->"Memory Split", enter 8 to give
+the GPU less memory. This will free up some memory that the GPU won't
+need, because you're running headless.
+
+Under (9\->A8) "Advanced Options"\->"Serial"
 
 Back up one level, under Interfacing Options (5), it is important to select
 'Serial' (P6), and select 'No' for 'Would you like a login shell to be
-accessible over serial?' and select 'Yes' for 'Would you like the serial port
-hardware to be enabled?'. Your HAT needs the GPIO pins it uses, and it's
+accessible over serial?'  Your HAT needs the GPIO pins it uses, and it's
 easiest to disable from the configurator.
-
-Under Advanced Options (7) select 'Expand Filesystem' (A1). This will
-make all the space on the SD above the end of your copied OS image
-available on next reboot. (Some Raspbian images may do this automatically.)
-
-Still under Advanced Options (7), Memory Split (A3), enter 8 to give
-the GPU less memory. This will free up some memory that the GPU won't
-need, because you're running headless.
+//Note: We may need enable-uart back
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -1259,11 +1277,15 @@ unstable to hand to newbies.  We may try again when it has matured.
 1.3: 2017-01-02::
      Track an incompatible change in GPSD configuration.
 
+1.4: 2017-10-03::
+     Update for Debian Stretch version of Raspbian
+
 == Acknowledgements ==
 
 Various devteam members and friends of the GPSD and NTPsec projects
 assisted with this HOWTO, including: Gary E. Miller, Hal Murray,
-Phil Salkie, and Richard Laager.
+Phil Salkie, and Richard Laager. Paul Theodoropolous contributed
+to the 1.4 version.
 
 == Other resources ==
 
