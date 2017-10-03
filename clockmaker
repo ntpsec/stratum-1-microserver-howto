@@ -4,8 +4,8 @@
 #
 # To run this, use either the default user account or non-root,
 # non-default account on the SBC. Copy it to the account's $HOME, go
-# root there, and run it.  The --build mode copies over some files
-# that the --install mode will install.
+# root there, and run it.  The --build and --update modes copy over
+# some files that the --install mode will install.
 #
 # If there is a local config utility such as raspi-config on the
 # Raspberry Pi, you should already have run it before calling the
@@ -260,10 +260,10 @@ def config():
     else:
         print("No configuration changes - no reboot is required.")
 
-def build():
+def build(clobber):
     "Perform fetch and build of the software."
     if os.geteuid() == 0:
-        print("The --build function should not be run as root.")
+        print("This function should not be run as root.")
         raise SystemExit(0)
 
     if not os.path.isdir("gpsd"):
@@ -283,7 +283,8 @@ def build():
     os.system("./waf build")
     os.chdir("..")
 
-    os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
+    if clobber:
+        os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
     os.system("rm -f pinup; wget %s/pinup" % webfaq)
     os.system("rm -f timeservice; wget %s/timeservice" % webfaq)
     os.system("rm -f timeservice.service; wget %s/timeservice.service" % webfaq)
@@ -410,7 +411,7 @@ def secure():
 def strip():
     "Remove unnecessary stuff."
     if os.geteuid() != 0:
-        print("The --mask function must run as root.")
+        print("The --strip function must run as root.")
         raise SystemExit(0)
     os.system("apt-get -y purge bluez triggerhappy")
     os.system("apt-get -y autoremove")
@@ -420,7 +421,8 @@ if __name__ == "__main__":
                                                 "--mask", "--secure", "--strip"):
         print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
-        print("  --build = build timeservice software")
+        print("  --build = build timeservice software (generate ntp.conf)")
+        print("  --update = update timeservice software (don't change ntp.conf)")
         print("  --install = install timeservice software")
         print("  --secure = secure the timeserver")
         print("  --strip = strip out unneeded services")
@@ -431,7 +433,9 @@ if __name__ == "__main__":
     if sys.argv[1] == "--config":
         config()
     if sys.argv[1] == "--build":
-        build()
+        build(True)
+    if sys.argv[1] == "--update":
+        build(False)
     if sys.argv[1] == "--install":
         install()
     if sys.argv[1] == "--mask":

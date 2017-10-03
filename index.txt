@@ -1121,6 +1121,12 @@ from a menu of daughterboard types.
 
 == Technical notes for advanced users ==
 
+=== The --update mode ===
+
+After first configuring your server, you can use the --update mode
+of clockmaker to update your software without re-generating ntp.conf.
+This may be useful if you have put local customizations in it.
+
 === Why GPSD? ===
 
 If you are already familiar with ntpd and wonder why this recipe uses
