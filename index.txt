@@ -303,10 +303,10 @@ Your ddimage command execution should look roughly like this:
 Checking /dev/sdd
 /dev/sdd exists as a storage device.
 /dev/sdd is not mounted
-Copying 2016-09-23-raspbian-jessie-lite.img...
-[96% of 1325Mb] 320 blocks (1280Mb) written. 00:00:00 remaining.
-331+1 records in
-331+1 records out
+Copying 2017-09-07-raspbian-stretch-lite.img...
+[97% of 1768Mb] 432 blocks (1728Mb) written. 00:00:00 remaining.
+442+1 records in
+442+1 records out
 Done
 ------------------------------------------------------------------------
 
@@ -325,6 +325,10 @@ display.  Power up.
 
 Log in as the default user, with the default password.  (On the
 Raspberry Pi this is 'pi' and 'raspberry'.
+
+Now run "sudo raspi-config".  Choose "Interfacing options"\->"SSH" and
+enable it. Without this step (not required on previous Raspbian
+releases) you will not be able to ssh into the device.
 
 Use 'passwd' to change the password of the default user.  Don't use
 anything obvious or cute.  Remember the password.
@@ -414,19 +418,17 @@ Call 'sudo raspi-config' on the Pi.
 # raspi-config
 ------------------------------------------------------------------------
 
-Select (1) "Expand Filesystem" and press return for OK. This will make
-all the space on the SD above the end of your copied OS image
-available on next reboot. (Some Raspbian images may do this
-automatically; if so, it probably hqppened on firstr boot and you got
-a message about it.)
+You should already have done (1) "Change User Password".
 
-You should already have done (2) "Change User Password".
+Under (2) "Hostname", change your hostname to something entertaining.
+If you forget to do this, you can edit /etc/hostname later on.  Note,
+this should just be a local name without a domain part.
 
-Under Boot Options (3) select B2 "Text console, automatically logged
+Under Boot Options (3) select (B1\->B2) "B2 "Text console, automatically logged
 in as 'pi' user". Or, if you're concerned about an evil maid attack, 
-B1 "Text console, requiring user to login".
+(B1\->B1) "Text console, requiring user to login".
 
-Select (4) 'Wait for Network at Boot' (B2).  This makes recovery a
+Select (3\->B2) 'Wait for Network at Boot' (B2).  This makes recovery a
 little more convenient if you power up the SBC forgetting to plug in
 the Ethernet cable.
 
@@ -438,29 +440,21 @@ code followed by ".UTF-8". Then set it as the default.
 Still under Localization, select 'Change Timezone' (I2) and set to
 your local Timezone.
 
-Again under Localization, select (I4) 'Change Wi-fi Country' and ensure
+Again under Localization, select (I3) 'Change Wi-fi Country' and ensure
 that it also matches your location.
 
-It is not necessary to set (6) "Enable Camera" or (7) "Add to
-Rastrack" (the latter does no harm).  You should not set (8)
-"Overclock", as this can have unpredictable interactions with timing
-loops.
+You should not set (6) "Overclock", as this can have unpredictable
+interactions with timing loops.
 
-Under (9\->A2) "Advanced Options"\->"Hostname", change your hostname
-to something entertaining.  If you forget to do this, you can edit
-/etc/hostname later on.  Note, this should just be a local name
-without a domain part.
+Select (7\->A1) "Advanced Options"\->"Expand Filesystem" and press
+return for OK. This will make all the space on the SD above the end of
+your copied OS image available on next reboot. (Some Raspbian images
+may do this automatically; if so, it probably happened on firstr boot
+and you got a message about it.)
 
-Under (9\->A3) "Advanced Options"\->"Memory Split", enter 8 to give
+Under (7\->A3) "Advanced Options"\->"Memory Split", enter 8 to give
 the GPU less memory. This will free up some memory that the GPU won't
 need, because you're running headless.
-
-Under (9\->A8) "Advanced Options"\->"Serial"
-
-Back up one level, under Interfacing Options (5), it is important to select
-'Serial' (P6), and select 'No' for 'Would you like a login shell to be
-accessible over serial?'  Your HAT needs the GPIO pins it uses, and it's
-easiest to disable from the configurator.
 
 You will be asked if you want to reboot after configuring.  Tell it
 yes, then log back in using the new hostname followed by ".local".
@@ -507,7 +501,7 @@ use clockmaker to avoid most of the typing.
 At this point the steps you can automate with clockmaker begin.  If
 you have not downloaded clockmaker, refer to "Using Clockmaker" above.
 
-=== Fully update Your OS ===
+=== Fully update your OS ===
 
 {--config} Fully update the Linux on your SBC.  The easiest way to do this is
 with these commands:
@@ -524,14 +518,19 @@ patches and other fixes.
 
 === Enable the UART ===
 
+{--config} On the Pi, remove this from /boot/cmdline.txt in order to
+prevent it from spawning a login shell on the serial port your GPS
+will use.
+
+------------------------------------------------------------------------
+console=serial0,115200 
+------------------------------------------------------------------------
+
 {--config} On the Pi, edit /boot/config.txt to contain this option.
 
 ------------------------------------------------------------------------
 enable_uart=1
 ------------------------------------------------------------------------
-
-You need to do this because raspi-config will have turned off the UART
-when you told it you didn’t want a login shell on the serial console.
 
 === Pi 3 only: disable Bluetooth and remap console device ===
 
@@ -592,7 +591,7 @@ table:
 | HAT        | Physical pin | RPi Logical pin   | Odroid C2 export pin
 | Adafruit   |      P-7     |   GPIO04          |    249
 | Uputronics |      P-12    |   GPIO18          |    238
-more | SKU 424254 |      P-29    |   GPIO05          |    228
+| SKU 424254 |      P-29    |   GPIO05          |    228
 |======================================================================
 
 There is a Linux kernel driver called pps-gpio which,
