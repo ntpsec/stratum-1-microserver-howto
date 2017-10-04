@@ -1,6 +1,21 @@
 #!/bin/bash
 #
 # Copy a good Raspbian image to an SD writer
+# Alternatively, back up or copy a gzipped image
+#
+# Usage: ddimage [-b] [-c] [-i imgname ]  [device-tag]
+
+mode=copy
+image=""
+while getopts bci:n opt
+do
+    case $opt in
+	b) mode=backup ;;
+	c) mode=copy ;;	# default mode
+	i) image=$OPTARG ;;
+    esac
+done
+shift $(($OPTIND - 1))
 
 target=/dev/${1-sdd}
 echo "Checking $target"
@@ -27,24 +42,56 @@ else
     echo "$target is not mounted"
 fi
 
-set -- *.img
-
-if [ $# != 1 ]
+if [ -z "$image" ]
 then
-    echo "Need a unique image file."
-    exit 1
-else
-    image=`ls *img`
+    case $mode in
+	copy)
+	    set -- *.img
+
+	    if [ $# != 1 ]
+	    then
+		echo "Need a unique existing image file, specify with -i."
+		exit 1
+	    else
+		image=`ls *img`
+	    fi
+	    ;;
+	backup)
+	    echo "Specify a unique image file with -i."
+	    exit 1
+	    ;;
+    esac
 fi
 
-if [ -f $image ]
-then
-    echo "Copying $image..."
-    dcfldd statusinterval=16 sizeprobe=if bs=4M if=$image of=$target
-else
-    echo "No .img file, bailing out!"
-    exit 1
-fi
+case $mode in
+    copy)
+	if [ -f $image ]
+	then
+	    echo "Copying $image..."
+	    if [[ $file =~ \.gz$ ]]
+	    then
+		# Previously-made backup
+		gunzip $file | dcfldd bs=4M of=$target
+	    else
+		# This is the arm for uncompressed Raspbian .img files
+		dcfldd statusinterval=16 sizeprobe=if bs=4M if=$image of=$target
+	    fi
+	else
+	    echo "No .img file, bailing out!"
+	    exit 1
+	fi
+	;;
+    backup)
+	if [ -f ${image}.gz ]
+	then
+	    echo "Refusing to overwrite ${image}.gz file, bailing out!"
+	    exit 1
+	else
+	    echo "Backing up $target to ${image}.gz..."
+	    dcfldd statusinterval=16 sizeprobe=if bs=4M if=$target | gzip >${image}.gz
+	fi
+	;;
+esac
 
 if df | grep $target >/dev/null
 then
