@@ -572,7 +572,6 @@ dissipates slightly more power but produces steadier behavior in
 timing loops.
 
 ------------------------------------------------------------------------
-# systemctl disable ondemand
 # echo 'GOVERNOR="performance"' >/etc/default/cpufrequtils
 # systemctl restart cpufrequtils
 ------------------------------------------------------------------------

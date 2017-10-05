@@ -240,7 +240,7 @@ def config():
         raise SystemExit(1)
 
     print "Setting CPU governor"
-    os.system("systemctl disable ondemand")
+    #os.system("systemctl disable ondemand")
     with open("/etc/default/cpufrequtils", "w") as cfu:
         cfu.write("GOVERNOR=\"performance\"\n")
     os.system("systemctl restart cpufrequtils")
