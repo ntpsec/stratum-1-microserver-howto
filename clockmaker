@@ -17,7 +17,7 @@
 # too fragile and unstable to be useful.  the code is left in as a model for
 # other SBCs but we recommend against trying to use it.
 #
-import sys, os, re, pwd
+import sys, os, re, pwd, time
 
 # If this changes, the corresponding Makefile declaration and asciidoc macro
 # must as well.
@@ -201,7 +201,8 @@ def config():
             need_uart = "enable_uart=1" not in config
             need_disablebt = "dtoverlay=pi3-disable-bt" not in config
         with open(bc, "a") as ap:
-            ap.write("\n#Timeserver customizations begin here\n")
+            if need_disablebt or need_uart: 
+                ap.write("\n#Timeserver customizations begin here\n")
             if not need_disablebt:
                 print("Bluetooth use of UART already disabled.")
             else:
@@ -254,6 +255,18 @@ def config():
             wfp.write('KERNEL=="%s", SYMLINK+="gpsd0"\n' % sbc.gpsdev)
             reboot_required = True
         os.system("udevadm trigger")
+
+    print("")
+    print("Disabling console login")
+    # Necessary so that later we can remove the pi user.
+    # In an ideal world, we'd leave the console login in place
+    # but have the agetty instance be owned by root.
+    try:
+        os.remove("/etc/systemd/system/autologin@.service")
+        os.remove("/etc/systemd/system/getty.target.wants/getty@tty1.service")
+    except OSError:
+        pass
+
     print("")
     if reboot_required:
         print("A reboot is required for configuration changes to take effect")
@@ -286,7 +299,7 @@ def build(clobber):
 
     if clobber:
         os.system("rm -f ntp.conf; wget %s/ntp.conf" % webfaq)
-    os.system("rm -f pinup; wget %s/pinup" % webfaq)
+    os.system("rm -f pinup; wget %s/pinup; chmod a+x pinup" % webfaq)
     os.system("rm -f timeservice; wget %s/timeservice" % webfaq)
     os.system("rm -f timeservice.service; wget %s/timeservice.service" % webfaq)
 
@@ -322,6 +335,9 @@ def install():
     print("Enabling time service")
     os.system("systemctl enable timeservice")
 
+    with open("/etc/motd", "w") as motd:
+        motd.write("Microserver configuration installed on %s\n" % time.ctime())
+
     # FIXME: set up cron jobs?
 
     print("A reboot is required for these changes to take effect.")
@@ -355,6 +371,9 @@ def mask():
     print "Copying build files..."
     os.system("mv ~%s/* ~%s;" % (sbc.default_login, nonroot))
     os.system("chown -R %s.%s ~%s/*" % (nonroot, nonroot, nonroot))
+    print "Setting up sudoer permissions"
+    with open("/etc/sudoers.d/020_%s-nopasswd" % nonroot) as fp:
+        fp.read("%s ALL=(ALL) NOPASSWD: ALL\n" % nonroot)
     print "Check that you can log in as %s, then install ssh keys for %s" \
           % (created, created)
     print "before calling ./clockmaker --secure as root."
@@ -401,15 +420,13 @@ def secure():
     else:
         print("Root login and password tunneling are already disabled.")
 
-    # We used to disable the pi login, but can't do that any more because
-    # for some unknown reason the console login process is owned by it.
-    #print("")
-    #if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
-    #    print("Default login %s is still present." % sbc.default_login)
-    #    os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
-    #    reboot_required = True
-    #else:
-    #    print("Default login has been removed.")
+    print("")
+    if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
+        print("Default login %s is still present." % sbc.default_login)
+        os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
+        reboot_required = True
+    else:
+        print("Default login has been removed.")
 
 def strip():
     "Remove unnecessary stuff."

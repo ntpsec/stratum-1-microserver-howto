@@ -331,7 +331,8 @@ enable it. Without this step (not required on previous Raspbian
 releases) you will not be able to ssh into the device.
 
 Use 'passwd' to change the password of the default user.  Don't use
-anything obvious or cute.  Remember the password.
+anything obvious or cute.  Remember the password until, later in this
+process, the default user account is removed.
 
 You're now done with the keyboard and display.  You can unplug them, plug
 in your ethernet cable, and do the rest of this recipe via ssh.
@@ -350,10 +351,10 @@ You can't use anything obvious or cute as a password because those
 bots could very well run a specialized dictionary attack if they find
 a passworded SBC with one of the names they're expecting.
 
-You can skip this step only if your network lives behind a firewall
-with both IPv4 and IPv6 forwarding rules.  If anyone on the public
-Internet can reach your SBC via ssh before you either change the
-default-account password or remove the default account altogether,
+You can skip the re-passwording step only if your network lives behind
+a firewall with both IPv4 and IPv6 forwarding rules.  If anyone on the
+public Internet can reach your SBC via ssh before you either change
+the default-account password or remove the default account altogether,
 your Pi could be enslaved by an attack bot within minutes.
 
 === First ssh access ===
@@ -420,9 +421,9 @@ Call 'sudo raspi-config' on the Pi.
 
 You should already have done (1) "Change User Password".
 
-Under (2) "Hostname", change your hostname to something entertaining.
-If you forget to do this, you can edit /etc/hostname later on.  Note,
-this should just be a local name without a domain part.
+Under (2) "Hostname" you could change your hostname.  This recipe
+will delay that step until late so you have the option of backing up
+a generic image that you can use to initialize multiple SDs
 
 Under Boot Options (3) select (B1\->B2) "B2 "Text console, automatically logged
 in as 'pi' user". Or, if you're concerned about an evil maid attack, 
@@ -665,6 +666,17 @@ If you want to run the system constantly at the lowest frequency
 instead (maybe to avoid thermal problems) you can use the governor
 "conservative".  Everything will run slower than with governor
 "performance", but consistently so and the system may stay cooler.
+
+== Disable the console ==
+
+{--config} At this point be need to disable the serial/USB console, so
+that later we can remove the default 'pi' user.  It would be better to
+change the startup sequence so the login process for the console
+is owned by some other privileged user than 'pi'.
+
+------------------------------------------------------------------------
+# rm /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service"
+------------------------------------------------------------------------
 
 == Smoke-test the GPS/HAT combination ==
 
@@ -1022,6 +1034,17 @@ who gets access to your network.  Here's how to fix this:
 # usermod -a -G sudo,dialout me
 ------------------------------------------------------------------------
 
+. {--mask} Optional step: In /etc/sudoers.d, create a file that
+  will give you permission to sudo without a password.  It should
+  look like this
++
+------------------------------------------------------------------------
+me ALL=(ALL) NOPASSWD: ALL
+------------------------------------------------------------------------
++
+but with 'me' replaced by your userid.  The name of the file doesn't
+matter, but must not end with a '~' or contain a '.'.
+
 . {--mask} Move the contents of the default-user home directory to
   the home directory of the "me" account. Be sure to 'chown' the files
   from the pi user to the new user.
@@ -1044,12 +1067,23 @@ who gets access to your network.  Here's how to fix this:
   "PermitRootLogin" and "PasswordAuthentication" lines so the second
   token is "no".
 
-//We used to disable the pi login, but can't do that any more because
-//for some unknown reason the console login process is now owned by it.
-//. {--secure} On the SBC, disable the default-user login (on the RPi
-//  "deluser pi" as root).  Note: This step may fail on the Stretch
-//  version of Raspbian - there's some systemd problem in the way there.
-//  This failure is harmless.
+. {--secure} On the SBC, disable the default-user login (on the RPi
+  "deluser pi" as root).
+
+== Final configuration ==
+
+Now, before you change the hostname, would be a good time to use
+"ddimage -b" to back up your customized Raspbian image.  Having done
+that, you can later use ddimage to set up more servers without having to
+go through the entire configuration process.
+
+Change your hostname to something entertaining by editing
+/etc/hostname.  Note, this should just be a local name without a
+domain part.
+
+If you skipped to this step after making your SD image from a
+backup, don't forget to run "pinup -p" to set the GPIO pin
+for your daughterboard type.
 
 == Performance tuning ==
 
