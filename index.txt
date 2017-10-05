@@ -438,6 +438,16 @@ enable the appropriate one for your location.  In the US, you probably
 want en_US.UTF-8; in any other country, look for your ISO language
 code followed by ".UTF-8". Then set it as the default.
 
+Note: if, later in the process, you see messages beginning with
+this line,
+
+------------------------------------------------------------------------
+perl: warning: Setting locale failed.
+------------------------------------------------------------------------
+
+then you missed setting up locales and should do the above. That will
+banish these messages with no harm done.
+
 Still under Localization, select 'Change Timezone' (I2) and set to
 your local Timezone.
 
