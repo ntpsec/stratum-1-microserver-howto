@@ -424,6 +424,7 @@ def secure():
     if ("\n"+ sbc.default_login + ":") in open("/etc/passwd").read():
         print("Default login %s is still present." % sbc.default_login)
         os.system("rm -fr ~%s/*; deluser %s" % (sbc.default_login, sbc.default_login))
+        os.remove("/etc/sudoers.d/010_pi-nopasswd")
         reboot_required = True
     else:
         print("Default login has been removed.")

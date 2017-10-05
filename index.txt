@@ -565,6 +565,18 @@ dtoverlay line.
 # systemctl disable hciuart
 ------------------------------------------------------------------------
 
+=== Other root-mode configuration ===
+
+{--config} Set the kernel governor for performance mode -
+dissipates slightly more power but produces steadier behavior in
+timing loops.
+
+------------------------------------------------------------------------
+# systemctl disable ondemand
+# echo 'GOVERNOR="performance"' >/etc/default/cpufrequtils
+# systemctl restart cpufrequtils
+------------------------------------------------------------------------
+
 {--config} Create a symlink to the GPS device to make it easier to refer
 to.  Put the following in a new file /etc/udev/rules.d/10-pps.rules to
 accomplish this.  On the Pi:
