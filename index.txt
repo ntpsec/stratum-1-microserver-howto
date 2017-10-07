@@ -97,8 +97,8 @@ u-blox 8 and solderless assembly is tough to beat.
   felines.
 
 * (Optional) 2 hex standoffs, 11mm with M2.5 threading, compatible
-  screws.  Adafruit sells these <<STANDOFFS>>.  They are the very
-  similar to standard spacers used in PC cases; if you keep the small
+  screws.  Adafruit sells these <<STANDOFFS>>.  They are very
+  similar to the standard spacers used in PC cases; if you keep the small
   parts from old PCs around you'll have a dozen of them and probably
   the screws to match.
 
@@ -655,11 +655,18 @@ $GPRMC,205252.00,A,4002.10169,N,07531.20380,W,0.092,,240516,,,A*6F
 $GPVTG,,T,,M,0.092,N,0.171,K,A*2F
 ------------------------------------------------------------------------
 
-If you see no output or see random baud barf, re-do the stty command being
-very careful that all the arguments are correct.  If you still don't
-see output, check that the HAT is correctly seated on the GPIO and
-powered up (a red light near the north edge should blink at least once
-per 10 seconds).
+It is not unusual for there to be an initial burst of baud barf before
+the first legible sentence, so wait a few seconds.
+
+If you see no output or continuing random baud barf, re-do the stty
+command being very careful that all the arguments are correct.  If you
+still don't see output, check that the HAT is correctly seated on the
+GPIO and powered up (a red light near the north edge should blink at
+least once per 10 seconds).
+
+If you don't see a light on the HAT, it might not be properly seated
+on the GPIO connector. Try powering off, popping the HAT off, and
+reseating it.
 
 Sometimes changing the baud rate may 'kickstart' communication with the
 device if it is balking. You can try this, for example:
@@ -1123,9 +1130,10 @@ from a menu of daughterboard types.
 
 === The --update mode ===
 
-After first configuring your server, you can use the --update mode
-of clockmaker to update your software without re-generating ntp.conf.
-This may be useful if you have put local customizations in it.
+After first configuring and building your server software, you can use
+the --update mode of clockmaker to update your software without
+re-generating ntp.conf (this replaces --build).  This may be useful if
+you have put local customizations in ntp.conf.
 
 === Why GPSD? ===
 
