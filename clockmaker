@@ -175,6 +175,11 @@ def config():
 
     reboot_required = False
 
+    print "Configuring locale..."
+    os.system("dpkg-reconfigure locales")
+    print "Configuring timezone..."
+    os.system("dpkg-reconfigure tzdata")
+
     print("About to upgrade your OS")
     os.system("apt-get -y update; apt-get -y dist-upgrade")
 
@@ -200,8 +205,9 @@ def config():
             config = rp.read()
             need_uart = "enable_uart=1" not in config
             need_disablebt = "dtoverlay=pi3-disable-bt" not in config
+            need_gpumem = "gpu_mem=0" not in config
         with open(bc, "a") as ap:
-            if need_disablebt or need_uart: 
+            if need_disablebt or need_uart or need_gpumem: 
                 ap.write("\n#Timeserver customizations begin here\n")
             if not need_disablebt:
                 print("Bluetooth use of UART already disabled.")
@@ -217,6 +223,12 @@ def config():
                 reboot_required = True
             else:
                 print("UART is already enabled")
+            if need_gpumem:
+                print("Reclaiming GPU storage")
+                ap.write("gpu_mem=0\n")
+                reboot_required = True
+            else:
+                print("GPU memory already set to zero")
         kc = "/boot/cmdline.txt"
         with open(kc, "r") as rp:
             config = rp.read().split("\n")[0]
@@ -267,6 +279,8 @@ def config():
     except OSError:
         pass
 
+    print "Clockmaker --config complete."
+
     print("")
     if reboot_required:
         print("A reboot is required for configuration changes to take effect")
@@ -302,6 +316,7 @@ def build(clobber):
     os.system("rm -f pinup; wget %s/pinup; chmod a+x pinup" % webfaq)
     os.system("rm -f timeservice; wget %s/timeservice" % webfaq)
     os.system("rm -f timeservice.service; wget %s/timeservice.service" % webfaq)
+    print "Clockmaker --build complete."
 
 def install():
     "Install timeserver software & start script once everything has been tested."
@@ -340,6 +355,8 @@ def install():
 
     # FIXME: set up cron jobs?
 
+    print "Clockmaker --install complete."
+
     print("A reboot is required for these changes to take effect.")
     os.system("reboot")
 
@@ -372,8 +389,9 @@ def mask():
     os.system("mv ~%s/* ~%s;" % (sbc.default_login, nonroot))
     os.system("chown -R %s.%s ~%s/*" % (nonroot, nonroot, nonroot))
     print "Setting up sudoer permissions"
-    with open("/etc/sudoers.d/020_%s-nopasswd" % nonroot) as fp:
-        fp.read("%s ALL=(ALL) NOPASSWD: ALL\n" % nonroot)
+    with open("/etc/sudoers.d/020_%s-nopasswd" % nonroot, "w") as fp:
+        fp.write("%s ALL=(ALL) NOPASSWD: ALL\n" % nonroot)
+    print "Clockmaker --mask complete."
     print "Check that you can log in as %s, then install ssh keys for %s" \
           % (created, created)
     print "before calling ./clockmaker --secure as root."
@@ -428,6 +446,7 @@ def secure():
         reboot_required = True
     else:
         print("Default login has been removed.")
+    print "Clockmaker --secure complete."
 
 def strip():
     "Remove unnecessary stuff."

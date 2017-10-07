@@ -408,68 +408,6 @@ now see a shell prompt on your Pi.
 The hardest part is done; you may remove the keyboard and display now
 - you won't need them any more!
 
-=== Initial configuration ===
-
-Note: This part of the configuration tends to be unstable between
-Raspbian releases.  Even if you've done it before, review carefully.
-
-Call 'sudo raspi-config' on the Pi.
-
-------------------------------------------------------------------------
-# raspi-config
-------------------------------------------------------------------------
-
-You should already have done (1) "Change User Password".
-
-Under (2) "Hostname" you could change your hostname.  This recipe
-will delay that step until late so you have the option of backing up
-a generic image that you can use to initialize multiple SDs
-
-Under Boot Options (3) select (B1\->B2) "B2 "Text console, automatically logged
-in as 'pi' user". Or, if you're concerned about an evil maid attack, 
-(B1\->B1) "Text console, requiring user to login".
-
-Select (3\->B2) 'Wait for Network at Boot' (B2).  This makes recovery a
-little more convenient if you power up the SBC forgetting to plug in
-the Ethernet cable.
-
-Under Localization Options (5) select 'Change Locale' (I1) and
-enable the appropriate one for your location.  In the US, you probably
-want en_US.UTF-8; in any other country, look for your ISO language
-code followed by ".UTF-8". Then set it as the default.
-
-Note: if, later in the process, you see messages beginning with
-this line,
-
-------------------------------------------------------------------------
-perl: warning: Setting locale failed.
-------------------------------------------------------------------------
-
-then you missed setting up locales and should do the above. That will
-banish these messages with no harm done.
-
-Still under Localization, select 'Change Timezone' (I2) and set to
-your local Timezone.
-
-Again under Localization, select (I3) 'Change Wi-fi Country' and ensure
-that it also matches your location.
-
-You should not set (6) "Overclock", as this can have unpredictable
-interactions with timing loops.
-
-Select (7\->A1) "Advanced Options"\->"Expand Filesystem" and press
-return for OK. This will make all the space on the SD above the end of
-your copied OS image available on next reboot. (Some Raspbian images
-may do this automatically; if so, it probably happened on firstr boot
-and you got a message about it.)
-
-Under (7\->A3) "Advanced Options"\->"Memory Split", enter 8 to give
-the GPU less memory. This will free up some memory that the GPU won't
-need, because you're running headless.
-
-You will be asked if you want to reboot after configuring.  Tell it
-yes, then log back in using the new hostname followed by ".local".
-
 === Clockmaker ===
 
 Most of the remaining instructions do not have to be done by hand.  You can
@@ -1346,7 +1284,8 @@ unstable to hand to newbies.  We may try again when it has matured.
      Track an incompatible change in GPSD configuration.
 
 1.4: 2017-10-03::
-     Update for Debian Stretch version of Raspbian
+     Update for Debian Stretch version of Raspbian.  We no longer need
+     an enire raspi-config phase.
 
 == Acknowledgements ==
 
