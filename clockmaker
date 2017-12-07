@@ -458,12 +458,14 @@ def strip():
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ("--config","--build","--install",
-                                                "--mask", "--secure", "--strip"):
+                                                "--mask", "--secure", "--strip",
+                                                "--update"):
         print("Please specify a configuration stage argument:")
         print("  --config = basic SBC configuration")
         print("  --build = build timeservice software (generate ntp.conf)")
         print("  --update = update timeservice software (don't change ntp.conf)")
         print("  --install = install timeservice software")
+        print("  --mask = create and enable non-default user")
         print("  --secure = secure the timeserver")
         print("  --strip = strip out unneeded services")
         raise SystemExit(1)
